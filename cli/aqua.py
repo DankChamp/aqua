@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+"""
+Aqua CLI - HTTP client for the Aqua API.
+
+Usage:
+    aqua ask "what is machine learning?"
+    aqua docs add "Title" --content "..."
+    aqua notes list
+    aqua flashcards review
+    aqua serve         # Start the web server
+    aqua init          # Initialize database
+"""
+import argparse
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+import httpx
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
+from rich.prompt import Prompt, Confirm
+from rich.markdown import Markdown
+
+console = Console()
+API_URL = os.environ.get("AQUA_API_URL", "http://localhost:8000")
+
+
+def api(method: str, path: str, **kwargs) -> httpx.Response:
+    url = f"{API_URL}{path}"
+    headers = {"Content-Type": "application/json"}
+    pw = os.environ.get("AQUA_WEB_PASSWORD") or None
+    if pw:
+        headers["Authorization"] = f"Bearer {pw}"
+    with httpx.Client(timeout=120.0) as client:
+        return client.request(method, url, headers=headers, **kwargs)
+
+
+def cmd_ask(args):
+    resp = api("POST", "/chat", json={
+        "message": " ".join(args.query),
+        "task_type": getattr(args, "task_type", "conversation"),
+        "provider": getattr(args, "provider", None),
+        "model": getattr(args, "model", None),
+    })
+    if resp.status_code == 503:
+        console.print(f"[red]Error:[/red] {resp.json()['detail']}")
+        return
+    resp.raise_for_status()
+    data = resp.json()
+    console.print(Panel(data["reply"], title=f"[bold]{data['provider']}/{data['model']}[/bold]"))
+
+
+def cmd_docs_list(args):
+    resp = api("GET", "/documents", params={"tag": args.tag, "source": args.source, "limit": args.limit})
+    docs = resp.json()
+    if not docs:
+        console.print("[yellow]No documents[/yellow]")
+        return
+    table = Table(show_header=True)
+    table.add_column("ID", style="dim")
+    table.add_column("Title")
+    table.add_column("Source")
+    table.add_column("Tags")
+    for d in docs:
+        tags = ", ".join(d.get("tags", []))
+        table.add_row(str(d["id"]), d["title"][:60], d.get("source", ""), tags)
+    console.print(table)
+
+
+def cmd_docs_add(args):
+    resp = api("POST", "/documents", json={
+        "title": args.title,
+        "content": args.content or "",
+        "authors": args.authors or "",
+        "source": args.source or "manual",
+        "tags": [t.strip() for t in (args.tags or "").split(",") if t.strip()],
+    })
+    resp.raise_for_status()
+    doc = resp.json()
+    console.print(f"[green]Document added:[/green] {doc['title']} (id={doc['id']})")
+
+
+def cmd_docs_show(args):
+    resp = api("GET", f"/documents/{args.id}")
+    if resp.status_code == 404:
+        console.print("[red]Not found[/red]")
+        return
+    doc = resp.json()
+    tags = ", ".join(doc.get("tags", []))
+    console.print(Panel(
+        f"[bold]{doc['title']}[/bold]\nTags: {tags}\nSource: {doc.get('source', 'N/A')}\n\n{doc.get('content', '')[:2000]}",
+        title=f"Document #{doc['id']}",
+    ))
+
+
+def cmd_docs_search(args):
+    resp = api("GET", f"/documents/search/{args.query}")
+    for d in resp.json()[:args.limit]:
+        console.print(Panel(d.get("content", "")[:500] or "(no content)", title=f"[bold]{d['title']}[/bold] (id={d['id']})"))
+
+
+def cmd_docs_delete(args):
+    if not Confirm.ask(f"Delete document {args.id}?"):
+        return
+    resp = api("DELETE", f"/documents/{args.id}")
+    console.print("[green]Deleted[/green]" if resp.ok else "[red]Not found[/red]")
+
+
+def cmd_notes_list(args):
+    params = {"limit": args.limit}
+    if args.doc_id:
+        params["document_id"] = args.doc_id
+    resp = api("GET", "/notes", params=params)
+    notes = resp.json()
+    if not notes:
+        console.print("[yellow]No notes[/yellow]")
+        return
+    table = Table(show_header=True)
+    table.add_column("ID", style="dim")
+    table.add_column("Title")
+    table.add_column("Preview")
+    for n in notes:
+        table.add_row(str(n["id"]), n.get("title", "") or "(untitled)", n.get("content", "")[:80])
+    console.print(table)
+
+
+def cmd_notes_add(args):
+    resp = api("POST", "/notes", json={
+        "content": args.content,
+        "title": args.title or "",
+        "document_id": args.doc_id,
+    })
+    resp.raise_for_status()
+    note = resp.json()
+    console.print(f"[green]Note added[/green] (id={note['id']})")
+
+
+def cmd_notes_search(args):
+    resp = api("GET", f"/notes/search/{args.query}")
+    for n in resp.json()[:args.limit]:
+        console.print(Panel(n.get("content", "")[:500], title=f"[bold]{n.get('title', 'Untitled')}[/bold] (id={n['id']})"))
+
+
+def cmd_flashcards_list(args):
+    params = {"limit": args.limit}
+    if args.topic:
+        params["topic"] = args.topic
+    resp = api("GET", "/flashcards", params=params)
+    cards = resp.json()
+    if not cards:
+        console.print("[yellow]No flashcards[/yellow]")
+        return
+    table = Table(show_header=True)
+    table.add_column("ID", style="dim")
+    table.add_column("Question")
+    table.add_column("Topic")
+    table.add_column("Difficulty")
+    for c in cards:
+        table.add_row(str(c["id"]), c["question"][:60], c.get("topic", ""), str(c.get("difficulty", 1)))
+    console.print(table)
+
+
+def cmd_flashcards_add(args):
+    resp = api("POST", "/flashcards", json={
+        "question": args.question,
+        "answer": args.answer,
+        "topic": args.topic or "",
+        "difficulty": args.difficulty or 1,
+    })
+    resp.raise_for_status()
+    card = resp.json()
+    console.print(f"[green]Flashcard added[/green] (id={card['id']})")
+
+
+def cmd_flashcards_review(args):
+    resp = api("GET", "/flashcards", params={"topic": args.topic, "limit": 50})
+    cards = resp.json()
+    if not cards:
+        console.print("[yellow]No cards to review[/yellow]")
+        return
+    for c in cards:
+        console.print(Panel(c["question"], title=f"Flashcard #{c['id']}"))
+        answer = Prompt.ask("[bold]Your answer[/bold]")
+        console.print(f"[bold]Correct:[/bold] {c['answer']}")
+        correct = Confirm.ask("Were you correct?")
+        api("POST", f"/flashcards/{c['id']}/review", json={"correct": correct})
+        console.print()
+
+
+def cmd_serve(args):
+    cmd = ["uvicorn", "main:app", "--host", args.host or "0.0.0.0", "--port", str(args.port or 8000)]
+    if args.reload:
+        cmd.append("--reload")
+    os.chdir(Path(__file__).resolve().parent.parent)
+    subprocess.run(cmd)
+
+
+def cmd_init(args):
+    from config import get_settings
+    s = get_settings()
+    s.db_path.parent.mkdir(parents=True, exist_ok=True)
+    from core.documents.manager import _get_db
+    from core.study.flashcards import _get_db as _get_study_db
+    _get_db().close()
+    _get_study_db().close()
+    console.print(f"[green]Aqua initialized[/green] (db: {s.db_path})")
+
+
+def cli_main():
+    import sys
+    root = str(Path(__file__).resolve().parent.parent)
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    main()
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="aqua")
+    sub = parser.add_subparsers(dest="command")
+
+    p_ask = sub.add_parser("ask", help="Ask a question")
+    p_ask.add_argument("query", nargs="+")
+    p_ask.add_argument("--task-type", "-t", default="conversation")
+    p_ask.add_argument("--provider", "-p")
+    p_ask.add_argument("--model", "-m")
+
+    p_docs = sub.add_parser("docs", help="Manage documents")
+    docs_sub = p_docs.add_subparsers(dest="subcommand")
+    p_dl = docs_sub.add_parser("list")
+    p_dl.add_argument("--tag", "-t")
+    p_dl.add_argument("--source", "-s")
+    p_dl.add_argument("--limit", "-l", type=int, default=50)
+    p_da = docs_sub.add_parser("add")
+    p_da.add_argument("title")
+    p_da.add_argument("--content", "-c")
+    p_da.add_argument("--authors", "-a")
+    p_da.add_argument("--source", "-s")
+    p_da.add_argument("--tags", "-t")
+    p_ds = docs_sub.add_parser("show")
+    p_ds.add_argument("id", type=int)
+    p_dsr = docs_sub.add_parser("search")
+    p_dsr.add_argument("query")
+    p_dsr.add_argument("--limit", "-l", type=int, default=20)
+    p_dd = docs_sub.add_parser("delete")
+    p_dd.add_argument("id", type=int)
+
+    p_notes = sub.add_parser("notes", help="Manage notes")
+    n_sub = p_notes.add_subparsers(dest="subcommand")
+    n_l = n_sub.add_parser("list")
+    n_l.add_argument("--doc-id", "-d", type=int)
+    n_l.add_argument("--limit", "-l", type=int, default=50)
+    n_a = n_sub.add_parser("add")
+    n_a.add_argument("content")
+    n_a.add_argument("--title", "-t")
+    n_a.add_argument("--doc-id", "-d", type=int)
+    n_s = n_sub.add_parser("search")
+    n_s.add_argument("query")
+    n_s.add_argument("--limit", "-l", type=int, default=20)
+
+    p_fc = sub.add_parser("flashcards", help="Manage flashcards")
+    fc_sub = p_fc.add_subparsers(dest="subcommand")
+    fc_l = fc_sub.add_parser("list")
+    fc_l.add_argument("--topic", "-t")
+    fc_l.add_argument("--limit", "-l", type=int, default=50)
+    fc_a = fc_sub.add_parser("add")
+    fc_a.add_argument("question")
+    fc_a.add_argument("answer")
+    fc_a.add_argument("--topic", "-t")
+    fc_a.add_argument("--difficulty", "-d", type=int, default=1)
+    fc_r = fc_sub.add_parser("review")
+    fc_r.add_argument("--topic", "-t")
+
+    p_serve = sub.add_parser("serve", help="Start the web server")
+    p_serve.add_argument("--host", default="0.0.0.0")
+    p_serve.add_argument("--port", type=int, default=8000)
+    p_serve.add_argument("--reload", action="store_true")
+
+    p_init = sub.add_parser("init", help="Initialize database")
+
+    args = parser.parse_args()
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    if args.command == "ask":
+        cmd_ask(args)
+    elif args.command == "docs":
+        {"list": cmd_docs_list, "add": cmd_docs_add, "show": cmd_docs_show, "search": cmd_docs_search, "delete": cmd_docs_delete}[args.subcommand](args)
+    elif args.command == "notes":
+        {"list": cmd_notes_list, "add": cmd_notes_add, "search": cmd_notes_search}[args.subcommand](args)
+    elif args.command == "flashcards":
+        {"list": cmd_flashcards_list, "add": cmd_flashcards_add, "review": cmd_flashcards_review}[args.subcommand](args)
+    elif args.command == "serve":
+        cmd_serve(args)
+    elif args.command == "init":
+        cmd_init(args)
+
+
+if __name__ == "__main__":
+    cli_main()

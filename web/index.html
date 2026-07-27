@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aqua</title>
+<style>
+:root {
+  --bg: #050510;
+  --bg-elevated: #0a0a1a;
+  --bg-input: #0d0d24;
+  --border: #1a1a3a;
+  --text: #c0c0d0;
+  --text-dim: #505080;
+  --accent: #00e5ff;
+  --accent-hover: #66f0ff;
+  --accent-dim: rgba(0, 229, 255, 0.12);
+  --pink: #ff00aa;
+  --pink-dim: rgba(255, 0, 170, 0.12);
+  --ok: #00e5ff;
+  --warn: #ffd600;
+  --err: #ff00aa;
+  --font: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--font);
+  display: flex; height: 100vh; overflow: hidden;
+}
+.sidebar {
+  width: 200px; min-width: 200px; background: var(--bg-elevated);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+}
+.brand {
+  font-size: 20px; font-weight: 700; padding: 20px 16px 2px;
+  color: var(--accent); text-shadow: 0 0 10px rgba(0,229,255,0.5);
+  letter-spacing: 4px;
+}
+.brand-sub {
+  font-size: 10px; color: var(--pink); padding: 0 16px 18px;
+  letter-spacing: 3px;
+}
+.nav { list-style: none; padding: 8px; flex: 1; overflow-y: auto; }
+.nav li {
+  padding: 10px 12px; border-radius: 4px; margin-bottom: 2px;
+  color: var(--text-dim); cursor: pointer; font-size: 12px;
+  letter-spacing: 1px; text-transform: uppercase;
+  border-left: 2px solid transparent;
+}
+.nav li:hover { background: var(--bg-input); color: var(--text); }
+.nav li.active { background: var(--bg-input); color: var(--accent); border-left-color: var(--accent); }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.page { display: none; padding: 24px; overflow-y: auto; height: 100%; }
+.page.active { display: flex; flex-direction: column; }
+.page-title {
+  font-size: 14px; font-weight: 600; margin-bottom: 16px;
+  color: var(--accent); letter-spacing: 2px; text-transform: uppercase;
+}
+.card {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 4px; padding: 16px; margin-bottom: 12px;
+}
+input, textarea, select {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 4px; padding: 7px 10px; font-size: 12px;
+  color: var(--text); font-family: var(--font); width: 100%;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; }
+textarea { resize: vertical; min-height: 60px; }
+::placeholder { color: var(--text-dim); opacity: 0.5; }
+button {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 16px; font-size: 11px;
+  color: var(--text); cursor: pointer; letter-spacing: 1px;
+  text-transform: uppercase; font-family: var(--font);
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+button:disabled { opacity: 0.3; cursor: default; }
+button.primary { border-color: var(--accent); color: var(--accent); }
+button.primary:hover { background: rgba(0,229,255,0.1); }
+button.danger { border-color: var(--pink); color: var(--pink); }
+button.danger:hover { background: rgba(255,0,170,0.1); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.flex { display: flex; gap: 8px; }
+.grow { flex: 1; }
+.chat-messages { flex: 1; overflow-y: auto; margin-bottom: 12px; }
+.chat-msg { margin-bottom: 12px; }
+.chat-msg .role { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; letter-spacing: 1px; }
+.chat-msg .content { white-space: pre-wrap; line-height: 1.5; font-size: 13px; }
+.chat-msg.user .content { color: var(--accent); }
+.chat-msg.assistant .content { color: var(--text); }
+.chat-input { display: flex; gap: 8px; }
+.chat-input input { flex: 1; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot.ok { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.status-dot.err { background: var(--err); box-shadow: 0 0 6px var(--err); }
+.status-dot.warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+.login-overlay {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.login-box { width: 320px; }
+.login-box h2 { color: var(--accent); margin-bottom: 16px; letter-spacing: 3px; }
+.login-box .error { color: var(--err); font-size: 11px; margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+th { color: var(--text-dim); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div id="login" class="login-overlay" style="display:none">
+  <div class="login-box card">
+    <h2>AQUA</h2>
+    <input type="password" id="login-pw" placeholder="password" style="margin-bottom:8px">
+    <button class="primary" onclick="login()" style="width:100%">unlock</button>
+    <div id="login-error" class="error"></div>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="brand">AQUA</div>
+  <div class="brand-sub">AI RESEARCH ASSISTANT</div>
+  <ul class="nav" id="nav">
+    <li class="active" data-page="chat">Talk</li>
+    <li data-page="documents">Documents</li>
+    <li data-page="notes">Notes</li>
+    <li data-page="flashcards">Flashcards</li>
+    <li data-page="providers">Providers</li>
+    <li data-page="settings">Settings</li>
+  </ul>
+</div>
+
+<div class="main">
+  <!-- Chat -->
+  <div class="page active" id="page-chat">
+    <div class="page-title">Talk</div>
+    <div class="flex mb-8" style="align-items:center;gap:12px">
+      <select id="chat-task" style="width:auto">
+        <option value="conversation">Conversation</option>
+        <option value="general">General</option>
+        <option value="coding">Coding</option>
+        <option value="reasoning">Reasoning</option>
+        <option value="creative">Creative</option>
+        <option value="research">Research</option>
+        <option value="study">Study</option>
+      </select>
+      <label style="font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px">
+        <input type="checkbox" id="chat-manual"> Manual
+      </label>
+      <select id="chat-provider" style="width:auto;display:none">
+        <option value="ollama">Ollama</option>
+        <option value="local_generic">Local (OpenAI-compat)</option>
+        <option value="groq">Groq</option>
+        <option value="nvidia">NVIDIA</option>
+        <option value="openai">OpenAI</option>
+        <option value="anthropic">Anthropic</option>
+      </select>
+      <input id="chat-model" placeholder="model override" style="width:auto;display:none">
+      <span id="chat-status" style="font-size:11px;color:var(--text-dim)"></span>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input">
+      <input id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()">
+      <button class="primary" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="page" id="page-documents">
+    <div class="page-title">Documents</div>
+    <div class="flex mb-8">
+      <input id="doc-search" placeholder="Search..." class="grow" onkeydown="if(event.key==='Enter')searchDocs()">
+      <button onclick="searchDocs()">Search</button>
+      <button class="primary" onclick="showAddDoc()">+ Add</button>
+    </div>
+    <div id="doc-list"></div>
+    <div id="doc-form" style="display:none" class="card">
+      <input id="doc-title" placeholder="Title" class="mb-8">
+      <textarea id="doc-content" placeholder="Content" class="mb-8"></textarea>
+      <div class="flex mb-8">
+        <input id="doc-authors" placeholder="Authors" class="grow">
+        <input id="doc-source" placeholder="Source (manual/pdf/url)" value="manual">
+      </div>
+      <input id="doc-tags" placeholder="Tags (comma-separated)" class="mb-8">
+      <div class="flex">
+        <button class="primary" onclick="addDoc()">Save</button>
+        <button onclick="document.getElementById('doc-form').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="page" id="page-notes">
+    <div class="page-title">Notes</div>
+    <div class="flex mb-8">
+      <input id="note-search" placeholder="Search notes..." class="grow" onkeydown="if(event.key==='Enter')searchNotes()">
+      <button onclick="searchNotes()">Search</button>
+      <button class="primary" onclick="showAddNote()">+ Add</button>
+    </div>
+    <div id="note-list"></div>
+    <div id="note-form" style="display:none" class="card">
+      <input id="note-title" placeholder="Title" class="mb-8">
+      <textarea id="note-content" placeholder="Content" class="mb-8"></textarea>
+      <div class="flex">
+        <button class="primary" onclick="addNote()">Save</button>
+        <button onclick="document.getElementById('note-form').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flashcards -->
+  <div class="page" id="page-flashcards">
+    <div class="page-title">Flashcards</div>
+    <div class="flex mb-8">
+      <input id="fc-topic" placeholder="Filter by topic..." class="grow">
+      <button onclick="loadFlashcards()">List</button>
+      <button class="primary" onclick="showAddFc()">+ Add</button>
+      <button class="ok" onclick="reviewMode()">Review</button>
+    </div>
+    <div id="fc-list"></div>
+    <div id="fc-form" style="display:none" class="card">
+      <input id="fc-question" placeholder="Question" class="mb-8">
+      <input id="fc-answer" placeholder="Answer" class="mb-8">
+      <div class="flex">
+        <input id="fc-topic-input" placeholder="Topic" class="grow">
+        <input id="fc-difficulty" placeholder="Difficulty (1-5)" type="number" min="1" max="5" value="1" style="width:100px">
+      </div>
+      <div class="flex mt-8">
+        <button class="primary" onclick="addFc()">Save</button>
+        <button onclick="document.getElementById('fc-form').style.display='none'">Cancel</button>
+      </div>
+    </div>
+    <div id="fc-review" style="display:none" class="card"></div>
+  </div>
+
+  <!-- Providers -->
+  <div class="page" id="page-providers">
+    <div class="page-title">Providers & API Keys</div>
+    <div id="provider-list"></div>
+    <div class="card mt-8">
+      <div class="page-title" style="font-size:12px;margin-bottom:8px">Configure Keys</div>
+      <div id="provider-form">
+        <div class="grid-2">
+          <label style="font-size:11px;color:var(--text-dim)">Groq API Key
+            <input id="cfg-groq" placeholder="gsk_...">
+          </label>
+          <label style="font-size:11px;color:var(--text-dim)">NVIDIA API Key
+            <input id="cfg-nvidia" placeholder="nvapi-...">
+          </label>
+          <label style="font-size:11px;color:var(--text-dim)">OpenAI API Key
+            <input id="cfg-openai" placeholder="sk-...">
+          </label>
+          <label style="font-size:11px;color:var(--text-dim)">Anthropic API Key
+            <input id="cfg-anthropic" placeholder="sk-ant-...">
+          </label>
+        </div>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-top:8px">Ollama Base URL
+          <input id="cfg-ollama-url" value="http://localhost:11434">
+        </label>
+        <label style="font-size:11px;color:var(--text-dim);display:block;margin-top:8px">Local Base URL (OpenAI-compatible)
+          <input id="cfg-local-url" placeholder="http://localhost:1234">
+        </label>
+        <button class="primary mt-8" onclick="saveProviderConfig()">Save</button>
+        <span id="cfg-status" style="font-size:11px;color:var(--text-dim);margin-left:8px"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="page" id="page-settings">
+    <div class="page-title">Settings</div>
+    <div class="card">
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px">
+        <input type="checkbox" id="cfg-prefer-local" checked> Prefer local when available
+      </label>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px">
+        Web Password
+        <input id="cfg-web-pw" placeholder="Leave blank for no auth">
+      </label>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px">
+        Default Models
+        <div class="grid-2">
+          <input id="cfg-model-ollama" placeholder="Ollama model" value="llama3.2:3b">
+          <input id="cfg-model-groq" placeholder="Groq model" value="llama-3.3-70b-versatile">
+          <input id="cfg-model-nvidia" placeholder="NVIDIA model" value="meta/llama-3.1-8b-instruct">
+          <input id="cfg-model-openai" placeholder="OpenAI model" value="gpt-4o-mini">
+        </div>
+      </label>
+      <button class="primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let token = sessionStorage.getItem("aqua_token") || "";
+
+function api(method, path, body) {
+  const opts = { method, headers: {"Content-Type": "application/json"} };
+  if (token) opts.headers["Authorization"] = `Bearer ${token}`;
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(`${API}${path}`, opts).then(r => {
+    if (r.status === 401) { sessionStorage.removeItem("aqua_token"); token = ""; showLogin(); }
+    return r;
+  });
+}
+
+async function checkAuth() {
+  const r = await api("GET", "/health");
+  const h = await r.json();
+  if (h.auth_required && !token) showLogin();
+  else if (h.auth_required) { document.getElementById("login").style.display = "none"; }
+  else { document.getElementById("login").style.display = "none"; }
+}
+
+function showLogin() {
+  document.getElementById("login").style.display = "flex";
+}
+
+async function login() {
+  const pw = document.getElementById("login-pw").value;
+  const r = await api("POST", "/api/auth", { password: pw });
+  if (r.ok) {
+    token = pw;
+    sessionStorage.setItem("aqua_token", pw);
+    document.getElementById("login").style.display = "none";
+    document.getElementById("login-error").textContent = "";
+  } else {
+    document.getElementById("login-error").textContent = "Wrong password";
+  }
+}
+
+document.getElementById("chat-manual").onchange = function() {
+  const manual = this.checked;
+  document.getElementById("chat-provider").style.display = manual ? "inline" : "none";
+  document.getElementById("chat-model").style.display = manual ? "inline" : "none";
+};
+
+// Navigation
+document.querySelectorAll(".nav li").forEach(li => {
+  li.onclick = function() {
+    document.querySelectorAll(".nav li").forEach(l => l.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    this.classList.add("active");
+    document.getElementById("page-" + this.dataset.page).classList.add("active");
+    if (this.dataset.page === "documents") loadDocs();
+    if (this.dataset.page === "notes") loadNotes();
+    if (this.dataset.page === "flashcards") loadFlashcards();
+    if (this.dataset.page === "providers") loadProviders();
+    if (this.dataset.page === "settings") loadSettings();
+  };
+});
+
+// ── Chat ──
+async function sendMessage() {
+  const input = document.getElementById("chat-input");
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = "";
+  addChatMessage("user", msg);
+
+  const taskType = document.getElementById("chat-task").value;
+  const manual = document.getElementById("chat-manual").checked;
+  const provider = manual ? document.getElementById("chat-provider").value : null;
+  const model = manual ? document.getElementById("chat-model").value || null : null;
+
+  document.getElementById("chat-status").textContent = "thinking...";
+  const r = await api("POST", "/chat", { message: msg, task_type: taskType, provider, model });
+  document.getElementById("chat-status").textContent = "";
+  if (!r.ok) {
+    const err = await r.json();
+    addChatMessage("assistant", `[error] ${err.detail || "Request failed"}`);
+    return;
+  }
+  const data = await r.json();
+  addChatMessage("assistant", data.reply, `${data.provider}/${data.model}`);
+}
+
+function addChatMessage(role, content, meta) {
+  const div = document.createElement("div");
+  div.className = `chat-msg ${role}`;
+  const roleLabel = role === "user" ? "You" : "Aqua";
+  div.innerHTML = `<div class="role">${roleLabel}${meta ? ` · ${meta}` : ""}</div><div class="content">${escapeHtml(content)}</div>`;
+  document.getElementById("chat-messages").appendChild(div);
+  div.scrollIntoView({ behavior: "smooth" });
+}
+
+// ── Documents ──
+async function loadDocs() {
+  const r = await api("GET", "/documents?limit=50");
+  const docs = await r.json();
+  const el = document.getElementById("doc-list");
+  el.innerHTML = docs.map(d => `<div class="card" style="cursor:pointer" onclick="showDoc(${d.id})">
+    <b>${escapeHtml(d.title)}</b> <span style="color:var(--text-dim)">#${d.id}</span>
+    <div style="font-size:11px;color:var(--text-dim)">${(d.tags||[]).join(", ")} · ${d.source}</div>
+  </div>`).join("");
+}
+
+async function searchDocs() {
+  const q = document.getElementById("doc-search").value;
+  if (!q) return loadDocs();
+  const r = await api("GET", `/documents/search/${encodeURIComponent(q)}`);
+  const docs = await r.json();
+  document.getElementById("doc-list").innerHTML = docs.map(d => `<div class="card">
+    <b>${escapeHtml(d.title)}</b> <span style="color:var(--text-dim)">#${d.id}</span>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml((d.content||"").slice(0,300))}</div>
+  </div>`).join("");
+}
+
+function showAddDoc() {
+  document.getElementById("doc-form").style.display = "block";
+  document.getElementById("doc-title").value = "";
+  document.getElementById("doc-content").value = "";
+  document.getElementById("doc-authors").value = "";
+  document.getElementById("doc-source").value = "manual";
+  document.getElementById("doc-tags").value = "";
+}
+
+async function addDoc() {
+  const r = await api("POST", "/documents", {
+    title: document.getElementById("doc-title").value,
+    content: document.getElementById("doc-content").value,
+    authors: document.getElementById("doc-authors").value,
+    source: document.getElementById("doc-source").value,
+    tags: document.getElementById("doc-tags").value.split(",").map(t=>t.trim()).filter(Boolean),
+  });
+  if (r.ok) {
+    document.getElementById("doc-form").style.display = "none";
+    loadDocs();
+  }
+}
+
+async function showDoc(id) {
+  const r = await api("GET", `/documents/${id}`);
+  const d = await r.json();
+  const html = `<div class="card">
+    <div style="float:right"><button class="danger" onclick="deleteDoc(${d.id})">Delete</button></div>
+    <b>${escapeHtml(d.title)}</b> <span style="color:var(--text-dim)">#${d.id}</span>
+    <div style="font-size:11px;color:var(--text-dim);margin:4px 0">${(d.tags||[]).join(" · ")}</div>
+    <div style="white-space:pre-wrap;font-size:12px;margin-top:8px">${escapeHtml((d.content||"").slice(0,5000))}</div>
+  </div>`;
+  document.getElementById("doc-list").innerHTML = html;
+}
+
+async function deleteDoc(id) {
+  if (!confirm("Delete document?")) return;
+  await api("DELETE", `/documents/${id}`);
+  loadDocs();
+}
+
+// ── Notes ──
+async function loadNotes() {
+  const r = await api("GET", "/notes?limit=50");
+  const notes = await r.json();
+  document.getElementById("note-list").innerHTML = notes.map(n => `<div class="card">
+    <b>${escapeHtml(n.title || "Untitled")}</b> <span style="color:var(--text-dim)">#${n.id}</span>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml((n.content||"").slice(0,300))}</div>
+  </div>`).join("");
+}
+
+async function searchNotes() {
+  const q = document.getElementById("note-search").value;
+  if (!q) return loadNotes();
+  const r = await api("GET", `/notes/search/${encodeURIComponent(q)}`);
+  const notes = await r.json();
+  document.getElementById("note-list").innerHTML = notes.map(n => `<div class="card">
+    <b>${escapeHtml(n.title || "Untitled")}</b> #${n.id}
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml((n.content||"").slice(0,300))}</div>
+  </div>`).join("");
+}
+
+function showAddNote() {
+  document.getElementById("note-form").style.display = "block";
+  document.getElementById("note-title").value = "";
+  document.getElementById("note-content").value = "";
+}
+
+async function addNote() {
+  const r = await api("POST", "/notes", {
+    content: document.getElementById("note-content").value,
+    title: document.getElementById("note-title").value,
+  });
+  if (r.ok) {
+    document.getElementById("note-form").style.display = "none";
+    loadNotes();
+  }
+}
+
+// ── Flashcards ──
+async function loadFlashcards() {
+  const topic = document.getElementById("fc-topic").value;
+  const url = topic ? `/flashcards?topic=${encodeURIComponent(topic)}` : "/flashcards?limit=100";
+  const r = await api("GET", url);
+  const cards = await r.json();
+  document.getElementById("fc-list").innerHTML = cards.map(c => `<div class="card">
+    <b>${escapeHtml(c.question)}</b>
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml(c.answer)} · ${c.topic || "no topic"} · difficulty ${c.difficulty}</div>
+  </div>`).join("");
+}
+
+function showAddFc() {
+  document.getElementById("fc-form").style.display = "block";
+  document.getElementById("fc-question").value = "";
+  document.getElementById("fc-answer").value = "";
+  document.getElementById("fc-topic-input").value = "";
+  document.getElementById("fc-difficulty").value = "1";
+}
+
+async function addFc() {
+  const r = await api("POST", "/flashcards", {
+    question: document.getElementById("fc-question").value,
+    answer: document.getElementById("fc-answer").value,
+    topic: document.getElementById("fc-topic-input").value,
+    difficulty: parseInt(document.getElementById("fc-difficulty").value) || 1,
+  });
+  if (r.ok) {
+    document.getElementById("fc-form").style.display = "none";
+    loadFlashcards();
+  }
+}
+
+async function reviewMode() {
+  const topic = document.getElementById("fc-topic").value;
+  const url = topic ? `/flashcards?topic=${encodeURIComponent(topic)}` : "/flashcards?limit=50";
+  const r = await api("GET", url);
+  const cards = await r.json();
+  if (!cards.length) { document.getElementById("fc-review").innerHTML = "No cards to review."; document.getElementById("fc-review").style.display = "block"; return; }
+  let i = 0;
+  const el = document.getElementById("fc-review");
+  el.style.display = "block";
+  function showCard() {
+    if (i >= cards.length) { el.innerHTML = "<div style='color:var(--accent)'>All done!</div>"; return; }
+    const c = cards[i];
+    el.innerHTML = `<div style="margin-bottom:8px"><b>Q:</b> ${escapeHtml(c.question)}</div>
+      <input id="review-answer" placeholder="Your answer..." style="margin-bottom:8px">
+      <div class="flex">
+        <button class="primary" onclick="revealAnswer(${c.id},${i})">Submit</button>
+        <button onclick="skipCard(${i})">Skip</button>
+      </div>
+      <div id="review-result"></div>`;
+  }
+  window.revealAnswer = async (id, idx) => {
+    const ans = document.getElementById("review-answer").value;
+    const c = cards[idx];
+    document.getElementById("review-result").innerHTML = `<b>Correct:</b> ${escapeHtml(c.answer)}<br>
+      <button class="ok mt-8" onclick="markCard(${id},true,${idx})">Correct</button>
+      <button class="danger" onclick="markCard(${id},false,${idx})">Wrong</button>`;
+  };
+  window.skipCard = (idx) => { i = idx + 1; showCard(); };
+  window.markCard = async (id, correct, idx) => {
+    await api("POST", `/flashcards/${id}/review`, { correct });
+    i = idx + 1; showCard();
+  };
+  showCard();
+}
+
+// ── Providers ──
+async function loadProviders() {
+  const r = await api("GET", "/settings/providers");
+  const providers = await r.json();
+  document.getElementById("provider-list").innerHTML = `<table>
+    <tr><th>Provider</th><th>Status</th><th>Model</th></tr>
+    ${providers.map(p => `<tr>
+      <td>${p.name}</td>
+      <td><span class="status-dot ${p.available ? 'ok' : 'err'}"></span>${p.available ? 'Available' : 'Offline'}</td>
+      <td>${p.default_model || '-'}</td>
+    </tr>`).join("")}
+  </table>`;
+}
+
+async function saveProviderConfig() {
+  const updates = {};
+  const groq = document.getElementById("cfg-groq").value;
+  if (groq) updates.GROQ_API_KEY = groq;
+  const nvidia = document.getElementById("cfg-nvidia").value;
+  if (nvidia) updates.NVIDIA_API_KEY = nvidia;
+  const openai = document.getElementById("cfg-openai").value;
+  if (openai) updates.OPENAI_API_KEY = openai;
+  const anthropic = document.getElementById("cfg-anthropic").value;
+  if (anthropic) updates.ANTHROPIC_API_KEY = anthropic;
+  const ollamaUrl = document.getElementById("cfg-ollama-url").value;
+  if (ollamaUrl) updates.OLLAMA_BASE_URL = ollamaUrl;
+  const localUrl = document.getElementById("cfg-local-url").value;
+  if (localUrl) updates.LOCAL_BASE_URL = localUrl;
+  const r = await api("POST", "/settings/env", { updates });
+  if (r.ok) {
+    document.getElementById("cfg-status").textContent = "Saved! Restart server to apply.";
+    loadProviders();
+  }
+}
+
+// ── Settings ──
+async function loadSettings() {
+  const r = await api("GET", "/settings");
+  const s = await r.json();
+  document.getElementById("cfg-prefer-local").checked = true;
+  if (s.ollama_base_url) document.getElementById("cfg-ollama-url").value = s.ollama_base_url;
+  if (s.ollama_default_model) document.getElementById("cfg-model-ollama").value = s.ollama_default_model;
+  if (s.groq_default_model) document.getElementById("cfg-model-groq").value = s.groq_default_model;
+  if (s.nvidia_default_model) document.getElementById("cfg-model-nvidia").value = s.nvidia_default_model;
+  if (s.openai_default_model) document.getElementById("cfg-model-openai").value = s.openai_default_model;
+}
+
+async function saveSettings() {
+  const updates = {};
+  updates.OLLAMA_BASE_URL = document.getElementById("cfg-ollama-url").value;
+  updates.OLLAMA_DEFAULT_MODEL = document.getElementById("cfg-model-ollama").value;
+  updates.GROQ_DEFAULT_MODEL = document.getElementById("cfg-model-groq").value;
+  updates.NVIDIA_DEFAULT_MODEL = document.getElementById("cfg-model-nvidia").value;
+  updates.OPENAI_DEFAULT_MODEL = document.getElementById("cfg-model-openai").value;
+  const pw = document.getElementById("cfg-web-pw").value;
+  if (pw) updates.AQUA_WEB_PASSWORD = pw;
+  await api("POST", "/settings/env", { updates });
+  alert("Settings saved. Restart server to apply.");
+}
+
+function escapeHtml(s) {
+  if (!s) return "";
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Init
+checkAuth();
+</script>
+</body>
+</html>

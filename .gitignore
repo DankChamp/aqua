@@ -1,6 +1,5 @@
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .env
 .venv/
@@ -11,3 +10,5 @@ aqua/data/
 dist/
 build/
 .chromadb/
+aqua.pid
+aqua.log
