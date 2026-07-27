@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.venv/
+venv/
+*.db
+aqua/data/
+*.egg-info/
+dist/
+build/
+.chromadb/
