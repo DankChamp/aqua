@@ -20,8 +20,14 @@ class ReviewRequest(BaseModel):
 
 
 @router.post("")
-def create_flashcard(payload: FlashcardCreate):
-    return add_flashcard(**payload.model_dump())
+async def create_flashcard(payload: FlashcardCreate):
+    card = add_flashcard(**payload.model_dump())
+    try:
+        from core.emma_bridge import push_summary_to_emma
+        await push_summary_to_emma("flashcard", payload.question, payload.answer[:200], tags=[payload.topic] if payload.topic else None)
+    except Exception:
+        pass
+    return card
 
 
 @router.get("")

@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     web_host: str = "0.0.0.0"
     web_port: int = 8000
 
+    emma_api_url: str = ""
+    emma_api_key: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:

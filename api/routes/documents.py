@@ -25,8 +25,14 @@ class DocCreate(BaseModel):
 
 
 @router.post("")
-def create_doc(payload: DocCreate):
+async def create_doc(payload: DocCreate):
     doc = add_document(**payload.model_dump())
+    try:
+        summary = payload.summary or payload.content[:200]
+        from core.emma_bridge import push_summary_to_emma
+        await push_summary_to_emma("document", payload.title, summary, tags=payload.tags)
+    except Exception:
+        pass
     return doc
 
 

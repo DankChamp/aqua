@@ -20,8 +20,15 @@ class NoteEdit(BaseModel):
 
 
 @router.post("")
-def create_note(payload: NoteCreate):
-    return add_note(content=payload.content, title=payload.title, document_id=payload.document_id)
+async def create_note(payload: NoteCreate):
+    note = add_note(content=payload.content, title=payload.title, document_id=payload.document_id)
+    try:
+        title = payload.title or "untitled"
+        from core.emma_bridge import push_summary_to_emma
+        await push_summary_to_emma("note", title, payload.content[:200])
+    except Exception:
+        pass
+    return note
 
 
 @router.get("")

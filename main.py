@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes
+from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts
 from api.routes import settings as settings_routes
 from config import get_settings
 
@@ -32,6 +32,7 @@ app.include_router(flashcards.router)
 app.include_router(quizzes.router)
 app.include_router(profile.router)
 app.include_router(webroutes.router)
+app.include_router(facts.router)
 app.include_router(settings_routes.router)
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
@@ -64,7 +65,7 @@ def login(payload: LoginRequest):
 async def auth_middleware(request: Request, call_next):
     if not settings.web_password:
         return await call_next(request)
-    if request.url.path in ("/", "/health", "/api/auth") or request.url.path.startswith("/ui/"):
+    if request.url.path in ("/", "/health", "/api/auth") or request.url.path.startswith("/ui/") or request.url.path.startswith("/api/facts"):
         return await call_next(request)
     auth = request.headers.get("Authorization", "")
     if auth == f"Bearer {settings.web_password}":
