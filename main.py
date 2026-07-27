@@ -7,7 +7,8 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from api.routes import chat, documents, notes, flashcards, quizzes, settings as settings_routes
+from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes
+from api.routes import settings as settings_routes
 from config import get_settings
 
 logger = logging.getLogger("aqua.main")
@@ -29,6 +30,8 @@ app.include_router(documents.router)
 app.include_router(notes.router)
 app.include_router(flashcards.router)
 app.include_router(quizzes.router)
+app.include_router(profile.router)
+app.include_router(webroutes.router)
 app.include_router(settings_routes.router)
 
 WEB_DIR = Path(__file__).resolve().parent / "web"

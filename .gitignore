@@ -5,6 +5,9 @@ __pycache__/
 .venv/
 venv/
 *.db
+*.db-shm
+*.db-wal
+data/
 aqua/data/
 *.egg-info/
 dist/

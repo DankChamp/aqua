@@ -127,6 +127,8 @@ th { color: var(--text-dim); font-size: 10px; letter-spacing: 1px; text-transfor
     <li data-page="documents">Documents</li>
     <li data-page="notes">Notes</li>
     <li data-page="flashcards">Flashcards</li>
+    <li data-page="profile">Profile</li>
+    <li data-page="research">Research</li>
     <li data-page="providers">Providers</li>
     <li data-page="settings">Settings</li>
   </ul>
@@ -174,6 +176,10 @@ th { color: var(--text-dim); font-size: 10px; letter-spacing: 1px; text-transfor
       <input id="doc-search" placeholder="Search..." class="grow" onkeydown="if(event.key==='Enter')searchDocs()">
       <button onclick="searchDocs()">Search</button>
       <button class="primary" onclick="showAddDoc()">+ Add</button>
+    </div>
+    <div class="flex mb-8">
+      <input id="doc-fetch-url" placeholder="Fetch from URL and save as document..." class="grow" onkeydown="if(event.key==='Enter')docFetchUrl()">
+      <button onclick="docFetchUrl()">Fetch URL</button>
     </div>
     <div id="doc-list"></div>
     <div id="doc-form" style="display:none" class="card">
@@ -233,6 +239,62 @@ th { color: var(--text-dim); font-size: 10px; letter-spacing: 1px; text-transfor
       </div>
     </div>
     <div id="fc-review" style="display:none" class="card"></div>
+  </div>
+
+  <!-- Profile -->
+  <div class="page" id="page-profile">
+    <div class="page-title">Profile</div>
+    <div class="card">
+      <div class="page-title" style="font-size:12px;margin-bottom:8px">System Prompt / About Me</div>
+      <p class="text-dim" style="font-size:11px;margin-bottom:8px">Write about yourself and how Aqua should work. This is injected into every conversation.</p>
+      <textarea id="profile-prompt" placeholder="e.g. I'm a 3rd year Computer Science student. I want Aqua to help me with research papers, study for exams, and keep track of my projects. Explain concepts from fundamentals up, use analogies, and quiz me after teaching me something." style="width:100%;min-height:200px" class="mb-8"></textarea>
+      <button class="primary" onclick="saveProfilePrompt()">Save Prompt</button>
+      <span id="profile-prompt-status" style="font-size:11px;color:var(--accent);margin-left:8px"></span>
+    </div>
+    <div class="card">
+      <div class="page-title" style="font-size:12px;margin-bottom:8px">Profile Facts</div>
+      <p class="text-dim" style="font-size:11px;margin-bottom:8px">Key-value facts about you. Categories: education, projects, goals, preferences, health, skills, work, interests.</p>
+      <table>
+        <thead><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr></thead>
+        <tbody id="profile-table"></tbody>
+      </table>
+      <div class="flex mt-8">
+        <input id="profile-new-key" placeholder="Key" style="width:150px">
+        <input id="profile-new-value" placeholder="Value" class="grow">
+        <input id="profile-new-category" placeholder="Category" style="width:120px">
+        <button class="primary" onclick="addProfileEntry()">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Research -->
+  <div class="page" id="page-research">
+    <div class="page-title">Research</div>
+    <div class="card">
+      <div class="page-title" style="font-size:12px;margin-bottom:8px">Search the Web</div>
+      <div class="flex mb-8">
+        <input id="research-query" placeholder="Search topic..." class="grow" onkeydown="if(event.key==='Enter')searchWeb()">
+        <button class="primary" onclick="searchWeb()">Search</button>
+      </div>
+      <div id="research-results"></div>
+    </div>
+    <div class="card">
+      <div class="page-title" style="font-size:12px;margin-bottom:8px">Import from URL</div>
+      <div class="flex mb-8">
+        <input id="fetch-url" placeholder="https://..." class="grow" onkeydown="if(event.key==='Enter')fetchUrl()">
+        <button class="primary" onclick="fetchUrl()">Fetch & Import</button>
+      </div>
+      <div id="fetch-result" style="font-size:11px"></div>
+    </div>
+    <div class="card">
+      <div class="page-title" style="font-size:12px;margin-bottom:8px">Full Research Pipeline</div>
+      <p class="text-dim" style="font-size:11px;margin-bottom:8px">Search DuckDuckGo, fetch all results, and save them as documents.</p>
+      <div class="flex mb-8">
+        <input id="research-topic" placeholder="Research topic..." class="grow" onkeydown="if(event.key==='Enter')researchTopic()">
+        <button class="primary" onclick="researchTopic()">Research</button>
+      </div>
+      <div id="research-pipeline-result" style="font-size:11px"></div>
+    </div>
   </div>
 
   <!-- Providers -->
@@ -348,6 +410,7 @@ document.querySelectorAll(".nav li").forEach(li => {
     if (this.dataset.page === "documents") loadDocs();
     if (this.dataset.page === "notes") loadNotes();
     if (this.dataset.page === "flashcards") loadFlashcards();
+    if (this.dataset.page === "profile") loadProfile();
     if (this.dataset.page === "providers") loadProviders();
     if (this.dataset.page === "settings") loadSettings();
   };
@@ -428,6 +491,16 @@ async function addDoc() {
   });
   if (r.ok) {
     document.getElementById("doc-form").style.display = "none";
+    loadDocs();
+  }
+}
+
+async function docFetchUrl() {
+  const url = document.getElementById("doc-fetch-url").value.trim();
+  if (!url) return;
+  const r = await api("POST", "/web/fetch", { url });
+  if (r.ok) {
+    document.getElementById("doc-fetch-url").value = "";
     loadDocs();
   }
 }
@@ -554,6 +627,109 @@ async function reviewMode() {
     i = idx + 1; showCard();
   };
   showCard();
+}
+
+// ── Profile ──
+async function loadProfile() {
+  const r = await api("GET", "/profile/system-prompt");
+  const sp = await r.json();
+  document.getElementById("profile-prompt").value = sp.text || "";
+
+  const r2 = await api("GET", "/profile");
+  const entries = await r2.json();
+  const tbody = document.getElementById("profile-table");
+  tbody.innerHTML = entries.map(e => `<tr>
+    <td style="font-family:var(--mono);font-size:11px">${escapeHtml(e.key)}</td>
+    <td>${escapeHtml(e.value)}</td>
+    <td class="text-dim">${escapeHtml(e.category || "")}</td>
+    <td><button class="danger" onclick="deleteProfileEntry('${escapeHtml(e.key)}')" style="padding:2px 8px;font-size:10px">✕</button></td>
+  </tr>`).join("");
+}
+
+document.getElementById("profile-prompt")?.addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && e.ctrlKey) saveProfilePrompt();
+});
+
+async function saveProfilePrompt() {
+  const text = document.getElementById("profile-prompt").value;
+  const r = await api("PUT", "/profile/system-prompt", { text });
+  const status = document.getElementById("profile-prompt-status");
+  status.textContent = r.ok ? "✓ Saved" : "✗ Error";
+}
+
+async function addProfileEntry() {
+  const key = document.getElementById("profile-new-key").value.trim();
+  const value = document.getElementById("profile-new-value").value.trim();
+  const category = document.getElementById("profile-new-category").value.trim();
+  if (!key || !value) return;
+  const r = await api("POST", "/profile", { key, value, category });
+  if (r.ok) {
+    document.getElementById("profile-new-key").value = "";
+    document.getElementById("profile-new-value").value = "";
+    document.getElementById("profile-new-category").value = "";
+    loadProfile();
+  }
+}
+
+async function deleteProfileEntry(key) {
+  const r = await api("DELETE", `/profile/${encodeURIComponent(key)}`);
+  if (r.ok) loadProfile();
+}
+
+// ── Research ──
+async function searchWeb() {
+  const q = document.getElementById("research-query").value.trim();
+  if (!q) return;
+  const el = document.getElementById("research-results");
+  el.innerHTML = "Searching...";
+  const r = await api("POST", "/web/search", { query: q, max_results: 10 });
+  const data = await r.json();
+  const results = data.results || [];
+  if (!results.length) { el.innerHTML = "<span class='text-dim'>No results</span>"; return; }
+  el.innerHTML = results.map((res, i) => `<div class="card" style="padding:10px;margin-bottom:6px">
+    <div class="flex" style="align-items:flex-start">
+      <div class="grow">
+        <b style="font-size:12px">${escapeHtml(res.title)}</b>
+        <div style="font-size:10px;color:var(--text-dim);word-break:break-all">${escapeHtml(res.url)}</div>
+        <div style="font-size:11px;margin-top:4px">${escapeHtml(res.snippet)}</div>
+      </div>
+      <button onclick="importResearchUrl('${escapeHtml(res.url)}', this)" style="padding:4px 8px;font-size:10px;white-space:nowrap">Import</button>
+    </div>
+  </div>`).join("");
+}
+
+async function importResearchUrl(url, btn) {
+  btn.disabled = true;
+  btn.textContent = "...";
+  const r = await api("POST", "/web/fetch", { url });
+  const data = await r.json();
+  if (data.error) { btn.textContent = "Failed"; return; }
+  btn.textContent = "✓ Imported";
+  btn.style.borderColor = "var(--ok)";
+}
+
+async function fetchUrl() {
+  const url = document.getElementById("fetch-url").value.trim();
+  if (!url) return;
+  const el = document.getElementById("fetch-result");
+  el.innerHTML = "Fetching...";
+  const r = await api("POST", "/web/fetch", { url });
+  const data = await r.json();
+  if (data.error) { el.innerHTML = `<span style="color:var(--err)">${data.error}</span>`; return; }
+  el.innerHTML = `<span style="color:var(--ok)">✓ Imported: ${escapeHtml(data.title)}</span> <span class="text-dim">(id=${data.id})</span>`;
+}
+
+async function researchTopic() {
+  const topic = document.getElementById("research-topic").value.trim();
+  if (!topic) return;
+  const el = document.getElementById("research-pipeline-result");
+  el.innerHTML = "Researching...";
+  const r = await api("POST", "/web/research", { topic, max_results: 5 });
+  const data = await r.json();
+  const docs = data.documents || [];
+  if (!docs.length) { el.innerHTML = "No documents imported."; return; }
+  el.innerHTML = `<span style="color:var(--ok)">✓ Imported ${docs.length} documents</span><br>` +
+    docs.map(d => `<span class="text-dim" style="font-size:11px">#${d.id} ${escapeHtml(d.search_title || d.title)}</span><br>`).join("");
 }
 
 // ── Providers ──
