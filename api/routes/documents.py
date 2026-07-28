@@ -1,13 +1,12 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 
 from core.documents.manager import (
     add_document, get_document, list_documents,
     search_documents, delete_document,
 )
-from core.documents.models import Document
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -33,6 +32,26 @@ async def create_doc(payload: DocCreate):
         await push_summary_to_emma("document", payload.title, summary, tags=payload.tags)
     except Exception:
         pass
+    return doc
+
+
+@router.post("/import")
+async def import_doc(file: UploadFile = File(...), title: Optional[str] = Form(None)):
+    content = await file.read()
+    filename = file.filename or "untitled"
+    doc_title = title or filename
+    text = ""
+    if filename.endswith(".pdf"):
+        try:
+            from pypdf import PdfReader
+            import io
+            reader = PdfReader(io.BytesIO(content))
+            text = "\n".join(page.extract_text() or "" for page in reader.pages)
+        except Exception:
+            raise HTTPException(400, "Failed to extract PDF text")
+    else:
+        text = content.decode("utf-8", errors="replace")
+    doc = add_document(title=doc_title, content=text, source="import", file_path=filename)
     return doc
 
 

@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-"""
-Aqua CLI - HTTP client for the Aqua API.
-
-Usage:
-    aqua ask "what is machine learning?"
-    aqua docs add "Title" --content "..."
-    aqua notes list
-    aqua flashcards review
-    aqua serve         # Start the web server
-    aqua init          # Initialize database
-"""
 import argparse
 import json
 import os
@@ -190,91 +178,6 @@ def cmd_flashcards_review(args):
         console.print()
 
 
-def cmd_serve(args):
-    cmd = ["uvicorn", "main:app", "--host", args.host or "0.0.0.0", "--port", str(args.port or 8000)]
-    if args.reload:
-        cmd.append("--reload")
-    os.chdir(Path(__file__).resolve().parent.parent)
-    subprocess.run(cmd)
-
-
-def cmd_init(args):
-    from config import get_settings
-    s = get_settings()
-    s.db_path.parent.mkdir(parents=True, exist_ok=True)
-    from core.documents.manager import _get_db
-    from core.study.flashcards import _get_db as _get_study_db
-    _get_db().close()
-    _get_study_db().close()
-    console.print(f"[green]Aqua initialized[/green] (db: {s.db_path})")
-
-
-def cli_main():
-    import sys
-    root = str(Path(__file__).resolve().parent.parent)
-    if root not in sys.path:
-        sys.path.insert(0, root)
-    main()
-
-
-def main():
-    parser = argparse.ArgumentParser(prog="aqua")
-    sub = parser.add_subparsers(dest="command")
-
-    p_ask = sub.add_parser("ask", help="Ask a question")
-    p_ask.add_argument("query", nargs="+")
-    p_ask.add_argument("--task-type", "-t", default="conversation")
-    p_ask.add_argument("--provider", "-p")
-    p_ask.add_argument("--model", "-m")
-
-    p_docs = sub.add_parser("docs", help="Manage documents")
-    docs_sub = p_docs.add_subparsers(dest="subcommand")
-    p_dl = docs_sub.add_parser("list")
-    p_dl.add_argument("--tag", "-t")
-    p_dl.add_argument("--source", "-s")
-    p_dl.add_argument("--limit", "-l", type=int, default=50)
-    p_da = docs_sub.add_parser("add")
-    p_da.add_argument("title")
-    p_da.add_argument("--content", "-c")
-    p_da.add_argument("--authors", "-a")
-    p_da.add_argument("--source", "-s")
-    p_da.add_argument("--tags", "-t")
-    p_ds = docs_sub.add_parser("show")
-    p_ds.add_argument("id", type=int)
-    p_dsr = docs_sub.add_parser("search")
-    p_dsr.add_argument("query")
-    p_dsr.add_argument("--limit", "-l", type=int, default=20)
-    p_dd = docs_sub.add_parser("delete")
-    p_dd.add_argument("id", type=int)
-
-    p_notes = sub.add_parser("notes", help="Manage notes")
-    n_sub = p_notes.add_subparsers(dest="subcommand")
-    n_l = n_sub.add_parser("list")
-    n_l.add_argument("--doc-id", "-d", type=int)
-    n_l.add_argument("--limit", "-l", type=int, default=50)
-    n_a = n_sub.add_parser("add")
-    n_a.add_argument("content")
-    n_a.add_argument("--title", "-t")
-    n_a.add_argument("--doc-id", "-d", type=int)
-    n_s = n_sub.add_parser("search")
-    n_s.add_argument("query")
-    n_s.add_argument("--limit", "-l", type=int, default=20)
-
-    p_fc = sub.add_parser("flashcards", help="Manage flashcards")
-    fc_sub = p_fc.add_subparsers(dest="subcommand")
-    fc_l = fc_sub.add_parser("list")
-    fc_l.add_argument("--topic", "-t")
-    fc_l.add_argument("--limit", "-l", type=int, default=50)
-    fc_a = fc_sub.add_parser("add")
-    fc_a.add_argument("question")
-    fc_a.add_argument("answer")
-    fc_a.add_argument("--topic", "-t")
-    fc_a.add_argument("--difficulty", "-d", type=int, default=1)
-    fc_r = fc_sub.add_parser("review")
-    fc_r.add_argument("--topic", "-t")
-
-# ── Profile ──
-
 def cmd_profile_list(args):
     resp = api("GET", "/profile")
     entries = resp.json()
@@ -315,8 +218,6 @@ def cmd_profile_prompt(args):
         data = resp.json()
         console.print(Panel(data.get("text", ""), title="System Prompt"))
 
-
-# ── Web ──
 
 def cmd_web_search(args):
     resp = api("POST", "/web/search", json={"query": " ".join(args.query), "max_results": args.limit})
@@ -363,6 +264,124 @@ def cmd_web_research(args):
     console.print(table)
 
 
+def cmd_quiz_list(args):
+    resp = api("GET", "/quizzes", params={"limit": args.limit})
+    quizzes = resp.json()
+    if not quizzes:
+        console.print("[yellow]No quizzes[/yellow]")
+        return
+    table = Table(show_header=True)
+    table.add_column("ID", style="dim")
+    table.add_column("Title")
+    table.add_column("Topic")
+    table.add_column("Score")
+    for q in quizzes:
+        score = f"{q.get('score', '?'):.0f}%" if q.get('score') is not None else "-"
+        table.add_row(str(q["id"]), q["title"][:50], q.get("topic", ""), score)
+    console.print(table)
+
+
+def cmd_quiz_show(args):
+    resp = api("GET", f"/quizzes/{args.id}")
+    if resp.status_code == 404:
+        console.print("[red]Quiz not found[/red]")
+        return
+    q = resp.json()
+    console.print(f"[bold]{q['title']}[/bold] ({q.get('topic', 'no topic')})")
+    if q.get("score") is not None:
+        console.print(f"Score: {q['score']:.0f}% ({q.get('correct', '?')}/{q.get('total', '?')})")
+    for i, qd in enumerate(q.get("questions", []), 1):
+        ua = qd.get("user_answer")
+        icon = "[green]✓[/green]" if qd.get("is_correct") else "[red]✗[/red]" if ua else "[dim]—[/dim]"
+        console.print(f"  {i}. {qd['question']}  {icon}")
+        if ua:
+            console.print(f"     Your answer: {ua}")
+        console.print(f"     Correct: {qd['correct_answer']}")
+
+
+def cmd_quiz_generate(args):
+    resp = api("POST", "/quizzes/generate", json={
+        "document_id": args.doc_id,
+        "num_questions": args.count,
+        "topic": args.topic or "",
+    })
+    if resp.status_code == 400:
+        console.print(f"[red]{resp.json()['detail']}[/red]")
+        return
+    data = resp.json()
+    console.print(f"[green]Quiz generated:[/green] {data['title']} (id={data['id']})")
+
+
+def cmd_quiz_take(args):
+    resp = api("GET", f"/quizzes/{args.id}")
+    if resp.status_code == 404:
+        console.print("[red]Quiz not found[/red]")
+        return
+    q = resp.json()
+    console.print(f"\n[bold]{q['title']}[/bold]\n")
+    for i, qd in enumerate(q.get("questions", []), 1):
+        console.print(f"[bold]Q{i}:[/bold] {qd['question']}")
+        if qd.get("options"):
+            for j, opt in enumerate(qd["options"], 1):
+                console.print(f"  {j}. {opt}")
+        answer = Prompt.ask("Your answer")
+        api("POST", f"/quizzes/{q['id']}/questions/{qd['id']}/answer", json={"answer": answer})
+    resp = api("POST", f"/quizzes/{q['id']}/grade")
+    result = resp.json()
+    console.print(f"\n[bold]Score: {result['score']:.0f}% ({result['correct']}/{result['total']})[/bold]")
+
+
+def cmd_search(args):
+    resp = api("GET", f"/search?q={' '.join(args.query)}&limit={args.limit}")
+    data = resp.json()
+    if not data.get("documents") and not data.get("notes"):
+        console.print("[yellow]No results[/yellow]")
+        return
+    for d in data.get("documents", []):
+        console.print(Panel(d.get("content", "")[:300], title=f"[bold]{d['title']}[/bold] (doc #{d['id']})"))
+    for n in data.get("notes", []):
+        console.print(Panel(n.get("content", "")[:300], title=f"[bold]{n.get('title', 'Note')}[/bold] (note #{n['id']})"))
+
+
+def cmd_serve(args):
+    cmd = ["uvicorn", "main:app", "--host", args.host or "0.0.0.0", "--port", str(args.port or 8000)]
+    if args.reload:
+        cmd.append("--reload")
+    os.chdir(Path(__file__).resolve().parent.parent)
+    subprocess.run(cmd)
+
+
+def cmd_init(args):
+    from config import get_settings
+    s = get_settings()
+    s.db_path.parent.mkdir(parents=True, exist_ok=True)
+    from core.deps import get_db
+    get_db()
+    console.print(f"[green]Aqua initialized[/green] (db: {s.db_path})")
+
+
+def cmd_voice_start(args):
+    cmd = [sys.executable, "aqua_voice.py"]
+    wake_word = args.wake_word or None
+    if wake_word:
+        cmd.extend(["--wake-word", wake_word])
+    if args.device:
+        cmd.extend(["--device", args.device])
+    if args.no_barge_in:
+        cmd.append("--no-barge-in")
+    if args.list_devices:
+        cmd.append("--list-devices")
+    log = open("voice.log", "a")
+    subprocess.Popen(cmd, stdout=log, stderr=subprocess.STDOUT,
+                     cwd=Path(__file__).resolve().parent.parent)
+    console.print("[green]Voice assistant started[/green]")
+
+
+def cmd_voice_stop(args):
+    subprocess.run(["pkill", "-f", "aqua_voice.py"])
+    console.print("[red]Voice assistant stopped[/red]")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="aqua")
     sub = parser.add_subparsers(dest="command")
@@ -419,7 +438,6 @@ def main():
     fc_r = fc_sub.add_parser("review")
     fc_r.add_argument("--topic", "-t")
 
-    # Profile
     p_prof = sub.add_parser("profile", help="Manage your profile and system prompt")
     prof_sub = p_prof.add_subparsers(dest="subcommand")
     prof_l = prof_sub.add_parser("list")
@@ -432,7 +450,6 @@ def main():
     prof_p = prof_sub.add_parser("prompt")
     prof_p.add_argument("text", nargs="?", default=None)
 
-    # Web
     p_web = sub.add_parser("web", help="Search and fetch from the web")
     web_sub = p_web.add_subparsers(dest="subcommand")
     ws = web_sub.add_parser("search")
@@ -443,6 +460,32 @@ def main():
     wr = web_sub.add_parser("research")
     wr.add_argument("topic", nargs="+")
     wr.add_argument("--limit", "-l", type=int, default=5)
+
+    p_quiz = sub.add_parser("quiz", help="Manage and take quizzes")
+    quiz_sub = p_quiz.add_subparsers(dest="subcommand")
+    ql = quiz_sub.add_parser("list")
+    ql.add_argument("--limit", "-l", type=int, default=20)
+    qs = quiz_sub.add_parser("show")
+    qs.add_argument("id", type=int)
+    qg = quiz_sub.add_parser("generate")
+    qg.add_argument("doc_id", type=int)
+    qg.add_argument("--count", "-n", type=int, default=5)
+    qg.add_argument("--topic", "-t")
+    qt = quiz_sub.add_parser("take")
+    qt.add_argument("id", type=int)
+
+    p_search = sub.add_parser("search", help="Semantic search across documents and notes")
+    p_search.add_argument("query", nargs="+")
+    p_search.add_argument("--limit", "-l", type=int, default=10)
+
+    p_voice = sub.add_parser("voice", help="Voice assistant")
+    v_sub = p_voice.add_subparsers(dest="subcommand")
+    vs = v_sub.add_parser("start")
+    vs.add_argument("--wake-word")
+    vs.add_argument("--device")
+    vs.add_argument("--no-barge-in", action="store_true")
+    vs.add_argument("--list-devices", action="store_true")
+    v_stop = v_sub.add_parser("stop")
 
     p_serve = sub.add_parser("serve", help="Start the web server")
     p_serve.add_argument("--host", default="0.0.0.0")
@@ -468,6 +511,12 @@ def main():
         {"list": cmd_profile_list, "set": cmd_profile_set, "remove": cmd_profile_remove, "prompt": cmd_profile_prompt}[args.subcommand](args)
     elif args.command == "web":
         {"search": cmd_web_search, "fetch": cmd_web_fetch, "research": cmd_web_research}[args.subcommand](args)
+    elif args.command == "quiz":
+        {"list": cmd_quiz_list, "show": cmd_quiz_show, "generate": cmd_quiz_generate, "take": cmd_quiz_take}[args.subcommand](args)
+    elif args.command == "search":
+        cmd_search(args)
+    elif args.command == "voice":
+        {"start": cmd_voice_start, "stop": cmd_voice_stop}[args.subcommand](args)
     elif args.command == "serve":
         cmd_serve(args)
     elif args.command == "init":
@@ -475,4 +524,7 @@ def main():
 
 
 if __name__ == "__main__":
-    cli_main()
+    root = str(Path(__file__).resolve().parent.parent)
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    main()

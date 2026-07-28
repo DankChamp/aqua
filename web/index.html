@@ -6,801 +6,748 @@
 <title>Aqua</title>
 <style>
 :root {
-  --bg: #050510;
-  --bg-elevated: #0a0a1a;
-  --bg-input: #0d0d24;
-  --border: #1a1a3a;
-  --text: #c0c0d0;
-  --text-dim: #505080;
-  --accent: #00e5ff;
-  --accent-hover: #66f0ff;
-  --accent-dim: rgba(0, 229, 255, 0.12);
-  --pink: #ff00aa;
-  --pink-dim: rgba(255, 0, 170, 0.12);
-  --ok: #00e5ff;
-  --warn: #ffd600;
-  --err: #ff00aa;
-  --font: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
+  --bg: #080810;
+  --bg-elevated: #0e0e1e;
+  --bg-card: #12122a;
+  --bg-input: #1a1a30;
+  --border: #222244;
+  --text: #d0d0e0;
+  --text-dim: #606090;
+  --accent: #00d4aa;
+  --accent-dim: #009977;
+  --gold: #f0a030;
+  --gold-dim: #c08020;
+  --danger: #e04060;
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  background: var(--bg); color: var(--text); font-family: var(--font);
-  display: flex; height: 100vh; overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
 }
-.sidebar {
-  width: 200px; min-width: 200px; background: var(--bg-elevated);
-  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Top Nav ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 48px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 16px;
+  z-index: 100;
+  gap: 4px;
 }
-.brand {
-  font-size: 20px; font-weight: 700; padding: 20px 16px 2px;
-  color: var(--accent); text-shadow: 0 0 10px rgba(0,229,255,0.5);
-  letter-spacing: 4px;
+.topbar .brand {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--accent);
+  margin-right: 24px;
+  letter-spacing: 1px;
+  display: flex; align-items: center; gap: 8px;
 }
-.brand-sub {
-  font-size: 10px; color: var(--pink); padding: 0 16px 18px;
-  letter-spacing: 3px;
+.topbar .brand small {
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
-.nav { list-style: none; padding: 8px; flex: 1; overflow-y: auto; }
-.nav li {
-  padding: 10px 12px; border-radius: 4px; margin-bottom: 2px;
-  color: var(--text-dim); cursor: pointer; font-size: 12px;
-  letter-spacing: 1px; text-transform: uppercase;
-  border-left: 2px solid transparent;
+.nav {
+  display: flex; gap: 2px;
+  flex: 1;
 }
-.nav li:hover { background: var(--bg-input); color: var(--text); }
-.nav li.active { background: var(--bg-input); color: var(--accent); border-left-color: var(--accent); }
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.page { display: none; padding: 24px; overflow-y: auto; height: 100%; }
-.page.active { display: flex; flex-direction: column; }
-.page-title {
-  font-size: 14px; font-weight: 600; margin-bottom: 16px;
-  color: var(--accent); letter-spacing: 2px; text-transform: uppercase;
+.nav a {
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 13px;
+  transition: all .15s;
+  cursor: pointer;
+  white-space: nowrap;
 }
+.nav a:hover { color: var(--text); background: var(--bg-input); }
+.nav a.active { color: var(--accent); background: rgba(0,212,170,0.1); }
+
+/* ── Main Content ── */
+.main { margin-top: 48px; padding: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── Cards / Panels ── */
 .card {
-  background: var(--bg-elevated); border: 1px solid var(--border);
-  border-radius: 4px; padding: 16px; margin-bottom: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
 }
+.card h3 { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── Form Elements ── */
 input, textarea, select {
-  background: var(--bg-input); border: 1px solid var(--border);
-  border-radius: 4px; padding: 7px 10px; font-size: 12px;
-  color: var(--text); font-family: var(--font); width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: border .15s;
 }
-input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; }
-textarea { resize: vertical; min-height: 60px; }
-::placeholder { color: var(--text-dim); opacity: 0.5; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 60px; font-family: var(--font-mono); font-size: 12px; }
+label { display: block; margin-bottom: 4px; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+.form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.form-row > * { flex: 1; }
+.form-actions { display: flex; gap: 8px; margin-top: 8px; }
+
 button {
-  background: transparent; border: 1px solid var(--border);
-  border-radius: 4px; padding: 8px 16px; font-size: 11px;
-  color: var(--text); cursor: pointer; letter-spacing: 1px;
-  text-transform: uppercase; font-family: var(--font);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 16px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
 }
-button:hover { border-color: var(--accent); color: var(--accent); }
-button:disabled { opacity: 0.3; cursor: default; }
-button.primary { border-color: var(--accent); color: var(--accent); }
-button.primary:hover { background: rgba(0,229,255,0.1); }
-button.danger { border-color: var(--pink); color: var(--pink); }
-button.danger:hover { background: rgba(255,0,170,0.1); }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.mt-8 { margin-top: 8px; }
-.mb-8 { margin-bottom: 8px; }
-.flex { display: flex; gap: 8px; }
-.grow { flex: 1; }
-.chat-messages { flex: 1; overflow-y: auto; margin-bottom: 12px; }
-.chat-msg { margin-bottom: 12px; }
-.chat-msg .role { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; letter-spacing: 1px; }
-.chat-msg .content { white-space: pre-wrap; line-height: 1.5; font-size: 13px; }
-.chat-msg.user .content { color: var(--accent); }
-.chat-msg.assistant .content { color: var(--text); }
+button:hover { border-color: var(--text-dim); }
+button.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+button.primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+button.gold { background: var(--gold); color: #000; border-color: var(--gold); font-weight: 600; }
+button.gold:hover { background: var(--gold-dim); border-color: var(--gold-dim); }
+button.danger { color: var(--danger); border-color: var(--danger); }
+button.danger:hover { background: var(--danger); color: #000; }
+button:disabled { opacity: .4; cursor: default; }
+
+/* ── Tables ── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; font-size: 11px; border-bottom: 1px solid var(--border); }
+td { padding: 8px 10px; border-bottom: 1px solid rgba(34,34,68,.5); }
+tr:hover td { background: rgba(0,212,170,.03); }
+
+/* ── Login Overlay ── */
+.login-overlay {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(8,8,16,.95);
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+}
+.login-overlay.show { display: flex; }
+.login-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  width: 340px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+.login-box h1 { color: var(--accent); margin-bottom: 4px; font-size: 24px; }
+.login-box p { color: var(--text-dim); font-size: 12px; margin-bottom: 20px; }
+.login-box input { margin-bottom: 12px; text-align: center; }
+
+/* ── Chat ── */
+.chat-log {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  height: 400px; overflow-y: auto;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.msg { margin-bottom: 8px; padding: 8px 12px; border-radius: var(--radius); max-width: 80%; }
+.msg.user { background: rgba(0,212,170,.08); margin-left: auto; border: 1px solid rgba(0,212,170,.2); }
+.msg.assistant { background: var(--bg-input); border: 1px solid var(--border); }
+.msg .meta { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
 .chat-input { display: flex; gap: 8px; }
 .chat-input input { flex: 1; }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-.status-dot.ok { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-.status-dot.err { background: var(--err); box-shadow: 0 0 6px var(--err); }
-.status-dot.warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
-.login-overlay {
-  position: fixed; inset: 0; background: var(--bg);
-  display: flex; align-items: center; justify-content: center; z-index: 100;
+.chat-options { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.chat-options select, .chat-options input { width: auto; flex: 1; min-width: 120px; }
+
+/* ── Study / Research ── */
+.study-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.study-wide { grid-column: 1 / -1; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: rgba(0,212,170,.1); color: var(--accent); margin-right: 4px; }
+.tag.gold { background: rgba(240,160,48,.1); color: var(--gold); }
+.dashboard-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 16px; }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: var(--accent); }
+.stat-card .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* ── Misc ── */
+.flex { display: flex; gap: 8px; }
+.flex-1 { flex: 1; }
+.gap-4 { gap: 4px; }
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.text-dim { color: var(--text-dim); }
+.text-accent { color: var(--accent); }
+.text-gold { color: var(--gold); }
+.text-sm { font-size: 12px; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hidden { display: none !important; }
+
+/* ── Flashcard Review ── */
+.flip-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  text-align: center;
+  min-height: 180px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  margin-bottom: 12px;
 }
-.login-box { width: 320px; }
-.login-box h2 { color: var(--accent); margin-bottom: 16px; letter-spacing: 3px; }
-.login-box .error { color: var(--err); font-size: 11px; margin-top: 8px; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
-th { color: var(--text-dim); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+.flip-card .question { font-size: 18px; margin-bottom: 16px; }
+.flip-card .answer { font-size: 16px; color: var(--gold); display: none; }
+.flip-card.show-answer .answer { display: block; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 8px; gap: 4px; }
+  .topbar .brand { margin-right: 0; }
+  .nav { flex-wrap: wrap; }
+  .nav a { font-size: 11px; padding: 4px 10px; }
+  .main { margin-top: 80px; padding: 12px; }
+  .study-grid { grid-template-columns: 1fr; }
+  .form-row { flex-direction: column; }
+}
 </style>
 </head>
 <body>
-<div id="login" class="login-overlay" style="display:none">
-  <div class="login-box card">
-    <h2>AQUA</h2>
-    <input type="password" id="login-pw" placeholder="password" style="margin-bottom:8px">
-    <button class="primary" onclick="login()" style="width:100%">unlock</button>
-    <div id="login-error" class="error"></div>
+
+<!-- Login Overlay -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h1>⎔</h1>
+    <h1>Aqua</h1>
+    <p>research &amp; study assistant</p>
+    <input type="password" id="loginPass" placeholder="password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="primary" onclick="doLogin()" style="width:100%">Unlock</button>
   </div>
 </div>
 
-<div class="sidebar">
-  <div class="brand">AQUA</div>
-  <div class="brand-sub">AI RESEARCH ASSISTANT</div>
-  <ul class="nav" id="nav">
-    <li class="active" data-page="chat">Talk</li>
-    <li data-page="documents">Documents</li>
-    <li data-page="notes">Notes</li>
-    <li data-page="flashcards">Flashcards</li>
-    <li data-page="profile">Profile</li>
-    <li data-page="research">Research</li>
-    <li data-page="providers">Providers</li>
-    <li data-page="settings">Settings</li>
-  </ul>
+<!-- Top Nav -->
+<div class="topbar" id="topbar">
+  <div class="brand">⎔ Aqua <small>research &amp; study</small></div>
+  <div class="nav" id="nav">
+    <a data-page="dashboard" class="active">Dashboard</a>
+    <a data-page="chat">Chat</a>
+    <a data-page="documents">Documents</a>
+    <a data-page="notes">Notes</a>
+    <a data-page="study">Study</a>
+    <a data-page="research">Research</a>
+    <a data-page="profile">Profile</a>
+    <a data-page="voice">Voice</a>
+    <a data-page="settings">Settings</a>
+  </div>
 </div>
 
-<div class="main">
-  <!-- Chat -->
-  <div class="page active" id="page-chat">
-    <div class="page-title">Talk</div>
-    <div class="flex mb-8" style="align-items:center;gap:12px">
-      <select id="chat-task" style="width:auto">
-        <option value="conversation">Conversation</option>
-        <option value="general">General</option>
-        <option value="coding">Coding</option>
-        <option value="reasoning">Reasoning</option>
-        <option value="creative">Creative</option>
-        <option value="research">Research</option>
-        <option value="study">Study</option>
-      </select>
-      <label style="font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px">
-        <input type="checkbox" id="chat-manual"> Manual
-      </label>
-      <select id="chat-provider" style="width:auto;display:none">
-        <option value="ollama">Ollama</option>
-        <option value="local_generic">Local (OpenAI-compat)</option>
-        <option value="groq">Groq</option>
-        <option value="nvidia">NVIDIA</option>
-        <option value="openai">OpenAI</option>
-        <option value="anthropic">Anthropic</option>
-      </select>
-      <input id="chat-model" placeholder="model override" style="width:auto;display:none">
-      <span id="chat-status" style="font-size:11px;color:var(--text-dim)"></span>
+<div class="main" id="main">
+
+<!-- ── Dashboard ── -->
+<div class="page active" id="page-dashboard">
+  <h2 style="margin-bottom:16px; color: var(--accent);">Dashboard</h2>
+  <div class="dashboard-stats" id="dashStats">
+    <div class="stat-card"><div class="num" id="statDocs">-</div><div class="label">Documents</div></div>
+    <div class="stat-card"><div class="num" id="statNotes">-</div><div class="label">Notes</div></div>
+    <div class="stat-card"><div class="num" id="statCards">-</div><div class="label">Flashcards</div></div>
+    <div class="stat-card"><div class="num" id="statQuizzes">-</div><div class="label">Quizzes</div></div>
+  </div>
+  <div class="study-wide card">
+    <h3>Quick Actions</h3>
+    <div class="flex" style="flex-wrap:wrap">
+      <button class="gold" onclick="switchPage('chat')">Ask a Question</button>
+      <button class="primary" onclick="switchPage('research')">Research Topic</button>
+      <button class="" onclick="switchPage('study')">Review Flashcards</button>
+      <button class="" onclick="switchPage('documents')">Browse Documents</button>
     </div>
-    <div class="chat-messages" id="chat-messages"></div>
+  </div>
+</div>
+
+<!-- ── Chat ── -->
+<div class="page" id="page-chat">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Chat</h2>
+  <div class="card">
+    <div class="chat-log" id="chatLog"></div>
     <div class="chat-input">
-      <input id="chat-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMessage()">
-      <button class="primary" onclick="sendMessage()">Send</button>
+      <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
+      <button class="primary" onclick="sendChat()">Send</button>
     </div>
-  </div>
-
-  <!-- Documents -->
-  <div class="page" id="page-documents">
-    <div class="page-title">Documents</div>
-    <div class="flex mb-8">
-      <input id="doc-search" placeholder="Search..." class="grow" onkeydown="if(event.key==='Enter')searchDocs()">
-      <button onclick="searchDocs()">Search</button>
-      <button class="primary" onclick="showAddDoc()">+ Add</button>
-    </div>
-    <div class="flex mb-8">
-      <input id="doc-fetch-url" placeholder="Fetch from URL and save as document..." class="grow" onkeydown="if(event.key==='Enter')docFetchUrl()">
-      <button onclick="docFetchUrl()">Fetch URL</button>
-    </div>
-    <div id="doc-list"></div>
-    <div id="doc-form" style="display:none" class="card">
-      <input id="doc-title" placeholder="Title" class="mb-8">
-      <textarea id="doc-content" placeholder="Content" class="mb-8"></textarea>
-      <div class="flex mb-8">
-        <input id="doc-authors" placeholder="Authors" class="grow">
-        <input id="doc-source" placeholder="Source (manual/pdf/url)" value="manual">
-      </div>
-      <input id="doc-tags" placeholder="Tags (comma-separated)" class="mb-8">
-      <div class="flex">
-        <button class="primary" onclick="addDoc()">Save</button>
-        <button onclick="document.getElementById('doc-form').style.display='none'">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Notes -->
-  <div class="page" id="page-notes">
-    <div class="page-title">Notes</div>
-    <div class="flex mb-8">
-      <input id="note-search" placeholder="Search notes..." class="grow" onkeydown="if(event.key==='Enter')searchNotes()">
-      <button onclick="searchNotes()">Search</button>
-      <button class="primary" onclick="showAddNote()">+ Add</button>
-    </div>
-    <div id="note-list"></div>
-    <div id="note-form" style="display:none" class="card">
-      <input id="note-title" placeholder="Title" class="mb-8">
-      <textarea id="note-content" placeholder="Content" class="mb-8"></textarea>
-      <div class="flex">
-        <button class="primary" onclick="addNote()">Save</button>
-        <button onclick="document.getElementById('note-form').style.display='none'">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Flashcards -->
-  <div class="page" id="page-flashcards">
-    <div class="page-title">Flashcards</div>
-    <div class="flex mb-8">
-      <input id="fc-topic" placeholder="Filter by topic..." class="grow">
-      <button onclick="loadFlashcards()">List</button>
-      <button class="primary" onclick="showAddFc()">+ Add</button>
-      <button class="ok" onclick="reviewMode()">Review</button>
-    </div>
-    <div id="fc-list"></div>
-    <div id="fc-form" style="display:none" class="card">
-      <input id="fc-question" placeholder="Question" class="mb-8">
-      <input id="fc-answer" placeholder="Answer" class="mb-8">
-      <div class="flex">
-        <input id="fc-topic-input" placeholder="Topic" class="grow">
-        <input id="fc-difficulty" placeholder="Difficulty (1-5)" type="number" min="1" max="5" value="1" style="width:100px">
-      </div>
-      <div class="flex mt-8">
-        <button class="primary" onclick="addFc()">Save</button>
-        <button onclick="document.getElementById('fc-form').style.display='none'">Cancel</button>
-      </div>
-    </div>
-    <div id="fc-review" style="display:none" class="card"></div>
-  </div>
-
-  <!-- Profile -->
-  <div class="page" id="page-profile">
-    <div class="page-title">Profile</div>
-    <div class="card">
-      <div class="page-title" style="font-size:12px;margin-bottom:8px">System Prompt / About Me</div>
-      <p class="text-dim" style="font-size:11px;margin-bottom:8px">Write about yourself and how Aqua should work. This is injected into every conversation.</p>
-      <textarea id="profile-prompt" placeholder="e.g. I'm a 3rd year Computer Science student. I want Aqua to help me with research papers, study for exams, and keep track of my projects. Explain concepts from fundamentals up, use analogies, and quiz me after teaching me something." style="width:100%;min-height:200px" class="mb-8"></textarea>
-      <button class="primary" onclick="saveProfilePrompt()">Save Prompt</button>
-      <span id="profile-prompt-status" style="font-size:11px;color:var(--accent);margin-left:8px"></span>
-    </div>
-    <div class="card">
-      <div class="page-title" style="font-size:12px;margin-bottom:8px">Profile Facts</div>
-      <p class="text-dim" style="font-size:11px;margin-bottom:8px">Key-value facts about you. Categories: education, projects, goals, preferences, health, skills, work, interests.</p>
-      <table>
-        <thead><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr></thead>
-        <tbody id="profile-table"></tbody>
-      </table>
-      <div class="flex mt-8">
-        <input id="profile-new-key" placeholder="Key" style="width:150px">
-        <input id="profile-new-value" placeholder="Value" class="grow">
-        <input id="profile-new-category" placeholder="Category" style="width:120px">
-        <button class="primary" onclick="addProfileEntry()">Add</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Research -->
-  <div class="page" id="page-research">
-    <div class="page-title">Research</div>
-    <div class="card">
-      <div class="page-title" style="font-size:12px;margin-bottom:8px">Search the Web</div>
-      <div class="flex mb-8">
-        <input id="research-query" placeholder="Search topic..." class="grow" onkeydown="if(event.key==='Enter')searchWeb()">
-        <button class="primary" onclick="searchWeb()">Search</button>
-      </div>
-      <div id="research-results"></div>
-    </div>
-    <div class="card">
-      <div class="page-title" style="font-size:12px;margin-bottom:8px">Import from URL</div>
-      <div class="flex mb-8">
-        <input id="fetch-url" placeholder="https://..." class="grow" onkeydown="if(event.key==='Enter')fetchUrl()">
-        <button class="primary" onclick="fetchUrl()">Fetch & Import</button>
-      </div>
-      <div id="fetch-result" style="font-size:11px"></div>
-    </div>
-    <div class="card">
-      <div class="page-title" style="font-size:12px;margin-bottom:8px">Full Research Pipeline</div>
-      <p class="text-dim" style="font-size:11px;margin-bottom:8px">Search DuckDuckGo, fetch all results, and save them as documents.</p>
-      <div class="flex mb-8">
-        <input id="research-topic" placeholder="Research topic..." class="grow" onkeydown="if(event.key==='Enter')researchTopic()">
-        <button class="primary" onclick="researchTopic()">Research</button>
-      </div>
-      <div id="research-pipeline-result" style="font-size:11px"></div>
-    </div>
-  </div>
-
-  <!-- Providers -->
-  <div class="page" id="page-providers">
-    <div class="page-title">Providers & API Keys</div>
-    <div id="provider-list"></div>
-    <div class="card mt-8">
-      <div class="page-title" style="font-size:12px;margin-bottom:8px">Configure Keys</div>
-      <div id="provider-form">
-        <div class="grid-2">
-          <label style="font-size:11px;color:var(--text-dim)">Groq API Key
-            <input id="cfg-groq" placeholder="gsk_...">
-          </label>
-          <label style="font-size:11px;color:var(--text-dim)">NVIDIA API Key
-            <input id="cfg-nvidia" placeholder="nvapi-...">
-          </label>
-          <label style="font-size:11px;color:var(--text-dim)">OpenAI API Key
-            <input id="cfg-openai" placeholder="sk-...">
-          </label>
-          <label style="font-size:11px;color:var(--text-dim)">Anthropic API Key
-            <input id="cfg-anthropic" placeholder="sk-ant-...">
-          </label>
-        </div>
-        <label style="font-size:11px;color:var(--text-dim);display:block;margin-top:8px">Ollama Base URL
-          <input id="cfg-ollama-url" value="http://localhost:11434">
-        </label>
-        <label style="font-size:11px;color:var(--text-dim);display:block;margin-top:8px">Local Base URL (OpenAI-compatible)
-          <input id="cfg-local-url" placeholder="http://localhost:1234">
-        </label>
-        <button class="primary mt-8" onclick="saveProviderConfig()">Save</button>
-        <span id="cfg-status" style="font-size:11px;color:var(--text-dim);margin-left:8px"></span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings -->
-  <div class="page" id="page-settings">
-    <div class="page-title">Settings</div>
-    <div class="card">
-      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px">
-        <input type="checkbox" id="cfg-prefer-local" checked> Prefer local when available
-      </label>
-      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px">
-        Web Password
-        <input id="cfg-web-pw" placeholder="Leave blank for no auth">
-      </label>
-      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:8px">
-        Default Models
-        <div class="grid-2">
-          <input id="cfg-model-ollama" placeholder="Ollama model" value="llama3.2:3b">
-          <input id="cfg-model-groq" placeholder="Groq model" value="llama-3.3-70b-versatile">
-          <input id="cfg-model-nvidia" placeholder="NVIDIA model" value="meta/llama-3.1-8b-instruct">
-          <input id="cfg-model-openai" placeholder="OpenAI model" value="gpt-4o-mini">
-        </div>
-      </label>
-      <button class="primary" onclick="saveSettings()">Save</button>
+    <div class="chat-options">
+      <select id="chatTask"><option value="conversation">General</option><option value="research">Research</option><option value="study">Study</option><option value="coding">Coding</option></select>
+      <input id="chatSystem" placeholder="System override (optional)">
     </div>
   </div>
 </div>
+
+<!-- ── Documents ── -->
+<div class="page" id="page-documents">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Documents</h2>
+  <div class="study-wide card">
+    <div class="flex gap-4" style="margin-bottom:8px">
+      <input id="docSearch" placeholder="Search documents..." onkeydown="if(event.key==='Enter')loadDocs()">
+      <button onclick="loadDocs()">Search</button>
+      <button onclick="document.getElementById('fileUploader').click()" class="gold">Upload PDF</button>
+      <input type="file" id="fileUploader" accept=".pdf" class="hidden" onchange="uploadPDF(this)">
+    </div>
+    <div class="flex gap-4">
+      <input id="fetchUrl" placeholder="Import from URL..." style="flex:3">
+      <button onclick="fetchURL()" class="primary">Fetch</button>
+    </div>
+  </div>
+  <div id="docList"></div>
+</div>
+
+<!-- ── Notes ── -->
+<div class="page" id="page-notes">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Notes</h2>
+  <div class="study-wide card">
+    <div class="flex gap-4" style="margin-bottom:8px">
+      <input id="noteSearch" placeholder="Search notes..." onkeydown="if(event.key==='Enter')loadNotes()">
+      <button onclick="loadNotes()">Search</button>
+    </div>
+    <div class="form-row">
+      <div><label>Title</label><input id="noteTitle" placeholder="Note title"></div>
+      <div style="flex:3"><label>Content</label><textarea id="noteContent" placeholder="Note content..."></textarea></div>
+    </div>
+    <button class="primary" onclick="addNote()">Add Note</button>
+  </div>
+  <div id="noteList"></div>
+</div>
+
+<!-- ── Study (Flashcards + Quizzes) ── -->
+<div class="page" id="page-study">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Study</h2>
+  <div class="study-grid">
+    <div class="card">
+      <h3>Flashcards</h3>
+      <div class="flex gap-4 mb-8">
+        <input id="fcTopic" placeholder="Topic filter">
+        <button onclick="loadFlashcards()">List</button>
+        <button class="gold" onclick="startReview()">Review</button>
+      </div>
+      <div class="flex gap-4 mb-8">
+        <input id="fcQuestion" placeholder="Question" style="flex:2">
+        <input id="fcAnswer" placeholder="Answer" style="flex:2">
+      </div>
+      <button class="primary" onclick="addFlashcard()">Add Card</button>
+      <div id="fcList" class="mt-8"></div>
+    </div>
+    <div class="card">
+      <h3>Quizzes</h3>
+      <div class="flex gap-4 mb-8">
+        <select id="qzDocSelect"><option value="">Select document...</option></select>
+        <button class="gold" onclick="generateQuiz()">Generate</button>
+      </div>
+      <div id="qzList"></div>
+    </div>
+  </div>
+  <div class="card hidden" id="reviewArea">
+    <h3>Review</h3>
+    <div class="flip-card" id="flipCard">
+      <div class="question" id="reviewQ"></div>
+      <div class="answer" id="reviewA"></div>
+    </div>
+    <div class="flex" style="justify-content:center">
+      <button id="reviewShowBtn" class="gold" onclick="showAnswer()">Show Answer</button>
+      <button id="reviewCorrectBtn" class="primary hidden" onclick="markReview(true)">Correct</button>
+      <button id="reviewWrongBtn" class="danger hidden" onclick="markReview(false)">Wrong</button>
+    </div>
+    <div class="flex" style="justify-content:center;margin-top:8px">
+      <button onclick="endReview()">End Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Research ── -->
+<div class="page" id="page-research">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Research</h2>
+  <div class="card">
+    <h3>Web Research</h3>
+    <div class="form-row">
+      <div><label>Search Query</label><input id="rsQuery" placeholder="topic to research"></div>
+      <div style="flex:0 0 80px"><label>Results</label><input id="rsMax" type="number" value="3" min="1" max="10"></div>
+    </div>
+    <button class="gold" onclick="doResearch()">Research &amp; Import</button>
+  </div>
+  <div class="card">
+    <h3>Web Search</h3>
+    <div class="flex gap-4">
+      <input id="wsQuery" placeholder="Search the web..." onkeydown="if(event.key==='Enter')doWebSearch()">
+      <button onclick="doWebSearch()" class="primary">Search</button>
+    </div>
+    <div id="wsResults" class="mt-8"></div>
+  </div>
+</div>
+
+<!-- ── Profile ── -->
+<div class="page" id="page-profile">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Profile</h2>
+  <div class="card">
+    <h3>System Prompt</h3>
+    <textarea id="sysPrompt" rows="4" placeholder="Custom instructions for the AI..." style="margin-bottom:8px"></textarea>
+    <button class="primary" onclick="saveSysPrompt()">Save Prompt</button>
+  </div>
+  <div class="card">
+    <h3>Facts</h3>
+    <div class="form-row">
+      <div><label>Key</label><input id="pfKey" placeholder="e.g. university"></div>
+      <div><label>Value</label><input id="pfValue" placeholder="e.g. MIT"></div>
+      <div><label>Category</label><input id="pfCat" placeholder="e.g. education"></div>
+    </div>
+    <button class="primary" onclick="addProfileFact()">Add Fact</button>
+    <div id="pfList" class="mt-8"></div>
+  </div>
+</div>
+
+<!-- ── Voice ── -->
+<div class="page" id="page-voice">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Voice</h2>
+  <div class="card">
+    <p class="text-dim mb-8">Voice assistant listens for <strong class="text-accent">"hey aqua"</strong> wake word. Requires microphone access, Vosk model, and Piper TTS voice.</p>
+    <div class="flex gap-4">
+      <button id="voiceStartBtn" class="gold" onclick="startVoice()">Start Voice</button>
+      <button id="voiceStopBtn" class="danger hidden" onclick="stopVoice()">Stop Voice</button>
+    </div>
+    <pre id="voiceLog" style="margin-top:8px;background:var(--bg);padding:8px;border-radius:var(--radius);height:120px;overflow-y:auto;font-size:12px">Voice status will appear here.</pre>
+  </div>
+</div>
+
+<!-- ── Settings ── -->
+<div class="page" id="page-settings">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Settings</h2>
+  <div class="card">
+    <h3>AI Providers</h3>
+    <div id="providerStatus"></div>
+  </div>
+  <div class="card">
+    <h3>Environment</h3>
+    <div id="settingsEnv"></div>
+  </div>
+</div>
+
+</div><!-- /main -->
 
 <script>
 const API = window.location.origin;
-let token = sessionStorage.getItem("aqua_token") || "";
+let TOKEN = sessionStorage.getItem("aqua_token") || "";
 
 function api(method, path, body) {
-  const opts = { method, headers: {"Content-Type": "application/json"} };
-  if (token) opts.headers["Authorization"] = `Bearer ${token}`;
+  const opts = { method, headers: {"Content-Type":"application/json"} };
+  if (TOKEN) opts.headers["Authorization"] = "Bearer " + TOKEN;
   if (body) opts.body = JSON.stringify(body);
-  return fetch(`${API}${path}`, opts).then(r => {
-    if (r.status === 401) { sessionStorage.removeItem("aqua_token"); token = ""; showLogin(); }
-    return r;
+  return fetch(API + path, opts).then(r => {
+    if (r.status === 401 && !path.includes("/api/auth")) { sessionStorage.removeItem("aqua_token"); location.reload(); }
+    return r.json();
   });
 }
 
-async function checkAuth() {
-  const r = await api("GET", "/health");
-  const h = await r.json();
-  if (h.auth_required && !token) showLogin();
-  else if (h.auth_required) { document.getElementById("login").style.display = "none"; }
-  else { document.getElementById("login").style.display = "none"; }
+// ── Auth ──
+function doLogin() {
+  const pw = document.getElementById("loginPass").value;
+  api("POST", "/api/auth", {password:pw}).then(d => {
+    if (d.ok) { TOKEN = pw; sessionStorage.setItem("aqua_token", pw); document.getElementById("loginOverlay").classList.remove("show"); init(); }
+    else alert("Wrong password");
+  });
 }
+fetch(API+"/health").then(r=>r.json()).then(h => { if (h.auth_required && !TOKEN) document.getElementById("loginOverlay").classList.add("show"); });
 
-function showLogin() {
-  document.getElementById("login").style.display = "flex";
-}
-
-async function login() {
-  const pw = document.getElementById("login-pw").value;
-  const r = await api("POST", "/api/auth", { password: pw });
-  if (r.ok) {
-    token = pw;
-    sessionStorage.setItem("aqua_token", pw);
-    document.getElementById("login").style.display = "none";
-    document.getElementById("login-error").textContent = "";
-  } else {
-    document.getElementById("login-error").textContent = "Wrong password";
-  }
-}
-
-document.getElementById("chat-manual").onchange = function() {
-  const manual = this.checked;
-  document.getElementById("chat-provider").style.display = manual ? "inline" : "none";
-  document.getElementById("chat-model").style.display = manual ? "inline" : "none";
-};
-
-// Navigation
-document.querySelectorAll(".nav li").forEach(li => {
-  li.onclick = function() {
-    document.querySelectorAll(".nav li").forEach(l => l.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    this.classList.add("active");
-    document.getElementById("page-" + this.dataset.page).classList.add("active");
-    if (this.dataset.page === "documents") loadDocs();
-    if (this.dataset.page === "notes") loadNotes();
-    if (this.dataset.page === "flashcards") loadFlashcards();
-    if (this.dataset.page === "profile") loadProfile();
-    if (this.dataset.page === "providers") loadProviders();
-    if (this.dataset.page === "settings") loadSettings();
-  };
+// ── Navigation ──
+document.querySelectorAll(".nav a").forEach(a => {
+  a.addEventListener("click", () => switchPage(a.dataset.page));
 });
+function switchPage(name) {
+  document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.page === name));
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-"+name));
+  if (name === "dashboard") loadDashboard();
+  if (name === "documents") loadDocs();
+  if (name === "notes") loadNotes();
+  if (name === "study") { loadFlashcards(); loadQuizDocs(); }
+  if (name === "profile") loadProfile();
+  if (name === "settings") loadSettings();
+}
+
+// ── Dashboard ──
+function loadDashboard() {
+  Promise.all([
+    api("GET","/documents?limit=1").then(d => document.getElementById("statDocs").textContent = d.length === 1 && d[0]?.id ? "..." : "0"),
+    api("GET","/notes?limit=1").then(d => document.getElementById("statNotes").textContent = d.length),
+    api("GET","/flashcards?limit=1").then(d => document.getElementById("statCards").textContent = d.length),
+    api("GET","/quizzes?limit=1").then(d => document.getElementById("statQuizzes").textContent = d.length),
+  ]);
+  api("GET","/documents?limit=1000").then(d => document.getElementById("statDocs").textContent = d.length);
+  api("GET","/notes?limit=1000").then(d => document.getElementById("statNotes").textContent = d.length);
+  api("GET","/flashcards?limit=1000").then(d => document.getElementById("statCards").textContent = d.length);
+  api("GET","/quizzes?limit=1000").then(d => document.getElementById("statQuizzes").textContent = d.length);
+}
 
 // ── Chat ──
-async function sendMessage() {
-  const input = document.getElementById("chat-input");
+function sendChat() {
+  const input = document.getElementById("chatInput");
   const msg = input.value.trim();
   if (!msg) return;
+  const log = document.getElementById("chatLog");
+  log.innerHTML += `<div class="msg user"><div class="meta">You</div>${esc(msg)}</div>`;
   input.value = "";
-  addChatMessage("user", msg);
-
-  const taskType = document.getElementById("chat-task").value;
-  const manual = document.getElementById("chat-manual").checked;
-  const provider = manual ? document.getElementById("chat-provider").value : null;
-  const model = manual ? document.getElementById("chat-model").value || null : null;
-
-  document.getElementById("chat-status").textContent = "thinking...";
-  const r = await api("POST", "/chat", { message: msg, task_type: taskType, provider, model });
-  document.getElementById("chat-status").textContent = "";
-  if (!r.ok) {
-    const err = await r.json();
-    addChatMessage("assistant", `[error] ${err.detail || "Request failed"}`);
-    return;
-  }
-  const data = await r.json();
-  addChatMessage("assistant", data.reply, `${data.provider}/${data.model}`);
-}
-
-function addChatMessage(role, content, meta) {
-  const div = document.createElement("div");
-  div.className = `chat-msg ${role}`;
-  const roleLabel = role === "user" ? "You" : "Aqua";
-  div.innerHTML = `<div class="role">${roleLabel}${meta ? ` · ${meta}` : ""}</div><div class="content">${escapeHtml(content)}</div>`;
-  document.getElementById("chat-messages").appendChild(div);
-  div.scrollIntoView({ behavior: "smooth" });
+  log.scrollTop = log.scrollHeight;
+  const task = document.getElementById("chatTask").value;
+  const sys = document.getElementById("chatSystem").value.trim();
+  api("POST", "/chat", {message:msg, task_type:task, system:sys || undefined}).then(d => {
+    log.innerHTML += `<div class="msg assistant"><div class="meta">${d.provider}/${d.model}</div>${esc(d.reply)}</div>`;
+    log.scrollTop = log.scrollHeight;
+  }).catch(e => {
+    log.innerHTML += `<div class="msg assistant"><div class="meta" style="color:var(--danger)">Error</div>${esc(e.message||e)}</div>`;
+  });
 }
 
 // ── Documents ──
-async function loadDocs() {
-  const r = await api("GET", "/documents?limit=50");
-  const docs = await r.json();
-  const el = document.getElementById("doc-list");
-  el.innerHTML = docs.map(d => `<div class="card" style="cursor:pointer" onclick="showDoc(${d.id})">
-    <b>${escapeHtml(d.title)}</b> <span style="color:var(--text-dim)">#${d.id}</span>
-    <div style="font-size:11px;color:var(--text-dim)">${(d.tags||[]).join(", ")} · ${d.source}</div>
-  </div>`).join("");
-}
-
-async function searchDocs() {
-  const q = document.getElementById("doc-search").value;
-  if (!q) return loadDocs();
-  const r = await api("GET", `/documents/search/${encodeURIComponent(q)}`);
-  const docs = await r.json();
-  document.getElementById("doc-list").innerHTML = docs.map(d => `<div class="card">
-    <b>${escapeHtml(d.title)}</b> <span style="color:var(--text-dim)">#${d.id}</span>
-    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml((d.content||"").slice(0,300))}</div>
-  </div>`).join("");
-}
-
-function showAddDoc() {
-  document.getElementById("doc-form").style.display = "block";
-  document.getElementById("doc-title").value = "";
-  document.getElementById("doc-content").value = "";
-  document.getElementById("doc-authors").value = "";
-  document.getElementById("doc-source").value = "manual";
-  document.getElementById("doc-tags").value = "";
-}
-
-async function addDoc() {
-  const r = await api("POST", "/documents", {
-    title: document.getElementById("doc-title").value,
-    content: document.getElementById("doc-content").value,
-    authors: document.getElementById("doc-authors").value,
-    source: document.getElementById("doc-source").value,
-    tags: document.getElementById("doc-tags").value.split(",").map(t=>t.trim()).filter(Boolean),
+function loadDocs() {
+  const q = document.getElementById("docSearch").value.trim();
+  const url = q ? "/documents/search/"+encodeURIComponent(q) : "/documents?limit=50";
+  api("GET", url).then(docs => {
+    const el = document.getElementById("docList");
+    if (!docs.length) { el.innerHTML = '<p class="text-dim">No documents found.</p>'; return; }
+    el.innerHTML = `<table><tr><th>ID</th><th>Title</th><th>Source</th><th>Tags</th><th></th></tr>${docs.map(d => `<tr><td>${d.id}</td><td class="truncate" style="max-width:300px">${esc(d.title)}</td><td class="text-sm text-dim">${esc(d.source)}</td><td>${(d.tags||[]).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</td><td><button class="text-sm" onclick="showDoc(${d.id})">View</button> <button class="danger text-sm" onclick="deleteDoc(${d.id})">Del</button></td></tr>`).join('')}</table>`;
   });
-  if (r.ok) {
-    document.getElementById("doc-form").style.display = "none";
-    loadDocs();
-  }
 }
-
-async function docFetchUrl() {
-  const url = document.getElementById("doc-fetch-url").value.trim();
+function showDoc(id) {
+  api("GET", "/documents/"+id).then(d => {
+    const el = document.getElementById("docList");
+    el.innerHTML = `<div class="card"><h3>${esc(d.title)}</h3><p class="text-sm text-dim">${esc(d.source)} ${d.source_url ? '· <a href="'+esc(d.source_url)+'" target="_blank" style="color:var(--accent)">source</a>' : ''}</p><div style="margin-top:8px;max-height:500px;overflow-y:auto;font-size:12px;white-space:pre-wrap;font-family:var(--font-mono);background:var(--bg);padding:12px;border-radius:var(--radius)">${esc(d.content||'(no content)')}</div><button class="mt-8" onclick="loadDocs()">Back</button></div>`;
+  });
+}
+function deleteDoc(id) {
+  api("DELETE", "/documents/"+id).then(() => loadDocs());
+}
+function fetchURL() {
+  const url = document.getElementById("fetchUrl").value.trim();
   if (!url) return;
-  const r = await api("POST", "/web/fetch", { url });
-  if (r.ok) {
-    document.getElementById("doc-fetch-url").value = "";
-    loadDocs();
-  }
+  api("POST", "/web/fetch", {url}).then(d => { alert("Imported: "+d.title); loadDocs(); });
 }
-
-async function showDoc(id) {
-  const r = await api("GET", `/documents/${id}`);
-  const d = await r.json();
-  const html = `<div class="card">
-    <div style="float:right"><button class="danger" onclick="deleteDoc(${d.id})">Delete</button></div>
-    <b>${escapeHtml(d.title)}</b> <span style="color:var(--text-dim)">#${d.id}</span>
-    <div style="font-size:11px;color:var(--text-dim);margin:4px 0">${(d.tags||[]).join(" · ")}</div>
-    <div style="white-space:pre-wrap;font-size:12px;margin-top:8px">${escapeHtml((d.content||"").slice(0,5000))}</div>
-  </div>`;
-  document.getElementById("doc-list").innerHTML = html;
-}
-
-async function deleteDoc(id) {
-  if (!confirm("Delete document?")) return;
-  await api("DELETE", `/documents/${id}`);
-  loadDocs();
+function uploadPDF(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append("file", file);
+  const opts = {method:"POST", headers:{}};
+  if (TOKEN) opts.headers["Authorization"] = "Bearer "+TOKEN;
+  opts.body = fd;
+  fetch(API+"/documents/import", opts).then(r=>r.json()).then(d => { alert("Imported: "+d.title); loadDocs(); });
 }
 
 // ── Notes ──
-async function loadNotes() {
-  const r = await api("GET", "/notes?limit=50");
-  const notes = await r.json();
-  document.getElementById("note-list").innerHTML = notes.map(n => `<div class="card">
-    <b>${escapeHtml(n.title || "Untitled")}</b> <span style="color:var(--text-dim)">#${n.id}</span>
-    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml((n.content||"").slice(0,300))}</div>
-  </div>`).join("");
-}
-
-async function searchNotes() {
-  const q = document.getElementById("note-search").value;
-  if (!q) return loadNotes();
-  const r = await api("GET", `/notes/search/${encodeURIComponent(q)}`);
-  const notes = await r.json();
-  document.getElementById("note-list").innerHTML = notes.map(n => `<div class="card">
-    <b>${escapeHtml(n.title || "Untitled")}</b> #${n.id}
-    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml((n.content||"").slice(0,300))}</div>
-  </div>`).join("");
-}
-
-function showAddNote() {
-  document.getElementById("note-form").style.display = "block";
-  document.getElementById("note-title").value = "";
-  document.getElementById("note-content").value = "";
-}
-
-async function addNote() {
-  const r = await api("POST", "/notes", {
-    content: document.getElementById("note-content").value,
-    title: document.getElementById("note-title").value,
+function loadNotes() {
+  const q = document.getElementById("noteSearch").value.trim();
+  const url = q ? "/notes/search/"+encodeURIComponent(q) : "/notes?limit=50";
+  api("GET", url).then(notes => {
+    const el = document.getElementById("noteList");
+    if (!notes.length) { el.innerHTML = '<p class="text-dim">No notes found.</p>'; return; }
+    el.innerHTML = `<table><tr><th>ID</th><th>Title</th><th>Preview</th><th></th></tr>${notes.map(n => `<tr><td>${n.id}</td><td class="truncate" style="max-width:200px">${esc(n.title||'Untitled')}</td><td class="truncate text-dim" style="max-width:400px">${esc((n.content||'').slice(0,80))}</td><td><button class="danger text-sm" onclick="deleteNote(${n.id})">Del</button></td></tr>`).join('')}</table>`;
   });
-  if (r.ok) {
-    document.getElementById("note-form").style.display = "none";
-    loadNotes();
-  }
+}
+function addNote() {
+  const title = document.getElementById("noteTitle").value.trim();
+  const content = document.getElementById("noteContent").value.trim();
+  if (!content) return;
+  api("POST", "/notes", {content, title}).then(() => { document.getElementById("noteTitle").value=""; document.getElementById("noteContent").value=""; loadNotes(); });
+}
+function deleteNote(id) {
+  api("DELETE", "/notes/"+id).then(() => loadNotes());
 }
 
 // ── Flashcards ──
-async function loadFlashcards() {
-  const topic = document.getElementById("fc-topic").value;
-  const url = topic ? `/flashcards?topic=${encodeURIComponent(topic)}` : "/flashcards?limit=100";
-  const r = await api("GET", url);
-  const cards = await r.json();
-  document.getElementById("fc-list").innerHTML = cards.map(c => `<div class="card">
-    <b>${escapeHtml(c.question)}</b>
-    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${escapeHtml(c.answer)} · ${c.topic || "no topic"} · difficulty ${c.difficulty}</div>
-  </div>`).join("");
-}
-
-function showAddFc() {
-  document.getElementById("fc-form").style.display = "block";
-  document.getElementById("fc-question").value = "";
-  document.getElementById("fc-answer").value = "";
-  document.getElementById("fc-topic-input").value = "";
-  document.getElementById("fc-difficulty").value = "1";
-}
-
-async function addFc() {
-  const r = await api("POST", "/flashcards", {
-    question: document.getElementById("fc-question").value,
-    answer: document.getElementById("fc-answer").value,
-    topic: document.getElementById("fc-topic-input").value,
-    difficulty: parseInt(document.getElementById("fc-difficulty").value) || 1,
+function loadFlashcards() {
+  const topic = document.getElementById("fcTopic").value.trim();
+  const params = topic ? "?topic="+encodeURIComponent(topic)+"&limit=100" : "?limit=100";
+  api("GET", "/flashcards"+params).then(cards => {
+    const el = document.getElementById("fcList");
+    if (!cards.length) { el.innerHTML = '<p class="text-dim">No flashcards.</p>'; return; }
+    el.innerHTML = `<table><tr><th>ID</th><th>Question</th><th>Topic</th><th>Diff</th></tr>${cards.map(c => `<tr><td>${c.id}</td><td class="truncate" style="max-width:250px">${esc(c.question)}</td><td class="text-dim text-sm">${esc(c.topic)}</td><td>${c.difficulty}</td></tr>`).join('')}</table>`;
   });
-  if (r.ok) {
-    document.getElementById("fc-form").style.display = "none";
-    loadFlashcards();
-  }
+}
+function addFlashcard() {
+  const q = document.getElementById("fcQuestion").value.trim();
+  const a = document.getElementById("fcAnswer").value.trim();
+  const t = document.getElementById("fcTopic").value.trim();
+  if (!q || !a) return;
+  api("POST", "/flashcards", {question:q, answer:a, topic:t}).then(() => { document.getElementById("fcQuestion").value=""; document.getElementById("fcAnswer").value=""; loadFlashcards(); });
+}
+let reviewCards = [], reviewIdx = 0;
+function startReview() {
+  const topic = document.getElementById("fcTopic").value.trim();
+  const params = topic ? "?topic="+encodeURIComponent(topic)+"&limit=100" : "?limit=100";
+  api("GET", "/flashcards"+params).then(cards => {
+    if (!cards.length) { alert("No cards to review!"); return; }
+    reviewCards = cards; reviewIdx = 0;
+    document.getElementById("reviewArea").classList.remove("hidden");
+    showReviewCard();
+  });
+}
+function showReviewCard() {
+  if (reviewIdx >= reviewCards.length) { alert("Review complete!"); endReview(); return; }
+  const c = reviewCards[reviewIdx];
+  document.getElementById("reviewQ").textContent = c.question;
+  document.getElementById("reviewA").textContent = c.answer;
+  document.getElementById("flipCard").classList.remove("show-answer");
+  document.getElementById("reviewShowBtn").classList.remove("hidden");
+  document.getElementById("reviewCorrectBtn").classList.add("hidden");
+  document.getElementById("reviewWrongBtn").classList.add("hidden");
+}
+function showAnswer() {
+  document.getElementById("flipCard").classList.add("show-answer");
+  document.getElementById("reviewShowBtn").classList.add("hidden");
+  document.getElementById("reviewCorrectBtn").classList.remove("hidden");
+  document.getElementById("reviewWrongBtn").classList.remove("hidden");
+}
+function markReview(correct) {
+  const c = reviewCards[reviewIdx];
+  api("POST", "/flashcards/"+c.id+"/review", {correct}).then(() => { reviewIdx++; showReviewCard(); });
+}
+function endReview() {
+  document.getElementById("reviewArea").classList.add("hidden");
 }
 
-async function reviewMode() {
-  const topic = document.getElementById("fc-topic").value;
-  const url = topic ? `/flashcards?topic=${encodeURIComponent(topic)}` : "/flashcards?limit=50";
-  const r = await api("GET", url);
-  const cards = await r.json();
-  if (!cards.length) { document.getElementById("fc-review").innerHTML = "No cards to review."; document.getElementById("fc-review").style.display = "block"; return; }
-  let i = 0;
-  const el = document.getElementById("fc-review");
-  el.style.display = "block";
-  function showCard() {
-    if (i >= cards.length) { el.innerHTML = "<div style='color:var(--accent)'>All done!</div>"; return; }
-    const c = cards[i];
-    el.innerHTML = `<div style="margin-bottom:8px"><b>Q:</b> ${escapeHtml(c.question)}</div>
-      <input id="review-answer" placeholder="Your answer..." style="margin-bottom:8px">
-      <div class="flex">
-        <button class="primary" onclick="revealAnswer(${c.id},${i})">Submit</button>
-        <button onclick="skipCard(${i})">Skip</button>
-      </div>
-      <div id="review-result"></div>`;
-  }
-  window.revealAnswer = async (id, idx) => {
-    const ans = document.getElementById("review-answer").value;
-    const c = cards[idx];
-    document.getElementById("review-result").innerHTML = `<b>Correct:</b> ${escapeHtml(c.answer)}<br>
-      <button class="ok mt-8" onclick="markCard(${id},true,${idx})">Correct</button>
-      <button class="danger" onclick="markCard(${id},false,${idx})">Wrong</button>`;
-  };
-  window.skipCard = (idx) => { i = idx + 1; showCard(); };
-  window.markCard = async (id, correct, idx) => {
-    await api("POST", `/flashcards/${id}/review`, { correct });
-    i = idx + 1; showCard();
-  };
-  showCard();
+// ── Quizzes ──
+function loadQuizDocs() {
+  api("GET","/documents?limit=100").then(docs => {
+    const sel = document.getElementById("qzDocSelect");
+    sel.innerHTML = '<option value="">Select document...</option>'+docs.map(d => `<option value="${d.id}">${esc(d.title).slice(0,60)}</option>`).join('');
+  });
+  api("GET","/quizzes?limit=20").then(qz => {
+    const el = document.getElementById("qzList");
+    if (!qz.length) { el.innerHTML = '<p class="text-dim mt-8">No quizzes yet. Generate one from a document above.</p>'; return; }
+    el.innerHTML = `<table class="mt-8"><tr><th>ID</th><th>Title</th><th>Score</th></tr>${qz.map(q => `<tr><td>${q.id}</td><td>${esc(q.title)}</td><td>${q.score != null ? q.score.toFixed(0)+'%' : '-'}</td></tr>`).join('')}</table>`;
+  });
 }
-
-// ── Profile ──
-async function loadProfile() {
-  const r = await api("GET", "/profile/system-prompt");
-  const sp = await r.json();
-  document.getElementById("profile-prompt").value = sp.text || "";
-
-  const r2 = await api("GET", "/profile");
-  const entries = await r2.json();
-  const tbody = document.getElementById("profile-table");
-  tbody.innerHTML = entries.map(e => `<tr>
-    <td style="font-family:var(--mono);font-size:11px">${escapeHtml(e.key)}</td>
-    <td>${escapeHtml(e.value)}</td>
-    <td class="text-dim">${escapeHtml(e.category || "")}</td>
-    <td><button class="danger" onclick="deleteProfileEntry('${escapeHtml(e.key)}')" style="padding:2px 8px;font-size:10px">✕</button></td>
-  </tr>`).join("");
-}
-
-document.getElementById("profile-prompt")?.addEventListener("keydown", function(e) {
-  if (e.key === "Enter" && e.ctrlKey) saveProfilePrompt();
-});
-
-async function saveProfilePrompt() {
-  const text = document.getElementById("profile-prompt").value;
-  const r = await api("PUT", "/profile/system-prompt", { text });
-  const status = document.getElementById("profile-prompt-status");
-  status.textContent = r.ok ? "✓ Saved" : "✗ Error";
-}
-
-async function addProfileEntry() {
-  const key = document.getElementById("profile-new-key").value.trim();
-  const value = document.getElementById("profile-new-value").value.trim();
-  const category = document.getElementById("profile-new-category").value.trim();
-  if (!key || !value) return;
-  const r = await api("POST", "/profile", { key, value, category });
-  if (r.ok) {
-    document.getElementById("profile-new-key").value = "";
-    document.getElementById("profile-new-value").value = "";
-    document.getElementById("profile-new-category").value = "";
-    loadProfile();
-  }
-}
-
-async function deleteProfileEntry(key) {
-  const r = await api("DELETE", `/profile/${encodeURIComponent(key)}`);
-  if (r.ok) loadProfile();
+function generateQuiz() {
+  const docId = document.getElementById("qzDocSelect").value;
+  if (!docId) { alert("Select a document first"); return; }
+  api("POST", "/quizzes/generate", {document_id:parseInt(docId), num_questions:5}).then(q => {
+    alert("Quiz generated: "+q.title+" (id="+q.id+")");
+    document.getElementById("qzDocSelect").value = "";
+    const el = document.getElementById("qzList");
+    let html = `<div class="card"><h3>${esc(q.title)}</h3>`;
+    q.questions.forEach((qd, i) => {
+      html += `<div class="mb-8"><p><strong>Q${i+1}:</strong> ${esc(qd.question)}</p>`;
+      if (qd.options && qd.options.length) {
+        html += qd.options.map(o => `<label style="display:block;margin:2px 0;font-size:13px"><input type="radio" name="qz_${i}" value="${esc(o)}"> ${esc(o)}</label>`).join('');
+      } else {
+        html += `<input id="qzAns_${i}" placeholder="Your answer..." style="margin-top:4px">`;
+      }
+      html += `<p class="text-sm text-dim mt-4">Correct: ${esc(qd.correct_answer)}</p></div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+    loadQuizDocs();
+  });
 }
 
 // ── Research ──
-async function searchWeb() {
-  const q = document.getElementById("research-query").value.trim();
+function doWebSearch() {
+  const q = document.getElementById("wsQuery").value.trim();
   if (!q) return;
-  const el = document.getElementById("research-results");
-  el.innerHTML = "Searching...";
-  const r = await api("POST", "/web/search", { query: q, max_results: 10 });
-  const data = await r.json();
-  const results = data.results || [];
-  if (!results.length) { el.innerHTML = "<span class='text-dim'>No results</span>"; return; }
-  el.innerHTML = results.map((res, i) => `<div class="card" style="padding:10px;margin-bottom:6px">
-    <div class="flex" style="align-items:flex-start">
-      <div class="grow">
-        <b style="font-size:12px">${escapeHtml(res.title)}</b>
-        <div style="font-size:10px;color:var(--text-dim);word-break:break-all">${escapeHtml(res.url)}</div>
-        <div style="font-size:11px;margin-top:4px">${escapeHtml(res.snippet)}</div>
-      </div>
-      <button onclick="importResearchUrl('${escapeHtml(res.url)}', this)" style="padding:4px 8px;font-size:10px;white-space:nowrap">Import</button>
-    </div>
-  </div>`).join("");
+  api("POST", "/web/search", {query:q, max_results:5}).then(d => {
+    const el = document.getElementById("wsResults");
+    const rs = d.results || [];
+    if (!rs.length) { el.innerHTML = '<p class="text-dim">No results.</p>'; return; }
+    el.innerHTML = rs.map(r => `<div class="card" style="padding:10px"><a href="${esc(r.url)}" target="_blank" style="color:var(--accent);text-decoration:none"><strong>${esc(r.title)}</strong></a><p class="text-sm text-dim">${esc(r.snippet).slice(0,200)}</p></div>`).join('');
+  });
+}
+function doResearch() {
+  const q = document.getElementById("rsQuery").value.trim();
+  const max = parseInt(document.getElementById("rsMax").value) || 3;
+  if (!q) return;
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = "Researching...";
+  api("POST", "/web/research", {topic:q, max_results:max}).then(d => {
+    const n = (d.documents||[]).length;
+    alert(`Imported ${n} document(s) about "${q}"`);
+    btn.disabled = false; btn.textContent = "Research & Import";
+  }).catch(() => { btn.disabled = false; btn.textContent = "Research & Import"; });
 }
 
-async function importResearchUrl(url, btn) {
-  btn.disabled = true;
-  btn.textContent = "...";
-  const r = await api("POST", "/web/fetch", { url });
-  const data = await r.json();
-  if (data.error) { btn.textContent = "Failed"; return; }
-  btn.textContent = "✓ Imported";
-  btn.style.borderColor = "var(--ok)";
+// ── Profile ──
+function loadProfile() {
+  api("GET", "/profile/system-prompt").then(d => document.getElementById("sysPrompt").value = d.text || "");
+  api("GET", "/profile").then(entries => {
+    const el = document.getElementById("pfList");
+    if (!entries.length) { el.innerHTML = '<p class="text-dim">No facts yet.</p>'; return; }
+    el.innerHTML = `<table><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr>${entries.map(e => `<tr><td class="text-accent">${esc(e.key)}</td><td>${esc(e.value).slice(0,60)}</td><td class="text-dim text-sm">${esc(e.category)}</td><td><button class="danger text-sm" onclick="deleteFact('${esc(e.key)}')">Del</button></td></tr>`).join('')}</table>`;
+  });
+}
+function saveSysPrompt() {
+  const text = document.getElementById("sysPrompt").value;
+  api("PUT", "/profile/system-prompt", {text}).then(() => alert("Saved"));
+}
+function addProfileFact() {
+  const key = document.getElementById("pfKey").value.trim();
+  const val = document.getElementById("pfValue").value.trim();
+  const cat = document.getElementById("pfCat").value.trim();
+  if (!key || !val) return;
+  api("POST", "/profile", {key, value:val, category:cat}).then(() => { document.getElementById("pfKey").value=""; document.getElementById("pfValue").value=""; document.getElementById("pfCat").value=""; loadProfile(); });
+}
+function deleteFact(key) {
+  api("DELETE", "/profile/"+encodeURIComponent(key)).then(() => loadProfile());
 }
 
-async function fetchUrl() {
-  const url = document.getElementById("fetch-url").value.trim();
-  if (!url) return;
-  const el = document.getElementById("fetch-result");
-  el.innerHTML = "Fetching...";
-  const r = await api("POST", "/web/fetch", { url });
-  const data = await r.json();
-  if (data.error) { el.innerHTML = `<span style="color:var(--err)">${data.error}</span>`; return; }
-  el.innerHTML = `<span style="color:var(--ok)">✓ Imported: ${escapeHtml(data.title)}</span> <span class="text-dim">(id=${data.id})</span>`;
+// ── Voice ──
+function startVoice() {
+  api("POST", "/voice/start").then(d => {
+    document.getElementById("voiceStartBtn").classList.add("hidden");
+    document.getElementById("voiceStopBtn").classList.remove("hidden");
+    document.getElementById("voiceLog").textContent = "Voice assistant started. Listening for 'hey aqua'...\n";
+  }).catch(e => {
+    document.getElementById("voiceLog").textContent = "Error: "+e.message+"\nVoice mode must be run from CLI for now.";
+  });
 }
-
-async function researchTopic() {
-  const topic = document.getElementById("research-topic").value.trim();
-  if (!topic) return;
-  const el = document.getElementById("research-pipeline-result");
-  el.innerHTML = "Researching...";
-  const r = await api("POST", "/web/research", { topic, max_results: 5 });
-  const data = await r.json();
-  const docs = data.documents || [];
-  if (!docs.length) { el.innerHTML = "No documents imported."; return; }
-  el.innerHTML = `<span style="color:var(--ok)">✓ Imported ${docs.length} documents</span><br>` +
-    docs.map(d => `<span class="text-dim" style="font-size:11px">#${d.id} ${escapeHtml(d.search_title || d.title)}</span><br>`).join("");
-}
-
-// ── Providers ──
-async function loadProviders() {
-  const r = await api("GET", "/settings/providers");
-  const providers = await r.json();
-  document.getElementById("provider-list").innerHTML = `<table>
-    <tr><th>Provider</th><th>Status</th><th>Model</th></tr>
-    ${providers.map(p => `<tr>
-      <td>${p.name}</td>
-      <td><span class="status-dot ${p.available ? 'ok' : 'err'}"></span>${p.available ? 'Available' : 'Offline'}</td>
-      <td>${p.default_model || '-'}</td>
-    </tr>`).join("")}
-  </table>`;
-}
-
-async function saveProviderConfig() {
-  const updates = {};
-  const groq = document.getElementById("cfg-groq").value;
-  if (groq) updates.GROQ_API_KEY = groq;
-  const nvidia = document.getElementById("cfg-nvidia").value;
-  if (nvidia) updates.NVIDIA_API_KEY = nvidia;
-  const openai = document.getElementById("cfg-openai").value;
-  if (openai) updates.OPENAI_API_KEY = openai;
-  const anthropic = document.getElementById("cfg-anthropic").value;
-  if (anthropic) updates.ANTHROPIC_API_KEY = anthropic;
-  const ollamaUrl = document.getElementById("cfg-ollama-url").value;
-  if (ollamaUrl) updates.OLLAMA_BASE_URL = ollamaUrl;
-  const localUrl = document.getElementById("cfg-local-url").value;
-  if (localUrl) updates.LOCAL_BASE_URL = localUrl;
-  const r = await api("POST", "/settings/env", { updates });
-  if (r.ok) {
-    document.getElementById("cfg-status").textContent = "Saved! Restart server to apply.";
-    loadProviders();
-  }
+function stopVoice() {
+  api("POST", "/voice/stop").then(() => {
+    document.getElementById("voiceStartBtn").classList.remove("hidden");
+    document.getElementById("voiceStopBtn").classList.add("hidden");
+    document.getElementById("voiceLog").textContent += "Voice assistant stopped.\n";
+  });
 }
 
 // ── Settings ──
-async function loadSettings() {
-  const r = await api("GET", "/settings");
-  const s = await r.json();
-  document.getElementById("cfg-prefer-local").checked = true;
-  if (s.ollama_base_url) document.getElementById("cfg-ollama-url").value = s.ollama_base_url;
-  if (s.ollama_default_model) document.getElementById("cfg-model-ollama").value = s.ollama_default_model;
-  if (s.groq_default_model) document.getElementById("cfg-model-groq").value = s.groq_default_model;
-  if (s.nvidia_default_model) document.getElementById("cfg-model-nvidia").value = s.nvidia_default_model;
-  if (s.openai_default_model) document.getElementById("cfg-model-openai").value = s.openai_default_model;
+function loadSettings() {
+  api("GET", "/settings/providers").then(provs => {
+    const el = document.getElementById("providerStatus");
+    if (!provs || !provs.length) { el.innerHTML = '<p class="text-dim">No providers configured.</p>'; return; }
+    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex"><span class="text-accent">${esc(p.name)}</span><span class="${p.configured ? 'text-accent' : 'text-dim'}">${p.configured ? '✓' : '✗'}</span></div><p class="text-sm text-dim">${p.model || ''}</p></div>`).join('');
+  });
+  api("GET", "/settings").then(s => {
+    const el = document.getElementById("settingsEnv");
+    el.innerHTML = Object.entries(s).filter(([k]) => !k.includes('key') && !k.includes('password')).map(([k,v]) => `<div class="flex"><span class="text-dim text-sm" style="min-width:200px">${esc(k)}</span><span>${esc(String(v))}</span></div>`).join('');
+  });
 }
 
-async function saveSettings() {
-  const updates = {};
-  updates.OLLAMA_BASE_URL = document.getElementById("cfg-ollama-url").value;
-  updates.OLLAMA_DEFAULT_MODEL = document.getElementById("cfg-model-ollama").value;
-  updates.GROQ_DEFAULT_MODEL = document.getElementById("cfg-model-groq").value;
-  updates.NVIDIA_DEFAULT_MODEL = document.getElementById("cfg-model-nvidia").value;
-  updates.OPENAI_DEFAULT_MODEL = document.getElementById("cfg-model-openai").value;
-  const pw = document.getElementById("cfg-web-pw").value;
-  if (pw) updates.AQUA_WEB_PASSWORD = pw;
-  await api("POST", "/settings/env", { updates });
-  alert("Settings saved. Restart server to apply.");
-}
+// ── Init ──
+function init() { loadDashboard(); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-function escapeHtml(s) {
-  if (!s) return "";
-  const d = document.createElement("div");
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-// Init
-checkAuth();
+// Check auth on load
+fetch(API+"/health").then(r=>r.json()).then(h => {
+  if (h.auth_required && !TOKEN) document.getElementById("loginOverlay").classList.add("show");
+  else init();
+});
 </script>
 </body>
 </html>

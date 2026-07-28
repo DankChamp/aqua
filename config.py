@@ -48,6 +48,23 @@ class Settings(BaseSettings):
     emma_api_url: str = ""
     emma_api_key: str = ""
 
+    voice_wake_word: str = "hey aqua"
+    voice_backend_url: str = "http://127.0.0.1:8000"
+    voice_vosk_model_path: Optional[str] = None
+    voice_input_device: Optional[str] = None
+    voice_command_timeout_seconds: float = 8.0
+    voice_silence_seconds: float = 1.2
+    voice_barge_in: bool = True
+    voice_tts_engine: str = "auto"
+    voice_piper_model_path: Optional[str] = None
+    voice_piper_length_scale: float = 1.02
+    voice_piper_noise_scale: float = 0.667
+    voice_piper_noise_w_scale: float = 0.8
+    voice_piper_volume: float = 1.0
+    voice_piper_speaker_id: Optional[int] = None
+    voice_tts_rate: int = 175
+    voice_tts_voice: Optional[str] = None
+
 
 @lru_cache
 def get_settings() -> Settings:

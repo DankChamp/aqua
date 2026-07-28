@@ -24,7 +24,7 @@ all = [
 ]
 
 [project.scripts]
-aqua = "cli.aqua:cli_main"
+aqua = "cli.aqua:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

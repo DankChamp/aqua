@@ -1,9 +1,10 @@
+import json
 import sqlite3
 from datetime import datetime
 from dataclasses import dataclass
 from typing import Optional
 
-from config import get_settings
+from core.deps import get_db
 
 
 @dataclass
@@ -27,15 +28,6 @@ class Quiz:
     total: int = 0
     questions: list = None
     created_at: str = ""
-
-
-def _get_db() -> sqlite3.Connection:
-    db_path = get_settings().db_path
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    _migrate(conn)
-    return conn
 
 
 def _migrate(conn: sqlite3.Connection):
@@ -75,7 +67,8 @@ def _now() -> str:
 
 
 def add_flashcard(question: str, answer: str, topic: str = "", difficulty: int = 1) -> Flashcard:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     cur = conn.execute(
         "INSERT INTO flashcards (question, answer, topic, difficulty, created_at) VALUES (?, ?, ?, ?, ?)",
         (question, answer, topic, difficulty, _now()),
@@ -85,7 +78,8 @@ def add_flashcard(question: str, answer: str, topic: str = "", difficulty: int =
 
 
 def get_flashcard(card_id: int) -> Optional[Flashcard]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM flashcards WHERE id = ?", (card_id,)).fetchone()
     if not row:
         return None
@@ -93,7 +87,8 @@ def get_flashcard(card_id: int) -> Optional[Flashcard]:
 
 
 def list_flashcards(topic: Optional[str] = None, limit: int = 100) -> list[Flashcard]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     if topic:
         rows = conn.execute(
             "SELECT * FROM flashcards WHERE topic = ? ORDER BY last_reviewed ASC NULLS FIRST LIMIT ?",
@@ -107,7 +102,8 @@ def list_flashcards(topic: Optional[str] = None, limit: int = 100) -> list[Flash
 
 
 def review_flashcard(card_id: int, correct: bool) -> Optional[Flashcard]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM flashcards WHERE id = ?", (card_id,)).fetchone()
     if not row:
         return None
@@ -124,15 +120,16 @@ def review_flashcard(card_id: int, correct: bool) -> Optional[Flashcard]:
 
 
 def delete_flashcard(card_id: int) -> bool:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     conn.execute("DELETE FROM flashcards WHERE id = ?", (card_id,))
     conn.commit()
     return conn.total_changes > 0
 
 
 def create_quiz(title: str, topic: str, questions_data: list[dict]) -> Quiz:
-    import json
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     now = _now()
     cur = conn.execute(
         "INSERT INTO quizzes (title, topic, total, created_at) VALUES (?, ?, ?, ?)",
@@ -149,8 +146,8 @@ def create_quiz(title: str, topic: str, questions_data: list[dict]) -> Quiz:
 
 
 def get_quiz(quiz_id: int) -> Optional[Quiz]:
-    import json
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM quizzes WHERE id = ?", (quiz_id,)).fetchone()
     if not row:
         return None
@@ -170,15 +167,16 @@ def get_quiz(quiz_id: int) -> Optional[Quiz]:
 
 
 def list_quizzes(limit: int = 20) -> list[Quiz]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     rows = conn.execute("SELECT * FROM quizzes ORDER BY created_at DESC LIMIT ?", (limit,)).fetchall()
     return [Quiz(id=r["id"], title=r["title"], topic=r["topic"],
                  score=r["score"], total=r["total"], created_at=r["created_at"]) for r in rows]
 
 
 def submit_answer(question_id: int, answer: str) -> bool:
-    import json
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM quiz_questions WHERE id = ?", (question_id,)).fetchone()
     if not row:
         return False
@@ -192,7 +190,8 @@ def submit_answer(question_id: int, answer: str) -> bool:
 
 
 def grade_quiz(quiz_id: int) -> Optional[dict]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM quizzes WHERE id = ?", (quiz_id,)).fetchone()
     if not row:
         return None

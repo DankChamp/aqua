@@ -5,16 +5,8 @@ from pathlib import Path
 from typing import Optional
 
 from config import get_settings
+from core.deps import get_db
 from .models import Document, Note
-
-
-def _get_db() -> sqlite3.Connection:
-    db_path = get_settings().db_path
-    conn = sqlite3.connect(str(db_path))
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    _migrate(conn)
-    return conn
 
 
 def _migrate(conn: sqlite3.Connection):
@@ -41,6 +33,14 @@ def _migrate(conn: sqlite3.Connection):
             created_at TEXT NOT NULL DEFAULT '',
             updated_at TEXT NOT NULL DEFAULT ''
         );
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL DEFAULT 'default',
+            role TEXT NOT NULL DEFAULT 'user',
+            content TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT ''
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_session ON chat_messages(session_id, created_at);
     """)
 
 
@@ -51,7 +51,8 @@ def _now() -> str:
 def add_document(title: str, content: str = "", authors: str = "", source: str = "manual",
                  source_url: str = "", file_path: str = "", summary: str = "",
                  tags: Optional[list[str]] = None, metadata: Optional[dict] = None) -> Document:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     now = _now()
     tags_json = json.dumps(tags or [])
     meta_json = json.dumps(metadata or {})
@@ -62,11 +63,14 @@ def add_document(title: str, content: str = "", authors: str = "", source: str =
     )
     conn.commit()
     doc_id = cur.lastrowid
+    from core.search.vector import index_document
+    index_document(doc_id, title, content)
     return get_document(doc_id)
 
 
 def get_document(doc_id: int) -> Optional[Document]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM documents WHERE id = ?", (doc_id,)).fetchone()
     if not row:
         return None
@@ -74,7 +78,8 @@ def get_document(doc_id: int) -> Optional[Document]:
 
 
 def list_documents(tag: Optional[str] = None, source: Optional[str] = None, limit: int = 50) -> list[Document]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     query = "SELECT * FROM documents"
     params = []
     conditions = []
@@ -93,7 +98,8 @@ def list_documents(tag: Optional[str] = None, source: Optional[str] = None, limi
 
 
 def search_documents(query: str, limit: int = 20) -> list[Document]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     like = f"%{query}%"
     rows = conn.execute(
         "SELECT * FROM documents WHERE content LIKE ? OR title LIKE ? OR summary LIKE ? ORDER BY created_at DESC LIMIT ?",
@@ -103,9 +109,12 @@ def search_documents(query: str, limit: int = 20) -> list[Document]:
 
 
 def delete_document(doc_id: int) -> bool:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     conn.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
     conn.commit()
+    from core.search.vector import remove_document
+    remove_document(doc_id)
     return conn.total_changes > 0
 
 
@@ -127,18 +136,23 @@ def _row_to_doc(row: sqlite3.Row) -> Document:
 
 
 def add_note(content: str, title: str = "", document_id: Optional[int] = None) -> Note:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     now = _now()
     cur = conn.execute(
         "INSERT INTO notes (title, content, document_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
         (title, content, document_id, now, now),
     )
     conn.commit()
-    return get_note(cur.lastrowid)
+    note_id = cur.lastrowid
+    from core.search.vector import index_note
+    index_note(note_id, title, content)
+    return get_note(note_id)
 
 
 def get_note(note_id: int) -> Optional[Note]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT * FROM notes WHERE id = ?", (note_id,)).fetchone()
     if not row:
         return None
@@ -147,7 +161,8 @@ def get_note(note_id: int) -> Optional[Note]:
 
 
 def list_notes(document_id: Optional[int] = None, limit: int = 50) -> list[Note]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     if document_id:
         rows = conn.execute(
             "SELECT * FROM notes WHERE document_id = ? ORDER BY created_at DESC LIMIT ?",
@@ -162,7 +177,8 @@ def list_notes(document_id: Optional[int] = None, limit: int = 50) -> list[Note]
 
 
 def search_notes(query: str, limit: int = 20) -> list[Note]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     like = f"%{query}%"
     rows = conn.execute(
         "SELECT * FROM notes WHERE content LIKE ? OR title LIKE ? ORDER BY created_at DESC LIMIT ?",
@@ -173,7 +189,8 @@ def search_notes(query: str, limit: int = 20) -> list[Note]:
 
 
 def edit_note(note_id: int, content: str, title: Optional[str] = None) -> Optional[Note]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     now = _now()
     if title is not None:
         conn.execute("UPDATE notes SET content = ?, title = ?, updated_at = ? WHERE id = ?",
@@ -186,7 +203,8 @@ def edit_note(note_id: int, content: str, title: Optional[str] = None) -> Option
 
 
 def delete_note(note_id: int) -> bool:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
     conn.commit()
     return conn.total_changes > 0
