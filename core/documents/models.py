@@ -25,5 +25,8 @@ class Note:
     title: str = ""
     content: str = ""
     document_id: Optional[int] = None
+    class_std: str = ""
+    subject: str = ""
+    chapter: str = ""
     created_at: str = ""
     updated_at: str = ""

@@ -279,6 +279,7 @@ tr:hover td { background: rgba(0,212,170,.03); }
       <button class="gold" onclick="switchPage('chat')">Ask a Question</button>
       <button class="primary" onclick="switchPage('research')">Research Topic</button>
       <button class="" onclick="switchPage('study')">Review Flashcards</button>
+      <button class="" onclick="switchPage('notes')">Generate Notes</button>
       <button class="" onclick="switchPage('documents')">Browse Documents</button>
     </div>
   </div>
@@ -325,16 +326,28 @@ tr:hover td { background: rgba(0,212,170,.03); }
 <div class="page" id="page-notes">
   <h2 style="margin-bottom:12px; color: var(--accent);">Notes</h2>
   <div class="study-wide card">
+    <h3>Generate Notes</h3>
+    <p class="text-dim text-sm mb-8">Generate study notes for a specific class, subject, and chapter.</p>
+    <div class="form-row">
+      <div><label>Class / Standard</label><input id="noteClass" placeholder="e.g. 10, 12, 1st Year" list="classList"></div>
+      <div><label>Subject</label><input id="noteSubject" placeholder="e.g. Physics, Maths" list="subjectList"></div>
+      <div><label>Chapter</label><input id="noteChapter" placeholder="e.g. Thermodynamics"></div>
+    </div>
+    <div class="flex gap-4 mb-8">
+      <select id="noteDocSelect" style="flex:1"><option value="">From document (optional)...</option></select>
+    </div>
+    <button class="gold" onclick="generateNotes()" id="genNoteBtn">Generate Notes</button>
+  </div>
+  <div class="study-wide card">
     <div class="flex gap-4" style="margin-bottom:8px">
+      <input id="noteClassFilter" placeholder="Filter by class..." style="flex:1" list="classList" oninput="loadNotes()">
+      <input id="noteSubjectFilter" placeholder="Filter by subject..." style="flex:1" list="subjectList" oninput="loadNotes()">
       <input id="noteSearch" placeholder="Search notes..." onkeydown="if(event.key==='Enter')loadNotes()">
       <button onclick="loadNotes()">Search</button>
     </div>
-    <div class="form-row">
-      <div><label>Title</label><input id="noteTitle" placeholder="Note title"></div>
-      <div style="flex:3"><label>Content</label><textarea id="noteContent" placeholder="Note content..."></textarea></div>
-    </div>
-    <button class="primary" onclick="addNote()">Add Note</button>
   </div>
+  <datalist id="classList"></datalist>
+  <datalist id="subjectList"></datalist>
   <div id="noteList"></div>
 </div>
 
@@ -495,7 +508,7 @@ function switchPage(name) {
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-"+name));
   if (name === "dashboard") loadDashboard();
   if (name === "documents") loadDocs();
-  if (name === "notes") loadNotes();
+  if (name === "notes") { loadNotes(); loadNoteDocs(); loadClassList(); }
   if (name === "study") { loadFlashcards(); loadQuizDocs(); loadStudyPlans(); }
   if (name === "profile") loadProfile();
   if (name === "settings") loadSettings();
@@ -581,21 +594,63 @@ function uploadPDF(input) {
 // ── Notes ──
 function loadNotes() {
   const q = document.getElementById("noteSearch").value.trim();
-  const url = q ? "/notes/search/"+encodeURIComponent(q) : "/notes?limit=50";
+  const c = document.getElementById("noteClassFilter").value.trim();
+  const s = document.getElementById("noteSubjectFilter").value.trim();
+  let url = "/notes?limit=50";
+  const params = [];
+  if (q) { params.push("q="+encodeURIComponent(q)); url = "/notes/search/"+encodeURIComponent(q); }
+  if (c) params.push("class_std="+encodeURIComponent(c));
+  if (s) params.push("subject="+encodeURIComponent(s));
+  if (params.length && !q) url = "/notes?"+params.join("&");
   api("GET", url).then(notes => {
     const el = document.getElementById("noteList");
-    if (!notes.length) { el.innerHTML = '<p class="text-dim">No notes found.</p>'; return; }
-    el.innerHTML = `<table><tr><th>ID</th><th>Title</th><th>Preview</th><th></th></tr>${notes.map(n => `<tr><td>${n.id}</td><td class="truncate" style="max-width:200px">${esc(n.title||'Untitled')}</td><td class="truncate text-dim" style="max-width:400px">${esc((n.content||'').slice(0,80))}</td><td><button class="danger text-sm" onclick="deleteNote(${n.id})">Del</button></td></tr>`).join('')}</table>`;
+    if (!notes.length) { el.innerHTML = '<p class="text-dim">No notes found. Generate notes for a class/subject/chapter above.</p>'; return; }
+    el.innerHTML = `<table><tr><th>Class</th><th>Subject</th><th>Chapter</th><th>Preview</th><th></th></tr>${notes.map(n => `<tr><td class="text-sm text-accent">${esc(n.class_std||'-')}</td><td class="text-sm">${esc(n.subject||'-')}</td><td class="text-sm text-gold">${esc(n.chapter||esc(n.title||'Untitled'))}</td><td class="truncate text-dim" style="max-width:300px">${esc((n.content||'').slice(0,80))}</td><td><button class="text-sm" onclick="showNote(${n.id})">View</button> <button class="danger text-sm" onclick="deleteNote(${n.id})">Del</button></td></tr>`).join('')}</table>`;
   });
 }
-function addNote() {
-  const title = document.getElementById("noteTitle").value.trim();
-  const content = document.getElementById("noteContent").value.trim();
-  if (!content) return;
-  api("POST", "/notes", {content, title}).then(() => { document.getElementById("noteTitle").value=""; document.getElementById("noteContent").value=""; loadNotes(); });
+function showNote(id) {
+  api("GET", "/notes/"+id).then(n => {
+    const el = document.getElementById("noteList");
+    const meta = [n.class_std, n.subject, n.chapter].filter(Boolean).join(' › ') || n.title;
+    el.innerHTML = `<div class="card"><h3>${esc(meta)}</h3><div style="margin-top:8px;max-height:500px;overflow-y:auto;font-size:13px;line-height:1.6;white-space:pre-wrap;font-family:var(--font-mono);background:var(--bg);padding:12px;border-radius:var(--radius)">${esc(n.content||'(no content)')}</div><button class="mt-8" onclick="loadNotes()">Back</button></div>`;
+  });
 }
 function deleteNote(id) {
   api("DELETE", "/notes/"+id).then(() => loadNotes());
+}
+function generateNotes() {
+  const cls = document.getElementById("noteClass").value.trim();
+  const sub = document.getElementById("noteSubject").value.trim();
+  const ch = document.getElementById("noteChapter").value.trim();
+  if (!cls || !sub || !ch) { alert("Enter class, subject, and chapter"); return; }
+  const docId = document.getElementById("noteDocSelect").value;
+  const btn = document.getElementById("genNoteBtn");
+  btn.disabled = true; btn.textContent = "Generating...";
+  const body = {class_std: cls, subject: sub, chapter: ch};
+  if (docId) body.document_ids = [parseInt(docId)];
+  api("POST", "/notes/generate", body).then(note => {
+    btn.disabled = false; btn.textContent = "Generate Notes";
+    alert(`Notes generated for ${sub} - ${ch}`);
+    showNote(note.id);
+    loadNotes();
+  }).catch(e => {
+    btn.disabled = false; btn.textContent = "Generate Notes";
+    alert("Failed: "+e.message);
+  });
+}
+function loadNoteDocs() {
+  api("GET","/documents?limit=200").then(docs => {
+    const sel = document.getElementById("noteDocSelect");
+    sel.innerHTML = '<option value="">From document (optional)...</option>'+docs.map(d => `<option value="${d.id}">${esc(d.title).slice(0,60)}</option>`).join('');
+  });
+}
+function loadClassList() {
+  api("GET","/notes").then(notes => {
+    const classes = [...new Set(notes.map(n => n.class_std).filter(Boolean))];
+    document.getElementById("classList").innerHTML = classes.map(c => `<option value="${esc(c)}">`).join('');
+    const subjects = [...new Set(notes.map(n => n.subject).filter(Boolean))];
+    document.getElementById("subjectList").innerHTML = subjects.map(s => `<option value="${esc(s)}">`).join('');
+  });
 }
 
 // ── Flashcards ──
