@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from api.deps import get_ai_router
+from core.agent.engine import run_agent, build_system_prompt
 from core.chat.memory import add_message, get_history, clear_session, list_sessions
 from core.profile import manager as profile_mgr
 from core.router import AIRouter, TaskType
@@ -18,12 +19,14 @@ class ChatRequest(BaseModel):
     system: Optional[str] = None
     provider: Optional[str] = None
     model: Optional[str] = None
+    agentic: bool = False
 
 
 class ChatResponse(BaseModel):
     reply: str
     provider: str
     model: str
+    agent_used: bool = False
 
 
 @router.post("", response_model=ChatResponse)
@@ -60,6 +63,23 @@ async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router
 
     if payload.system:
         parts.append(payload.system)
+
+    if payload.agentic:
+        system = build_system_prompt(extra="\n\n".join(parts) if parts else None)
+        try:
+            reply = await run_agent(
+                ai_router,
+                payload.message,
+                system=system,
+                model=payload.model,
+                provider_name=payload.provider,
+                session_id=payload.session_id,
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+        add_message(payload.session_id, "assistant", reply)
+        return ChatResponse(reply=reply, provider="agent", model="agent", agent_used=True)
 
     system = "\n\n".join(parts) if parts else None
 

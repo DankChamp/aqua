@@ -29,7 +29,7 @@ class OllamaProvider(AIProvider):
 
         payload = {"model": model, "messages": messages, "stream": False}
 
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=180.0) as client:
             resp = await client.post(f"{self.base_url}/api/chat", json=payload)
             resp.raise_for_status()
             data = resp.json()

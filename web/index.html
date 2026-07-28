@@ -270,6 +270,8 @@ tr:hover td { background: rgba(0,212,170,.03); }
     <div class="stat-card"><div class="num" id="statNotes">-</div><div class="label">Notes</div></div>
     <div class="stat-card"><div class="num" id="statCards">-</div><div class="label">Flashcards</div></div>
     <div class="stat-card"><div class="num" id="statQuizzes">-</div><div class="label">Quizzes</div></div>
+    <div class="stat-card"><div class="num" id="statPlans">-</div><div class="label">Study Plans</div></div>
+    <div class="stat-card"><div class="num" id="statMinutes">-</div><div class="label">Study Minutes</div></div>
   </div>
   <div class="study-wide card">
     <h3>Quick Actions</h3>
@@ -294,6 +296,9 @@ tr:hover td { background: rgba(0,212,170,.03); }
     <div class="chat-options">
       <select id="chatTask"><option value="conversation">General</option><option value="research">Research</option><option value="study">Study</option><option value="coding">Coding</option></select>
       <input id="chatSystem" placeholder="System override (optional)">
+      <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text-dim);cursor:pointer">
+        <input type="checkbox" id="chatAgentic"> Agent mode
+      </label>
     </div>
   </div>
 </div>
@@ -358,6 +363,17 @@ tr:hover td { background: rgba(0,212,170,.03); }
         <button class="gold" onclick="generateQuiz()">Generate</button>
       </div>
       <div id="qzList"></div>
+    </div>
+    <div class="study-wide card">
+      <h3>Study Plans</h3>
+      <div class="flex gap-4 mb-8" style="flex-wrap:wrap">
+        <input id="spTopic" placeholder="Topic" style="flex:2">
+        <input id="spDuration" type="number" value="7" min="1" max="90" style="width:80px" title="Duration in days">
+        <select id="spDocSelect" style="flex:3"><option value="">All documents...</option></select>
+        <button class="gold" onclick="generateStudyPlan()">Generate Plan</button>
+      </div>
+      <div id="spList"></div>
+      <div id="spDetail" class="hidden mt-8"></div>
     </div>
   </div>
   <div class="card hidden" id="reviewArea">
@@ -480,7 +496,7 @@ function switchPage(name) {
   if (name === "dashboard") loadDashboard();
   if (name === "documents") loadDocs();
   if (name === "notes") loadNotes();
-  if (name === "study") { loadFlashcards(); loadQuizDocs(); }
+  if (name === "study") { loadFlashcards(); loadQuizDocs(); loadStudyPlans(); }
   if (name === "profile") loadProfile();
   if (name === "settings") loadSettings();
 }
@@ -497,6 +513,13 @@ function loadDashboard() {
   api("GET","/notes?limit=1000").then(d => document.getElementById("statNotes").textContent = d.length);
   api("GET","/flashcards?limit=1000").then(d => document.getElementById("statCards").textContent = d.length);
   api("GET","/quizzes?limit=1000").then(d => document.getElementById("statQuizzes").textContent = d.length);
+  api("GET","/study/stats").then(d => {
+    document.getElementById("statPlans").textContent = d.total_plans;
+    document.getElementById("statMinutes").textContent = d.total_study_minutes;
+  });
+  api("GET","/study/plans").then(d => {
+    document.getElementById("statPlans").textContent = d.length;
+  });
 }
 
 // ── Chat ──
@@ -510,8 +533,10 @@ function sendChat() {
   log.scrollTop = log.scrollHeight;
   const task = document.getElementById("chatTask").value;
   const sys = document.getElementById("chatSystem").value.trim();
-  api("POST", "/chat", {message:msg, task_type:task, system:sys || undefined}).then(d => {
-    log.innerHTML += `<div class="msg assistant"><div class="meta">${d.provider}/${d.model}</div>${esc(d.reply)}</div>`;
+  const agentic = document.getElementById("chatAgentic").checked;
+  api("POST", "/chat", {message:msg, task_type:task, system:sys || undefined, agentic}).then(d => {
+    const label = d.agent_used ? "🤖 agent" : `${d.provider}/${d.model}`;
+    log.innerHTML += `<div class="msg assistant"><div class="meta">${label}</div>${esc(d.reply)}</div>`;
     log.scrollTop = log.scrollHeight;
   }).catch(e => {
     log.innerHTML += `<div class="msg assistant"><div class="meta" style="color:var(--danger)">Error</div>${esc(e.message||e)}</div>`;
@@ -658,6 +683,56 @@ function generateQuiz() {
     el.innerHTML = html;
     loadQuizDocs();
   });
+}
+
+// ── Study Plans ──
+function loadStudyPlans() {
+  api("GET","/study/plans").then(plans => {
+    const el = document.getElementById("spList");
+    if (!plans.length) { el.innerHTML = '<p class="text-dim">No study plans yet. Generate one above.</p>'; return; }
+    el.innerHTML = `<table><tr><th>ID</th><th>Title</th><th>Days</th><th>Progress</th><th></th></tr>${plans.map(p => `<tr><td>${p.id}</td><td>${esc(p.title)}</td><td>${p.duration_days}</td><td><div style="background:var(--bg);border-radius:4px;overflow:hidden;width:100px;height:12px"><div style="background:var(--accent);width:${p.progress}%;height:100%"></div></div><span class="text-sm text-dim">${p.progress.toFixed(0)}%</span></td><td><button class="text-sm" onclick="showPlan(${p.id})">View</button></td></tr>`).join('')}</table>`;
+  });
+  api("GET","/documents?limit=200").then(docs => {
+    const sel = document.getElementById("spDocSelect");
+    sel.innerHTML = '<option value="">All documents...</option>'+docs.map(d => `<option value="${d.id}">${esc(d.title).slice(0,60)}</option>`).join('');
+  });
+}
+function generateStudyPlan() {
+  const topic = document.getElementById("spTopic").value.trim();
+  if (!topic) { alert("Enter a topic first"); return; }
+  const duration = parseInt(document.getElementById("spDuration").value) || 7;
+  const docSelect = document.getElementById("spDocSelect");
+  const docIds = docSelect.value ? [parseInt(docSelect.value)] : [];
+  api("POST", "/study/plans/generate", {topic, document_ids:docIds, duration_days:duration}).then(plan => {
+    document.getElementById("spTopic").value = "";
+    alert(`Study plan created: "${plan.title}" with ${plan.tasks.length} tasks`);
+    showPlan(plan.id);
+    loadStudyPlans();
+  }).catch(e => { alert("Failed: "+e.message); });
+}
+function showPlan(id) {
+  api("GET", "/study/plans/"+id).then(plan => {
+    const el = document.getElementById("spDetail");
+    el.classList.remove("hidden");
+    let html = `<div class="card"><div class="flex" style="justify-content:space-between;align-items:center"><h3>${esc(plan.title)}</h3><span class="text-sm text-dim">${plan.duration_days} days · ${plan.progress.toFixed(0)}% complete</span></div>`;
+    if (plan.description) html += `<p class="text-sm text-dim mb-8">${esc(plan.description)}</p>`;
+    html += `<div style="background:var(--bg);border-radius:4px;overflow:hidden;height:8px;margin-bottom:12px"><div style="background:var(--accent);width:${plan.progress}%;height:100%;transition:width .3s"></div></div>`;
+    let currentDay = 0;
+    (plan.tasks||[]).forEach(t => {
+      if (t.day !== currentDay) { currentDay = t.day; html += `<p class="text-sm text-gold mt-8 mb-4" style="font-weight:600">Day ${t.day}</p>`; }
+      html += `<div class="flex" style="align-items:center;gap:8px;padding:6px 8px;border-radius:var(--radius);background:${t.completed ? 'rgba(0,212,170,.05)' : 'transparent'};margin-bottom:2px">`;
+      html += `<span style="color:${t.completed ? 'var(--accent)' : 'var(--text-dim)'}">${t.completed ? '✓' : '○'}</span>`;
+      html += `<div style="flex:1"><strong>${esc(t.title)}</strong>${t.description ? `<p class="text-sm text-dim">${esc(t.description)}</p>` : ''}</div>`;
+      html += `<span class="text-sm text-dim">${t.duration_minutes}m</span>`;
+      if (!t.completed) html += `<button class="text-sm" onclick="completeTask(${plan.id},${t.id})">Done</button>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+    el.innerHTML = html;
+  });
+}
+function completeTask(planId, taskId) {
+  api("POST", "/study/tasks/"+taskId+"/complete").then(() => showPlan(planId));
 }
 
 // ── Research ──
