@@ -276,6 +276,7 @@ tr:hover td { background: rgba(0,212,170,.03); }
 .gap-4 { gap: 4px; }
 .mt-8 { margin-top: 8px; }
 .mb-8 { margin-bottom: 8px; }
+.ml-8 { margin-left: 8px; }
 .text-dim { color: var(--text-dim); }
 .text-accent { color: var(--accent); }
 .text-gold { color: var(--gold); }
@@ -578,6 +579,24 @@ tr:hover td { background: rgba(0,212,170,.03); }
 <!-- ── Settings ── -->
 <div class="page" id="page-settings">
   <h2 style="margin-bottom:12px; color: var(--accent);">Settings</h2>
+  <div class="card" id="apiKeysCard">
+    <h3>API Keys</h3>
+    <p class="text-dim text-sm mb-8">Enter provider API keys. Leave blank to keep existing, or enter a new value to update.</p>
+    <div class="form-row">
+      <div><label>Groq</label><input id="keyGroq" type="password" placeholder="gsk_..."></div>
+      <div><label>NVIDIA</label><input id="keyNvidia" type="password" placeholder="nvapi-..."></div>
+    </div>
+    <div class="form-row">
+      <div><label>OpenAI</label><input id="keyOpenAI" type="password" placeholder="sk-..."></div>
+      <div><label>Anthropic</label><input id="keyAnthropic" type="password" placeholder="sk-ant-..."></div>
+    </div>
+    <div class="form-row">
+      <div><label>Google Gemini</label><input id="keyGoogle" type="password" placeholder="AIza..."></div>
+      <div></div>
+    </div>
+    <button class="gold" onclick="saveApiKeys()">Save Keys</button>
+    <span id="keySaveStatus" class="text-sm text-dim ml-8"></span>
+  </div>
   <div class="card">
     <h3>AI Providers</h3>
     <div id="providerStatus"></div>
@@ -1052,15 +1071,51 @@ function stopVoice() {
 }
 
 // ── Settings ──
+const KEY_FIELDS = [
+  { id: "keyGroq", env: "GROQ_API_KEY" },
+  { id: "keyNvidia", env: "NVIDIA_API_KEY" },
+  { id: "keyOpenAI", env: "OPENAI_API_KEY" },
+  { id: "keyAnthropic", env: "ANTHROPIC_API_KEY" },
+  { id: "keyGoogle", env: "GOOGLE_API_KEY" },
+];
+
 function loadSettings() {
+  api("GET", "/settings").then(s => {
+    KEY_FIELDS.forEach(kf => {
+      const key = kf.env.toLowerCase();
+      const has = s["has_" + key] || false;
+      document.getElementById(kf.id).placeholder = has ? "•••••••• (set)" : "Not set";
+      document.getElementById(kf.id).value = "";
+    });
+  });
   api("GET", "/settings/providers").then(provs => {
     const el = document.getElementById("providerStatus");
     if (!provs || !provs.length) { el.innerHTML = '<p class="text-dim">No providers configured.</p>'; return; }
-    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex"><span class="text-accent">${esc(p.name)}</span><span class="${p.configured ? 'text-accent' : 'text-dim'}">${p.configured ? '✓' : '✗'}</span></div><p class="text-sm text-dim">${p.model || ''}</p></div>`).join('');
+    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex"><span class="text-accent">${esc(p.name)}</span><span class="${p.configured ? 'text-accent' : 'text-dim'}">${p.configured ? '✓' : '✗'}</span></div><p class="text-sm text-dim">${p.default_model || ''}</p></div>`).join('');
   });
   api("GET", "/settings").then(s => {
     const el = document.getElementById("settingsEnv");
     el.innerHTML = Object.entries(s).filter(([k]) => !k.includes('key') && !k.includes('password')).map(([k,v]) => `<div class="flex"><span class="text-dim text-sm" style="min-width:200px">${esc(k)}</span><span>${esc(String(v))}</span></div>`).join('');
+  });
+}
+
+function saveApiKeys() {
+  const updates = {};
+  KEY_FIELDS.forEach(kf => {
+    const val = document.getElementById(kf.id).value.trim();
+    if (val) updates[kf.env] = val;
+  });
+  if (!Object.keys(updates).length) { document.getElementById("keySaveStatus").textContent = "Nothing to save."; return; }
+  const btn = document.querySelector("#apiKeysCard .gold");
+  btn.disabled = true;
+  document.getElementById("keySaveStatus").textContent = "Saving...";
+  api("POST", "/settings/env", {updates}).then(() => {
+    document.getElementById("keySaveStatus").textContent = "Saved! Reloading...";
+    KEY_FIELDS.forEach(kf => document.getElementById(kf.id).value = "");
+    setTimeout(() => { loadSettings(); document.getElementById("keySaveStatus").textContent = ""; btn.disabled = false; }, 1000);
+  }).catch(e => {
+    document.getElementById("keySaveStatus").textContent = "Failed: " + e.message;
+    btn.disabled = false;
   });
 }
 
