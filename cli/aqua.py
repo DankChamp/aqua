@@ -289,7 +289,8 @@ def cmd_quiz_show(args):
     q = resp.json()
     console.print(f"[bold]{q['title']}[/bold] ({q.get('topic', 'no topic')})")
     if q.get("score") is not None:
-        console.print(f"Score: {q['score']:.0f}% ({q.get('correct', '?')}/{q.get('total', '?')})")
+        correct_count = sum(1 for qd in q.get("questions", []) if qd.get("is_correct"))
+        console.print(f"Score: {q['score']:.0f}% ({correct_count}/{q.get('total', '?')})")
     for i, qd in enumerate(q.get("questions", []), 1):
         ua = qd.get("user_answer")
         icon = "[green]✓[/green]" if qd.get("is_correct") else "[red]✗[/red]" if ua else "[dim]—[/dim]"

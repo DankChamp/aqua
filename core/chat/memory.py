@@ -62,6 +62,6 @@ def list_sessions() -> list[str]:
     _ensure_table()
     conn = get_db()
     rows = conn.execute(
-        "SELECT DISTINCT session_id FROM chat_messages ORDER BY MAX(created_at) DESC"
+        "SELECT session_id FROM chat_messages GROUP BY session_id ORDER BY MAX(created_at) DESC"
     ).fetchall()
     return [r["session_id"] for r in rows]

@@ -163,6 +163,7 @@ class GetDocumentTool(Tool):
     async def execute(self, doc_id: int) -> ToolResult:
         from core.documents.manager import get_document
         try:
+            doc_id = int(doc_id)
             doc = get_document(doc_id)
             if not doc:
                 return ToolResult(success=False, error=f"Document {doc_id} not found")
@@ -199,8 +200,9 @@ class GenerateStudyPlanTool(Tool):
     async def execute(self, topic: str, document_ids: str = "", duration_days: int = 7) -> ToolResult:
         from core.study.plans import generate_plan
         try:
+            duration_days = int(duration_days)
             ids = [int(x.strip()) for x in document_ids.split(",") if x.strip()] if document_ids else []
-            plan = await generate_plan(topic, ids, duration_days)
+            plan = await generate_plan(topic, ids, max(1, duration_days))
             return ToolResult(success=True, data=f"Study plan created: '{plan.title}' (id={plan.id}, {duration_days} days)")
         except Exception as exc:
             return ToolResult(success=False, error=str(exc))
@@ -241,6 +243,7 @@ class GetStudyPlanTool(Tool):
     async def execute(self, plan_id: int) -> ToolResult:
         from core.study.plans import get_plan_with_tasks
         try:
+            plan_id = int(plan_id)
             plan = get_plan_with_tasks(plan_id)
             if not plan:
                 return ToolResult(success=False, error=f"Study plan {plan_id} not found")

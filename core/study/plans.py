@@ -17,7 +17,7 @@ class StudyPlan:
     topic: str = ""
     description: str = ""
     duration_days: int = 7
-    document_ids: str = "[]"
+    document_ids: list[int] = field(default_factory=list)
     progress: float = 0.0
     created_at: str = ""
     updated_at: str = ""
@@ -33,7 +33,7 @@ class StudyPlanTask:
     duration_minutes: int = 30
     completed: bool = False
     completed_at: Optional[str] = None
-    resource_ids: str = "[]"
+    resource_ids: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -100,7 +100,7 @@ def _row_to_plan(row: sqlite3.Row) -> StudyPlan:
         topic=row["topic"],
         description=row["description"],
         duration_days=row["duration_days"],
-        document_ids=row["document_ids"],
+        document_ids=json.loads(row["document_ids"]),
         progress=row["progress"],
         created_at=row["created_at"],
         updated_at=row["updated_at"],
@@ -117,7 +117,7 @@ def _row_to_task(row: sqlite3.Row) -> StudyPlanTask:
         duration_minutes=row["duration_minutes"],
         completed=bool(row["completed"]),
         completed_at=row["completed_at"],
-        resource_ids=row["resource_ids"],
+        resource_ids=json.loads(row["resource_ids"]),
     )
 
 
@@ -155,10 +155,12 @@ def list_plans(limit: int = 20) -> list[StudyPlan]:
 def delete_plan(plan_id: int) -> bool:
     conn = get_db()
     _migrate(conn)
+    if not get_plan(plan_id):
+        return False
     conn.execute("DELETE FROM study_plan_tasks WHERE plan_id = ?", (plan_id,))
     conn.execute("DELETE FROM study_plans WHERE id = ?", (plan_id,))
     conn.commit()
-    return conn.total_changes > 0
+    return True
 
 
 def add_task(plan_id: int, day: int, title: str, description: str = "",
