@@ -74,6 +74,8 @@ def add_flashcard(question: str, answer: str, topic: str = "", difficulty: int =
         (question, answer, topic, difficulty, _now()),
     )
     conn.commit()
+    from core.activity import add_activity
+    add_activity("added_flashcard", f"{topic}: {question[:60]}", chapter=topic)
     return get_flashcard(cur.lastrowid)
 
 
@@ -142,6 +144,8 @@ def create_quiz(title: str, topic: str, questions_data: list[dict]) -> Quiz:
             (quiz_id, qd["question"], json.dumps(qd.get("options", [])), qd["correct_answer"]),
         )
     conn.commit()
+    from core.activity import add_activity
+    add_activity("generated_quiz", f"{title} ({len(questions_data)} questions)", chapter=topic)
     return get_quiz(quiz_id)
 
 

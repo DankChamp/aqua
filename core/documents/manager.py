@@ -33,6 +33,7 @@ def _migrate(conn: sqlite3.Connection):
             class_std TEXT NOT NULL DEFAULT '',
             subject TEXT NOT NULL DEFAULT '',
             chapter TEXT NOT NULL DEFAULT '',
+            note_type TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL DEFAULT '',
             updated_at TEXT NOT NULL DEFAULT ''
         );
@@ -45,7 +46,7 @@ def _migrate(conn: sqlite3.Connection):
         );
         CREATE INDEX IF NOT EXISTS idx_chat_session ON chat_messages(session_id, created_at);
     """)
-    for col in ("class_std", "subject", "chapter"):
+    for col in ("class_std", "subject", "chapter", "note_type"):
         try:
             conn.execute(f"ALTER TABLE notes ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
         except Exception:
@@ -73,6 +74,8 @@ def add_document(title: str, content: str = "", authors: str = "", source: str =
     doc_id = cur.lastrowid
     from core.search.vector import index_document
     index_document(doc_id, title, content)
+    from core.activity import add_activity
+    add_activity("added_document", f"{title} ({source})")
     return get_document(doc_id)
 
 
@@ -144,19 +147,22 @@ def _row_to_doc(row: sqlite3.Row) -> Document:
 
 
 def add_note(content: str, title: str = "", document_id: Optional[int] = None,
-             class_std: str = "", subject: str = "", chapter: str = "") -> Note:
+             class_std: str = "", subject: str = "", chapter: str = "",
+             note_type: str = "") -> Note:
     conn = get_db()
     _migrate(conn)
     now = _now()
     cur = conn.execute(
-        "INSERT INTO notes (title, content, document_id, class_std, subject, chapter, created_at, updated_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        (title, content, document_id, class_std, subject, chapter, now, now),
+        "INSERT INTO notes (title, content, document_id, class_std, subject, chapter, note_type, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (title, content, document_id, class_std, subject, chapter, note_type, now, now),
     )
     conn.commit()
     note_id = cur.lastrowid
     from core.search.vector import index_note
     index_note(note_id, title, content)
+    from core.activity import add_activity
+    add_activity("generated_notes", f"{note_type or 'detailed'} notes", class_std, subject, chapter)
     return get_note(note_id)
 
 
@@ -169,12 +175,13 @@ def get_note(note_id: int) -> Optional[Note]:
     return Note(id=row["id"], title=row["title"], content=row["content"],
                 document_id=row["document_id"], class_std=row["class_std"],
                 subject=row["subject"], chapter=row["chapter"],
+                note_type=row["note_type"],
                 created_at=row["created_at"], updated_at=row["updated_at"])
 
 
 def list_notes(document_id: Optional[int] = None, limit: int = 50,
                class_std: Optional[str] = None, subject: Optional[str] = None,
-               chapter: Optional[str] = None) -> list[Note]:
+               chapter: Optional[str] = None, note_type: Optional[str] = None) -> list[Note]:
     conn = get_db()
     _migrate(conn)
     conditions = []
@@ -191,6 +198,9 @@ def list_notes(document_id: Optional[int] = None, limit: int = 50,
     if chapter:
         conditions.append("chapter = ?")
         params.append(chapter)
+    if note_type:
+        conditions.append("note_type = ?")
+        params.append(note_type)
     sql = "SELECT * FROM notes"
     if conditions:
         sql += " WHERE " + " AND ".join(conditions)
@@ -204,6 +214,7 @@ def _row_to_note(row: sqlite3.Row) -> Note:
     return Note(id=row["id"], title=row["title"], content=row["content"],
                 document_id=row["document_id"], class_std=row["class_std"],
                 subject=row["subject"], chapter=row["chapter"],
+                note_type=row["note_type"],
                 created_at=row["created_at"], updated_at=row["updated_at"])
 
 
@@ -221,7 +232,7 @@ def search_notes(query: str, limit: int = 20) -> list[Note]:
 
 def edit_note(note_id: int, content: str, title: Optional[str] = None,
               class_std: Optional[str] = None, subject: Optional[str] = None,
-              chapter: Optional[str] = None) -> Optional[Note]:
+              chapter: Optional[str] = None, note_type: Optional[str] = None) -> Optional[Note]:
     conn = get_db()
     _migrate(conn)
     now = _now()
@@ -239,6 +250,9 @@ def edit_note(note_id: int, content: str, title: Optional[str] = None,
     if chapter is not None:
         sets.append("chapter = ?")
         params.append(chapter)
+    if note_type is not None:
+        sets.append("note_type = ?")
+        params.append(note_type)
     params.append(note_id)
     conn.execute(f"UPDATE notes SET {', '.join(sets)} WHERE id = ?", params)
     conn.commit()
@@ -274,10 +288,13 @@ def list_chapters(class_std: str, subject: str) -> list[str]:
 
 
 async def generate_note(class_std: str, subject: str, chapter: str,
-                        document_ids: Optional[list[int]] = None) -> Note:
+                        document_ids: Optional[list[int]] = None,
+                        note_type: str = "detailed") -> Note:
     from core.deps import get_router
     from core.router import TaskType
+    from .models import NOTE_TYPES, NOTE_TYPE_LABELS
 
+    type_label = NOTE_TYPE_LABELS.get(note_type, "Detailed Notes")
     docs_text = ""
     if document_ids:
         for did in document_ids:
@@ -286,18 +303,23 @@ async def generate_note(class_std: str, subject: str, chapter: str,
                 docs_text += f"\n--- {doc.title} ---\n{doc.content[:2000]}\n"
 
     prompt = (
-        f"Generate comprehensive study notes for Class {class_std} {subject}, Chapter: {chapter}.\n"
+        f"Generate {type_label} for Class {class_std} {subject}, Chapter: {chapter}.\n"
     )
     if docs_text:
         prompt += f"\nUse this source material:\n{docs_text[:5000]}\n"
     prompt += (
-        "\nFormat the notes with:\n"
+        "\nInclude:\n"
         "- Key concepts and definitions\n"
-        "- Important formulas or equations (if applicable)\n"
-        "- Examples\n"
-        "- Key points to remember\n\n"
-        "Return the notes in markdown format."
     )
+    if note_type == "formula_sheet":
+        prompt += "- Important formulas, equations, and theorems\n- Units and notation\n"
+    elif note_type == "key_points":
+        prompt += "- Bullet-point key takeaways\n- Common mistakes to avoid\n- Quick reference\n"
+    elif note_type == "summary":
+        prompt += "- Brief overview of the chapter\n- Main conclusions\n- Connection to next topics\n"
+    else:
+        prompt += "- Important formulas or equations (if applicable)\n- Examples\n- Key points to remember\n"
+    prompt += "\nReturn the notes in markdown format."
 
     ai_router = get_router()
     result = await ai_router.run(
@@ -312,4 +334,5 @@ async def generate_note(class_std: str, subject: str, chapter: str,
         class_std=class_std,
         subject=subject,
         chapter=chapter,
+        note_type=note_type,
     )

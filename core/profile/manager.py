@@ -2,15 +2,7 @@ import sqlite3
 from datetime import datetime
 from typing import Optional
 
-from config import get_settings
-
-
-def _get_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(str(get_settings().db_path))
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
-    _migrate(conn)
-    return conn
+from core.deps import get_db
 
 
 def _migrate(conn: sqlite3.Connection):
@@ -29,19 +21,22 @@ def _now() -> str:
 
 
 def get_all() -> list[dict]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     rows = conn.execute("SELECT * FROM profile WHERE key != 'system_prompt' ORDER BY category, key").fetchall()
     return [dict(r) for r in rows]
 
 
 def get(key: str) -> Optional[str]:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     row = conn.execute("SELECT value FROM profile WHERE key = ?", (key,)).fetchone()
     return row["value"] if row else None
 
 
 def set(key: str, value: str, category: str = ""):
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     now = _now()
     conn.execute(
         "INSERT INTO profile (key, value, category, updated_at) VALUES (?, ?, ?, ?) "
@@ -52,7 +47,8 @@ def set(key: str, value: str, category: str = ""):
 
 
 def delete(key: str) -> bool:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     conn.execute("DELETE FROM profile WHERE key = ?", (key,))
     conn.commit()
     return conn.total_changes > 0
@@ -67,7 +63,8 @@ def set_system_prompt(text: str):
 
 
 def to_context_block() -> str:
-    conn = _get_db()
+    conn = get_db()
+    _migrate(conn)
     rows = conn.execute(
         "SELECT key, value, category FROM profile WHERE key != 'system_prompt' ORDER BY category, key"
     ).fetchall()

@@ -133,6 +133,8 @@ def create_plan(title: str, topic: str, description: str, duration_days: int,
         (title, topic, description, duration_days, ids_json, now, now),
     )
     conn.commit()
+    from core.activity import add_activity
+    add_activity("created_study_plan", f"{title} ({duration_days} days)", chapter=topic)
     return get_plan(cur.lastrowid)
 
 
@@ -205,6 +207,8 @@ def complete_task(task_id: int) -> Optional[StudyPlanTask]:
     task = get_task(task_id)
     if task:
         _recalc_progress(task.plan_id)
+        from core.activity import add_activity
+        add_activity("completed_task", task.title)
     return task
 
 

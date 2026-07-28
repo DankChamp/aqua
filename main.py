@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts, search as search_routes, study
+from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts, search as search_routes, study, teach as teach_routes, activity as activity_routes
 from api.routes import settings as settings_routes
 from config import get_settings
 
@@ -53,6 +53,8 @@ app.include_router(facts.router)
 app.include_router(search_routes.router)
 app.include_router(settings_routes.router)
 app.include_router(study.router)
+app.include_router(teach_routes.router)
+app.include_router(activity_routes.router)
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 if WEB_DIR.is_dir():

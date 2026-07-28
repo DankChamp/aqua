@@ -28,5 +28,15 @@ class Note:
     class_std: str = ""
     subject: str = ""
     chapter: str = ""
+    note_type: str = ""
     created_at: str = ""
     updated_at: str = ""
+
+
+NOTE_TYPES = ["detailed", "formula_sheet", "key_points", "summary"]
+NOTE_TYPE_LABELS = {
+    "detailed": "Detailed Notes",
+    "formula_sheet": "Formula Sheet",
+    "key_points": "Key Points",
+    "summary": "Summary",
+}

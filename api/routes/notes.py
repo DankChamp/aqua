@@ -9,6 +9,7 @@ from core.documents.manager import (
     add_note, get_note, list_notes, search_notes, edit_note, delete_note,
     list_subjects, list_chapters, generate_note,
 )
+from core.documents.models import NOTE_TYPES
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -20,6 +21,7 @@ class NoteCreate(BaseModel):
     class_std: str = ""
     subject: str = ""
     chapter: str = ""
+    note_type: str = ""
 
 
 class NoteEdit(BaseModel):
@@ -28,6 +30,7 @@ class NoteEdit(BaseModel):
     class_std: Optional[str] = None
     subject: Optional[str] = None
     chapter: Optional[str] = None
+    note_type: Optional[str] = None
 
 
 class GenerateRequest(BaseModel):
@@ -35,6 +38,7 @@ class GenerateRequest(BaseModel):
     subject: str
     chapter: str
     document_ids: list[int] = []
+    note_type: str = "detailed"
 
 
 @router.post("/generate")
@@ -45,6 +49,7 @@ async def generate(payload: GenerateRequest, ai_router: AIRouter = Depends(get_a
             subject=payload.subject,
             chapter=payload.chapter,
             document_ids=payload.document_ids or None,
+            note_type=payload.note_type,
         )
         return note
     except Exception as exc:
@@ -57,6 +62,7 @@ async def create_note(payload: NoteCreate):
         content=payload.content, title=payload.title,
         document_id=payload.document_id,
         class_std=payload.class_std, subject=payload.subject, chapter=payload.chapter,
+        note_type=payload.note_type,
     )
     try:
         title = payload.title or "untitled"
@@ -70,9 +76,10 @@ async def create_note(payload: NoteCreate):
 @router.get("")
 def list_note(document_id: Optional[int] = None, limit: int = 50,
               class_std: Optional[str] = None, subject: Optional[str] = None,
-              chapter: Optional[str] = None):
+              chapter: Optional[str] = None, note_type: Optional[str] = None):
     return list_notes(document_id=document_id, limit=limit,
-                      class_std=class_std, subject=subject, chapter=chapter)
+                      class_std=class_std, subject=subject, chapter=chapter,
+                      note_type=note_type)
 
 
 @router.get("/subjects")
@@ -83,6 +90,11 @@ def subjects(class_std: Optional[str] = None):
 @router.get("/chapters")
 def chapters(class_std: str, subject: str):
     return list_chapters(class_std, subject)
+
+
+@router.get("/note-types")
+def note_types():
+    return NOTE_TYPES
 
 
 @router.get("/{note_id}")
@@ -102,7 +114,7 @@ def search_note(query: str, limit: int = 20):
 def update_note(note_id: int, payload: NoteEdit):
     note = edit_note(note_id, payload.content, title=payload.title,
                      class_std=payload.class_std, subject=payload.subject,
-                     chapter=payload.chapter)
+                     chapter=payload.chapter, note_type=payload.note_type)
     if not note:
         raise HTTPException(404, "Note not found")
     return note
