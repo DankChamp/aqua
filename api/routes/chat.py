@@ -33,7 +33,15 @@ class ChatResponse(BaseModel):
 async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router)):
     add_message(payload.session_id, "user", payload.message)
 
-    parts = []
+    AQUA_INSTRUCTIONS = (
+        "You are Aqua, a sharp and efficient research & study assistant. "
+        "Be conversational, not academic. Use short paragraphs, bullet points, "
+        "or simple lists to keep responses scannable. Never write a huge wall "
+        "of text unless the user explicitly asks for depth. If you use web or "
+        "knowledge sources, briefly cite them. Adapt your tone to the user."
+    )
+
+    parts = [AQUA_INSTRUCTIONS]
 
     custom_prompt = profile_mgr.get_system_prompt()
     if custom_prompt:
@@ -54,10 +62,13 @@ async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router
     try:
         chunks = search_chunks(payload.message, top_k=3)
         if chunks:
-            ctx = "Relevant knowledge:\n" + "\n---\n".join(
-                f"[{c.get('source','?')}] {c.get('title','')}: {c.get('text','')}" for c in chunks
-            )
-            parts.append(ctx)
+            lines = []
+            for c in chunks:
+                src = c.get("source", "?")
+                title = c.get("title", "")
+                text = c.get("text", "")
+                lines.append(f"[{src}] {title}: {text[:500]}")
+            parts.append("Knowledge base:\n" + "\n".join(lines))
     except Exception:
         pass
 
@@ -65,10 +76,13 @@ async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router
     try:
         web_results = search_duckduckgo(payload.message, max_results=3)
         if web_results:
-            ctx = "Latest web info:\n" + "\n---\n".join(
-                f"[{r['title']}]({r['url']}): {r['snippet'][:300]}" for r in web_results
-            )
-            parts.append(ctx)
+            lines = []
+            for r in web_results:
+                title = r.get("title", "")
+                snippet = r.get("snippet", "")
+                url = r.get("url", "")
+                lines.append(f"[Web] {title}: {snippet[:300]} ({url})")
+            parts.append("Latest web results:\n" + "\n".join(lines))
     except Exception:
         pass
 
