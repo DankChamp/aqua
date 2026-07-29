@@ -61,6 +61,17 @@ async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router
     except Exception:
         pass
 
+    from core.web.search import search_duckduckgo
+    try:
+        web_results = search_duckduckgo(payload.message, max_results=3)
+        if web_results:
+            ctx = "Latest web info:\n" + "\n---\n".join(
+                f"[{r['title']}]({r['url']}): {r['snippet'][:300]}" for r in web_results
+            )
+            parts.append(ctx)
+    except Exception:
+        pass
+
     if payload.system:
         parts.append(payload.system)
 

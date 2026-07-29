@@ -382,7 +382,8 @@ tr:hover td { background: rgba(0,212,170,.03); }
     </div>
     <div class="chat-options">
       <select id="chatTask"><option value="conversation">General</option><option value="research">Research</option><option value="study">Study</option></select>
-      <input id="chatSystem" placeholder="System override (optional)">
+      <input id="chatSystem" placeholder="System override (optional)" style="flex:1.5">
+      <input id="chatModel" placeholder="Model override (optional)" style="flex:1" title="Override the model for this message (e.g. mixtral-8x7b-32768)">
       <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text-dim);cursor:pointer">
         <input type="checkbox" id="chatAgentic"> Agent mode
       </label>
@@ -580,21 +581,29 @@ tr:hover td { background: rgba(0,212,170,.03); }
 <div class="page" id="page-settings">
   <h2 style="margin-bottom:12px; color: var(--accent);">Settings</h2>
   <div class="card" id="apiKeysCard">
-    <h3>API Keys</h3>
-    <p class="text-dim text-sm mb-8">Enter provider API keys. Leave blank to keep existing, or enter a new value to update.</p>
+    <h3>API Keys &amp; Models</h3>
+    <p class="text-dim text-sm mb-8">Enter API keys and optionally override the default model per provider.</p>
     <div class="form-row">
-      <div><label>Groq</label><input id="keyGroq" type="password" placeholder="gsk_..."></div>
-      <div><label>NVIDIA</label><input id="keyNvidia" type="password" placeholder="nvapi-..."></div>
+      <div style="flex:1"><label>Groq Key</label><input id="keyGroq" type="password" placeholder="gsk_..."></div>
+      <div style="flex:1"><label>Groq Model</label><input id="modelGroq" placeholder="llama-3.3-70b-versatile"></div>
     </div>
     <div class="form-row">
-      <div><label>OpenAI</label><input id="keyOpenAI" type="password" placeholder="sk-..."></div>
-      <div><label>Anthropic</label><input id="keyAnthropic" type="password" placeholder="sk-ant-..."></div>
+      <div style="flex:1"><label>NVIDIA Key</label><input id="keyNvidia" type="password" placeholder="nvapi-..."></div>
+      <div style="flex:1"><label>NVIDIA Model</label><input id="modelNvidia" placeholder="meta/llama-3.1-8b-instruct"></div>
     </div>
     <div class="form-row">
-      <div><label>Google Gemini</label><input id="keyGoogle" type="password" placeholder="AIza..."></div>
-      <div></div>
+      <div style="flex:1"><label>OpenAI Key</label><input id="keyOpenAI" type="password" placeholder="sk-..."></div>
+      <div style="flex:1"><label>OpenAI Model</label><input id="modelOpenAI" placeholder="gpt-4o-mini"></div>
     </div>
-    <button class="gold" onclick="saveApiKeys()">Save Keys</button>
+    <div class="form-row">
+      <div style="flex:1"><label>Anthropic Key</label><input id="keyAnthropic" type="password" placeholder="sk-ant-..."></div>
+      <div style="flex:1"><label>Anthropic Model</label><input id="modelAnthropic" placeholder="claude-3-haiku-20240307"></div>
+    </div>
+    <div class="form-row">
+      <div style="flex:1"><label>Google Key</label><input id="keyGoogle" type="password" placeholder="AIza..."></div>
+      <div style="flex:1"><label>Google Model</label><input id="modelGoogle" placeholder="gemini-2.0-flash-exp"></div>
+    </div>
+    <button class="gold" onclick="saveApiKeys()">Save Keys &amp; Models</button>
     <span id="keySaveStatus" class="text-sm text-dim ml-8"></span>
   </div>
   <div class="card">
@@ -872,8 +881,11 @@ function sendChat() {
   log.scrollTop = log.scrollHeight;
   const task = document.getElementById("chatTask").value;
   const sys = document.getElementById("chatSystem").value.trim();
+  const model = document.getElementById("chatModel").value.trim();
   const agentic = document.getElementById("chatAgentic").checked;
-  api("POST", "/chat", {message:msg, task_type:task, system:sys || undefined, agentic}).then(d => {
+  const body = {message:msg, task_type:task, system:sys || undefined, agentic};
+  if (model) body.model = model;
+  api("POST", "/chat", body).then(d => {
     const label = d.agent_used ? "🤖 agent" : `${d.provider}/${d.model}`;
     log.innerHTML += `<div class="msg assistant"><div class="meta">${label}</div>${esc(d.reply)}</div>`;
     log.scrollTop = log.scrollHeight;
@@ -1079,6 +1091,14 @@ const KEY_FIELDS = [
   { id: "keyGoogle", env: "GOOGLE_API_KEY" },
 ];
 
+const MODEL_FIELDS = [
+  { id: "modelGroq", env: "GROQ_DEFAULT_MODEL" },
+  { id: "modelNvidia", env: "NVIDIA_DEFAULT_MODEL" },
+  { id: "modelOpenAI", env: "OPENAI_DEFAULT_MODEL" },
+  { id: "modelAnthropic", env: "ANTHROPIC_DEFAULT_MODEL" },
+  { id: "modelGoogle", env: "GOOGLE_DEFAULT_MODEL" },
+];
+
 function loadSettings() {
   api("GET", "/settings").then(s => {
     KEY_FIELDS.forEach(kf => {
@@ -1086,6 +1106,12 @@ function loadSettings() {
       const has = s["has_" + key] || false;
       document.getElementById(kf.id).placeholder = has ? "•••••••• (set)" : "Not set";
       document.getElementById(kf.id).value = "";
+    });
+    MODEL_FIELDS.forEach(mf => {
+      const envName = mf.env.toLowerCase();
+      const current = s[envName] || "";
+      document.getElementById(mf.id).placeholder = current || "(default)";
+      document.getElementById(mf.id).value = "";
     });
   });
   api("GET", "/settings/providers").then(provs => {
@@ -1102,6 +1128,13 @@ function loadSettings() {
 function saveApiKeys() {
   const updates = {};
   KEY_FIELDS.forEach(kf => {
+    const val = document.getElementById(kf.id).value.trim();
+    if (val) updates[kf.env] = val;
+  });
+  MODEL_FIELDS.forEach(mf => {
+    const val = document.getElementById(mf.id).value.trim();
+    if (val) updates[mf.env] = val;
+  });
     const val = document.getElementById(kf.id).value.trim();
     if (val) updates[kf.env] = val;
   });
