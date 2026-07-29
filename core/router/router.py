@@ -17,7 +17,6 @@ logger = logging.getLogger("aqua.router")
 
 class TaskType(str, Enum):
     CONVERSATION = "conversation"
-    CODING = "coding"
     REASONING = "reasoning"
     CREATIVE = "creative"
     GENERAL = "general"
@@ -43,7 +42,6 @@ class AIRouter:
         self._routing_table: dict[TaskType, list[AIProvider]] = {
             TaskType.CONVERSATION: [self._ollama, self._local, self._groq, self._openai],
             TaskType.GENERAL: [self._groq, self._ollama, self._local, self._openai],
-            TaskType.CODING: [self._nvidia, self._groq, self._openai, self._ollama, self._local],
             TaskType.REASONING: [self._nvidia, self._groq, self._anthropic, self._openai, self._ollama, self._local],
             TaskType.CREATIVE: [self._groq, self._openai, self._ollama, self._local],
             TaskType.RESEARCH: [self._groq, self._nvidia, self._openai, self._ollama, self._local],

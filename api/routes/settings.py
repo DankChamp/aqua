@@ -47,7 +47,6 @@ class TaskTypeInfo(BaseModel):
 def get_task_types():
     return [
         {"name": "conversation", "description": "General conversation"},
-        {"name": "coding", "description": "Code generation and debugging"},
         {"name": "reasoning", "description": "Complex multi-step reasoning"},
         {"name": "creative", "description": "Creative writing and brainstorming"},
         {"name": "general", "description": "General assistant tasks"},
