@@ -1091,7 +1091,7 @@ function loadSettings() {
   api("GET", "/settings/providers").then(provs => {
     const el = document.getElementById("providerStatus");
     if (!provs || !provs.length) { el.innerHTML = '<p class="text-dim">No providers configured.</p>'; return; }
-    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex"><span class="text-accent">${esc(p.name)}</span><span class="${p.configured ? 'text-accent' : 'text-dim'}">${p.configured ? '✓' : '✗'}</span></div><p class="text-sm text-dim">${p.default_model || ''}</p></div>`).join('');
+    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex" style="align-items:center"><span class="text-accent" style="flex:1">${esc(p.name)}</span><span class="${p.available ? 'text-accent' : 'text-gold'}" style="font-size:11px">${p.available ? '✓ online' : '✗ offline'}</span></div><p class="text-sm text-dim">${p.default_model || ''}</p></div>`).join('');
   });
   api("GET", "/settings").then(s => {
     const el = document.getElementById("settingsEnv");

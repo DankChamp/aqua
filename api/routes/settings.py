@@ -28,6 +28,8 @@ def get_settings_route():
 @router.post("/env")
 def update_env(payload: EnvUpdate):
     update_env_file(payload.updates)
+    from core.deps import get_router
+    get_router.cache_clear()
     return {"ok": True}
 
 
