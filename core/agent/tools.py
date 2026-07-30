@@ -1,7 +1,8 @@
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Optional
+import asyncio
+from typing import Any
 
 
 @dataclass
@@ -45,7 +46,7 @@ class WebSearchTool(Tool):
     async def execute(self, query: str, max_results: int = 5) -> ToolResult:
         from core.web.search import search_duckduckgo
         try:
-            results = search_duckduckgo(query, max_results=max_results)
+            results = await asyncio.to_thread(search_duckduckgo, query, max_results=max_results)
             if not results:
                 return ToolResult(success=True, data="No results found.")
             formatted = []

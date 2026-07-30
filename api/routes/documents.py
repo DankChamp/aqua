@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
@@ -7,6 +8,8 @@ from core.documents.manager import (
     add_document, get_document, list_documents,
     search_documents, delete_document,
 )
+
+logger = logging.getLogger("aqua.documents")
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -30,8 +33,8 @@ async def create_doc(payload: DocCreate):
         summary = payload.summary or payload.content[:200]
         from core.emma_bridge import push_summary_to_emma
         await push_summary_to_emma("document", payload.title, summary, tags=payload.tags)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Emma bridge failed: %s", exc)
     return doc
 
 
@@ -49,6 +52,9 @@ async def import_doc(file: UploadFile = File(...), title: Optional[str] = Form(N
             text = "\n".join(page.extract_text() or "" for page in reader.pages)
         except Exception:
             raise HTTPException(400, "Failed to extract PDF text")
+    elif filename.endswith(".html") or filename.endswith(".htm"):
+        from core.web.scraper import extract_text
+        text = extract_text(content.decode("utf-8", errors="replace"))
     else:
         text = content.decode("utf-8", errors="replace")
     doc = add_document(title=doc_title, content=text, source="import", file_path=filename)

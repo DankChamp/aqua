@@ -1,10 +1,9 @@
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from core.study.flashcards import create_quiz, get_quiz, list_quizzes, submit_answer, grade_quiz
+from core.study.flashcards import create_quiz, get_quiz, list_quizzes, submit_answer, grade_quiz, retry_wrong_quiz
 from core.documents.manager import get_document
+from core.activity import add_activity
 from api.deps import get_ai_router
 from core.router import AIRouter, TaskType
 
@@ -95,4 +94,13 @@ def grade_quiz_route(quiz_id: int):
     result = grade_quiz(quiz_id)
     if not result:
         raise HTTPException(404, "Quiz not found")
+    add_activity("quiz_graded", f"Quiz #{quiz_id}: {result.get('score', 0)}/{result.get('total', 0)}")
     return result
+
+
+@router.post("/{quiz_id}/retry-wrong")
+def retry_wrong_route(quiz_id: int):
+    new_quiz = retry_wrong_quiz(quiz_id)
+    if not new_quiz:
+        raise HTTPException(400, "No wrong answers to retry")
+    return new_quiz

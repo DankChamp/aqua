@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 from core.deps import get_db
+from core.chat.memory import add_message, get_history
 
 logger = logging.getLogger("aqua.teach")
 
@@ -99,6 +100,8 @@ async def teach(ai_router, session_id: str, message: str) -> str:
     )
     conn.commit()
 
+    add_message(session_id, "user", message)
+
     context_parts = [TEACH_SYSTEM]
     context_parts.append(
         f"You are teaching: Class {session['class_std']}, {session['subject']}, Chapter: {session['chapter']}"
@@ -116,8 +119,16 @@ async def teach(ai_router, session_id: str, message: str) -> str:
             notes_block += f"\n--- {n.note_type or 'Notes'} ---\n{n.content[:2000]}\n"
         context_parts.append(notes_block)
 
+    history = get_history(session_id, max_tokens=2000)
+    if history:
+        history_block = "Previous conversation:\n" + "\n".join(
+            f"{m['role']}: {m['content']}" for m in history[:-1]
+        )
+        context_parts.append(history_block)
+
     system = "\n\n".join(context_parts)
     prompt = f"The student says: {message}\n\nRespond as a tutor."
 
     result = await ai_router.run(TaskType.STUDY, prompt, system=system)
+    add_message(session_id, "assistant", result.text)
     return result.text

@@ -1,12 +1,13 @@
 import json
+import logging
 import sqlite3
 from datetime import datetime
-from pathlib import Path
 from typing import Optional
 
-from config import get_settings
 from core.deps import get_db
 from .models import Document, Note
+
+logger = logging.getLogger("aqua.documents")
 
 
 def _migrate(conn: sqlite3.Connection):
@@ -49,10 +50,8 @@ def _migrate(conn: sqlite3.Connection):
     for col in ("class_std", "subject", "chapter", "note_type"):
         try:
             conn.execute(f"ALTER TABLE notes ADD COLUMN {col} TEXT NOT NULL DEFAULT ''")
-        except Exception:
-            pass
-
-
+        except Exception as exc:
+            logger.debug("Migration column %s may already exist: %s", col, exc)
 def _now() -> str:
     return datetime.utcnow().isoformat()
 
@@ -122,11 +121,11 @@ def search_documents(query: str, limit: int = 20) -> list[Document]:
 def delete_document(doc_id: int) -> bool:
     conn = get_db()
     _migrate(conn)
-    conn.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
+    cur = conn.execute("DELETE FROM documents WHERE id = ?", (doc_id,))
     conn.commit()
     from core.search.vector import remove_document
     remove_document(doc_id)
-    return conn.total_changes > 0
+    return cur.rowcount > 0
 
 
 def _row_to_doc(row: sqlite3.Row) -> Document:
@@ -262,9 +261,9 @@ def edit_note(note_id: int, content: str, title: Optional[str] = None,
 def delete_note(note_id: int) -> bool:
     conn = get_db()
     _migrate(conn)
-    conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
+    cur = conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
     conn.commit()
-    return conn.total_changes > 0
+    return cur.rowcount > 0
 
 
 def list_subjects(class_std: Optional[str] = None) -> list[str]:
@@ -308,8 +307,18 @@ async def generate_note(class_std: str, subject: str, chapter: str,
     if docs_text:
         prompt += f"\nUse this source material:\n{docs_text[:5000]}\n"
     prompt += (
-        "\nInclude:\n"
-        "- Key concepts and definitions\n"
+        "\nThe student will rely on these notes as their ONLY study resource, so they MUST be "
+        "extremely comprehensive and cover the ENTIRE chapter in full detail. Include:\n"
+        "- Every key concept, definition, and explanation from the chapter\n"
+        "- All important formulas, equations, and theorems with worked examples\n"
+        "- Step-by-step derivations where applicable\n"
+        "- Diagrams described in words (since they cannot be drawn)\n"
+        "- Real-world applications and examples for each concept\n"
+        "- Common mistakes students make and how to avoid them\n"
+        "- Exam-oriented tips and important points highlighted\n"
+        "- Comparison tables for related concepts\n"
+        "- A quick revision summary at the end\n"
+        "- Practice questions with answers\n"
     )
     if note_type == "formula_sheet":
         prompt += "- Important formulas, equations, and theorems\n- Units and notation\n"
@@ -319,7 +328,7 @@ async def generate_note(class_std: str, subject: str, chapter: str,
         prompt += "- Brief overview of the chapter\n- Main conclusions\n- Connection to next topics\n"
     else:
         prompt += "- Important formulas or equations (if applicable)\n- Examples\n- Key points to remember\n"
-    prompt += "\nReturn the notes in markdown format."
+    prompt += "\nReturn the notes in clean markdown format. Use tables, bullet lists, and sections generously. Make sure the notes are LONG and THOROUGH — at least several pages worth of content."
 
     ai_router = get_router()
     result = await ai_router.run(

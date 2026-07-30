@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Optional
+from typing import AsyncGenerator, Optional
 
 import httpx
 
@@ -72,17 +72,26 @@ class AIRouter:
     async def provider_status(self) -> list[dict]:
         status = []
         for name, provider in self.providers_by_name.items():
-            if provider is self._local:
-                configured = bool(getattr(provider, "base_url", None))
-            else:
-                configured = bool(getattr(provider, "api_key", True))
-            available = await provider.is_available()
-            status.append({
-                "name": name,
-                "configured": configured,
-                "default_model": getattr(provider, "default_model", None),
-                "available": available,
-            })
+            try:
+                if provider is self._local:
+                    configured = bool(getattr(provider, "base_url", None))
+                else:
+                    configured = bool(getattr(provider, "api_key", True))
+                available = await provider.is_available()
+                status.append({
+                    "name": name,
+                    "configured": configured,
+                    "default_model": getattr(provider, "default_model", None),
+                    "available": available,
+                })
+            except Exception as exc:
+                logger.warning("Provider %s status check failed: %s", name, exc)
+                status.append({
+                    "name": name,
+                    "configured": False,
+                    "default_model": getattr(provider, "default_model", None),
+                    "available": False,
+                })
         return status
 
     def _candidates(self, task: TaskType) -> list[AIProvider]:
@@ -130,6 +139,63 @@ class AIRouter:
             except Exception as exc:
                 msg = self._describe_error(exc)
                 logger.warning("Provider %s failed (%s); trying next.", provider.name, msg)
+                errors.append(f"{provider.name}: {msg}")
+                continue
+
+        if not tried_any and not errors:
+            raise RuntimeError(
+                f"No AI provider is available for '{task.value}'. Start Ollama, "
+                "point Aqua at a local server, or add a working cloud API key."
+            )
+
+        detail = "; ".join(errors) if errors else "all providers unavailable"
+        raise RuntimeError(
+            f"Aqua tried every provider for '{task.value}' but none could answer "
+            f"({detail}). Check your API keys and models."
+        )
+
+    async def stream(
+        self,
+        task: TaskType,
+        prompt: str,
+        system: Optional[str] = None,
+        model: Optional[str] = None,
+        provider_name: Optional[str] = None,
+    ) -> AsyncGenerator[str, None]:
+        if provider_name:
+            provider = self.providers_by_name.get(provider_name)
+            if provider is None:
+                raise RuntimeError(f"Unknown provider '{provider_name}'.")
+            kwargs = {"model": model} if model else {}
+            async for chunk in provider.stream(prompt, system=system, **kwargs):
+                yield chunk
+            return
+
+        candidates = self._candidates(task)
+        errors: list[str] = []
+        tried_any = False
+
+        for provider in candidates:
+            try:
+                if not await provider.is_available():
+                    continue
+            except Exception as exc:
+                errors.append(f"{provider.name}: {self._describe_error(exc)}")
+                continue
+
+            tried_any = True
+            kwargs = {"model": model} if model else {}
+            try:
+                full = ""
+                async for chunk in provider.stream(prompt, system=system, **kwargs):
+                    full += chunk
+                    yield chunk
+                if not full.strip():
+                    raise RuntimeError("provider returned an empty response")
+                return
+            except Exception as exc:
+                msg = self._describe_error(exc)
+                logger.warning("Provider %s stream failed (%s); trying next.", provider.name, msg)
                 errors.append(f"{provider.name}: {msg}")
                 continue
 

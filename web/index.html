@@ -20,87 +20,101 @@
   --danger: #e04060;
   --font: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --radius: 8px;
-  --shadow: 0 2px 12px rgba(0,0,0,0.3);
+  --base-font: 15px;
+  --radius: 10px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.35);
+}
+[data-theme="light"] {
+  --bg: #f5f5fa;
+  --bg-elevated: #eeecf4;
+  --bg-card: #ffffff;
+  --bg-input: #e8e6f0;
+  --border: #d0cce0;
+  --text: #1a1a2e;
+  --text-dim: #7070a0;
+  --accent: #009977;
+  --accent-dim: #007755;
+  --gold: #c08020;
+  --gold-dim: #a06810;
+  --danger: #c04050;
+  --shadow: 0 2px 16px rgba(0,0,0,0.08);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--base-font);
+  line-height: 1.6;
   min-height: 100vh;
 }
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
 /* ── Top Nav ── */
 .topbar {
   position: fixed; top: 0; left: 0; right: 0;
-  height: 48px;
+  height: 52px;
   background: var(--bg-elevated);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center;
-  padding: 0 12px;
+  padding: 0 16px;
   z-index: 100;
-  gap: 4px;
+  gap: 6px;
 }
 .topbar .brand {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 18px;
   color: var(--accent);
-  margin-right: 16px;
+  margin-right: 20px;
   letter-spacing: 1px;
   display: flex; align-items: center; gap: 8px;
   white-space: nowrap;
 }
-.nav {
-  display: flex; gap: 2px;
-}
+.nav { display: flex; gap: 2px; }
 .nav a {
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: var(--radius);
   color: var(--text-dim);
   text-decoration: none;
-  font-size: 12px;
+  font-size: 13px;
   transition: all .15s;
   cursor: pointer;
   white-space: nowrap;
 }
 .nav a:hover { color: var(--text); background: var(--bg-input); }
-.nav a.active { color: var(--accent); background: rgba(0,212,170,0.1); }
+.nav a.active { color: var(--accent); background: rgba(0,212,170,0.12); }
 
 /* ── Context Bar ── */
 .context-bar {
-  position: fixed; top: 48px; left: 0; right: 0;
-  height: 36px;
+  position: fixed; top: 52px; left: 0; right: 0;
+  height: 40px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center;
-  padding: 0 12px;
-  gap: 8px;
+  padding: 0 16px;
+  gap: 10px;
   z-index: 99;
-  font-size: 12px;
+  font-size: 13px;
 }
 .context-bar select, .context-bar input {
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 2px 8px;
+  border-radius: 5px;
+  padding: 3px 10px;
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   outline: none;
-  height: 24px;
+  height: 26px;
 }
 .context-bar select:focus, .context-bar input:focus { border-color: var(--accent); }
-.context-bar label { color: var(--text-dim); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 4px; }
-.context-bar .ctx-navlink { color: var(--accent); cursor: pointer; padding: 2px 8px; border-radius: 4px; }
-.context-bar .ctx-navlink:hover { background: rgba(0,212,170,.1); }
+.context-bar label { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 4px; }
+.context-bar .ctx-navlink { color: var(--accent); cursor: pointer; padding: 3px 10px; border-radius: 5px; font-size: 13px; }
+.context-bar .ctx-navlink:hover { background: rgba(0,212,170,.12); }
 
 /* ── Main Content ── */
-.main { margin-top: 84px; padding: 16px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+.main { margin-top: 92px; padding: 20px; max-width: min(1600px, 96vw); margin-left: auto; margin-right: auto; }
 .page { display: none; }
 .page.active { display: block; }
 
@@ -109,40 +123,58 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
   box-shadow: var(--shadow);
 }
-.card h3 { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.card h3 { font-size: 14px; color: var(--text-dim); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
 
 /* ── Form Elements ── */
 input, textarea, select {
   background: var(--bg-input);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 8px 12px;
+  padding: 10px 14px;
   color: var(--text);
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 14px;
   width: 100%;
   outline: none;
   transition: border .15s;
 }
 input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-textarea { resize: vertical; min-height: 60px; font-family: var(--font-mono); font-size: 12px; }
-label { display: block; margin-bottom: 4px; color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
-.form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+textarea { resize: vertical; min-height: 70px; font-family: var(--font-mono); font-size: 13px; }
+label { display: block; margin-bottom: 5px; color: var(--text-dim); font-size: 13px; text-transform: uppercase; letter-spacing: .5px; }
+.form-row { display: flex; gap: 12px; margin-bottom: 10px; }
 .form-row > * { flex: 1; }
-.form-actions { display: flex; gap: 8px; margin-top: 8px; }
+.model-select { width: 100%; padding: 8px 10px; font-size: 13px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--fg); }
+.msg table { border-collapse: collapse; margin: 8px 0; font-size: 13px; width: 100%; }
+.msg td { border: 1px solid var(--border); padding: 6px 10px; }
+.msg code { background: var(--bg); padding: 2px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px; }
+.msg pre { background: var(--bg); padding: 12px; border-radius: var(--radius); overflow-x: auto; font-size: 13px; }
+.msg pre code { background: none; padding: 0; }
+.msg ul { margin: 6px 0; padding-left: 22px; }
+.msg li { margin: 3px 0; }
+.msg h2, .msg h3, .msg h4 { margin: 10px 0 5px; color: var(--accent); }
+.note-content { margin-top:10px; max-height:85vh; overflow-y:auto; font-size:15px; line-height:1.8; background:var(--bg); padding:20px; border-radius:var(--radius); }
+.note-content table { border-collapse: collapse; margin: 10px 0; font-size: 14px; width: 100%; }
+.note-content td { border: 1px solid var(--border); padding: 8px 12px; }
+.note-content code { background: var(--bg-input); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 14px; }
+.note-content pre { background: var(--bg-input); padding: 16px; border-radius: var(--radius); overflow-x: auto; font-size: 14px; }
+.note-content pre code { background: none; padding: 0; }
+.note-content ul { margin: 8px 0; padding-left: 26px; }
+.note-content li { margin: 4px 0; }
+.note-content h2, .note-content h3, .note-content h4 { margin: 18px 0 8px; color: var(--accent); }
+.form-actions { display: flex; gap: 12px; margin-top: 10px; }
 
 button {
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 7px 16px;
+  padding: 9px 20px;
   color: var(--text);
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   transition: all .15s;
 }
@@ -154,12 +186,14 @@ button.gold:hover { background: var(--gold-dim); border-color: var(--gold-dim); 
 button.danger { color: var(--danger); border-color: var(--danger); }
 button.danger:hover { background: var(--danger); color: #000; }
 button:disabled { opacity: .4; cursor: default; }
-button.small { padding: 4px 10px; font-size: 11px; }
+button.small { padding: 5px 12px; font-size: 12px; }
+button.small-link { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0 3px; font-size: 13px; line-height: 1; opacity: 0.4; }
+button.small-link:hover { opacity: 1; color: var(--text); }
 
 /* ── Tables ── */
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; padding: 8px 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; font-size: 11px; border-bottom: 1px solid var(--border); }
-td { padding: 8px 10px; border-bottom: 1px solid rgba(34,34,68,.5); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; padding: 10px 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; font-size: 12px; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(34,34,68,.5); }
 tr:hover td { background: rgba(0,212,170,.03); }
 
 /* ── Login Overlay ── */
@@ -173,84 +207,93 @@ tr:hover td { background: rgba(0,212,170,.03); }
 .login-box {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 32px;
-  width: 340px;
+  border-radius: 14px;
+  padding: 40px;
+  width: 380px;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  box-shadow: 0 8px 40px rgba(0,0,0,.5);
 }
-.login-box h1 { color: var(--accent); margin-bottom: 4px; font-size: 24px; }
-.login-box p { color: var(--text-dim); font-size: 12px; margin-bottom: 20px; }
-.login-box input { margin-bottom: 12px; text-align: center; }
+.login-box h1 { color: var(--accent); margin-bottom: 4px; font-size: 28px; }
+.login-box p { color: var(--text-dim); font-size: 13px; margin-bottom: 24px; }
+.login-box input { margin-bottom: 14px; text-align: center; }
 
 /* ── Chat ── */
+.chat-layout { display: flex; gap: 16px; height: calc(100vh - 112px); }
+.chat-sidebar { width: 280px; flex-shrink: 0; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; }
+.chat-sidebar .session-item { padding: 8px 10px; border-radius: 5px; cursor: pointer; font-size: 13px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+.chat-sidebar .session-item:hover { background: var(--bg-input); }
+.chat-sidebar .session-item.active { background: rgba(0,212,170,.12); color: var(--accent); }
+.chat-sidebar .session-item .sname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-sidebar .session-item .ssort { font-size: 12px; width: 16px; text-align: center; color: var(--gold); }
+.chat-sidebar .session-item .scount { font-size: 11px; color: var(--text-dim); }
+.chat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; padding: 0 4px; }
 .chat-log {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px;
-  height: 400px; overflow-y: auto;
-  margin-bottom: 8px;
-  font-size: 13px;
+  padding: 16px;
+  flex: 1; overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 15px;
 }
-.msg { margin-bottom: 8px; padding: 8px 12px; border-radius: var(--radius); max-width: 80%; }
+.msg { margin-bottom: 10px; padding: 10px 16px; border-radius: var(--radius); max-width: 92%; }
 .msg.user { background: rgba(0,212,170,.08); margin-left: auto; border: 1px solid rgba(0,212,170,.2); }
 .msg.assistant { background: var(--bg-input); border: 1px solid var(--border); }
-.msg .meta { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
-.chat-input { display: flex; gap: 8px; }
+.msg .meta { font-size: 11px; color: var(--text-dim); margin-bottom: 5px; }
+.chat-input { display: flex; gap: 10px; }
 .chat-input input { flex: 1; }
-.chat-options { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-.chat-options select, .chat-options input { width: auto; flex: 1; min-width: 120px; }
+.chat-options { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.chat-options select, .chat-options input { width: auto; flex: 1; min-width: 120px; max-width: 260px; }
 
 /* ── Study / Research ── */
-.study-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.study-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .study-wide { grid-column: 1 / -1; }
-.tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: rgba(0,212,170,.1); color: var(--accent); margin-right: 4px; }
+.tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; background: rgba(0,212,170,.1); color: var(--accent); margin-right: 4px; }
 .tag.gold { background: rgba(240,160,48,.1); color: var(--gold); }
-.dashboard-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin-bottom: 16px; }
-.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
-.stat-card .num { font-size: 28px; font-weight: 700; color: var(--accent); }
-.stat-card .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.dashboard-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+.stat-card .num { font-size: 32px; font-weight: 700; color: var(--accent); }
+.stat-card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
 
 /* ── Split Layout (Notes Tree + Content) ── */
-.split-layout { display: flex; gap: 12px; min-height: 60vh; }
-.split-sidebar { flex: 0 0 280px; max-height: calc(100vh - 140px); overflow-y: auto; }
+.split-layout { display: flex; gap: 16px; min-height: 65vh; }
+.split-sidebar { flex: 0 0 340px; max-height: calc(100vh - 112px); overflow-y: auto; }
 .split-main { flex: 1; min-width: 0; }
-.tree-item { padding: 4px 8px; cursor: pointer; border-radius: 4px; font-size: 13px; color: var(--text-dim); transition: all .1s; display: flex; align-items: center; gap: 6px; }
+.tree-item { padding: 6px 10px; cursor: pointer; border-radius: 5px; font-size: 14px; color: var(--text-dim); transition: all .1s; display: flex; align-items: center; gap: 8px; }
 .tree-item:hover { background: rgba(0,212,170,.05); color: var(--text); }
 .tree-item.active { background: rgba(0,212,170,.1); color: var(--accent); }
-.tree-item .icon { width: 16px; text-align: center; color: var(--text-dim); font-size: 11px; }
-.tree-item .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.tree-item .icon { width: 18px; text-align: center; color: var(--text-dim); font-size: 12px; }
+.tree-item .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
 .tree-item .dot.detailed { background: #00d4aa; }
 .tree-item .dot.formula_sheet { background: #f0a030; }
 .tree-item .dot.key_points { background: #6080e0; }
 .tree-item .dot.summary { background: #c060e0; }
-.tree-children { padding-left: 20px; }
+.tree-children { padding-left: 24px; }
 
 /* ── Activity Feed ── */
-.activity-feed { max-height: 400px; overflow-y: auto; }
-.activity-item { padding: 8px 0; border-bottom: 1px solid rgba(34,34,68,.3); font-size: 12px; display: flex; gap: 8px; align-items: flex-start; }
+.activity-feed { max-height: 450px; overflow-y: auto; }
+.activity-item { padding: 10px 0; border-bottom: 1px solid rgba(34,34,68,.3); font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
 .activity-item:last-child { border-bottom: none; }
-.activity-item .act-icon { flex: 0 0 20px; text-align: center; color: var(--accent); }
+.activity-item .act-icon { flex: 0 0 22px; text-align: center; color: var(--accent); }
 .activity-item .act-body { flex: 1; }
-.activity-item .act-time { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+.activity-item .act-time { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
 
 /* ── Teach ── */
 .teach-log {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px;
-  height: 500px; overflow-y: auto;
-  margin-bottom: 8px;
-  font-size: 13px;
+  padding: 16px;
+  height: 55vh; overflow-y: auto;
+  margin-bottom: 10px;
+  font-size: 15px;
 }
-.teach-input { display: flex; gap: 8px; margin-top: 8px; }
+.teach-input { display: flex; gap: 10px; margin-top: 10px; }
 .teach-input input { flex: 1; }
 
 /* ── Progress Bar ── */
-.progress-bar { background: var(--bg); border-radius: 4px; overflow: hidden; height: 8px; }
-.progress-bar .fill { height: 100%; transition: width .3s; border-radius: 4px; }
+.progress-bar { background: var(--bg); border-radius: 5px; overflow: hidden; height: 10px; }
+.progress-bar .fill { height: 100%; transition: width .3s; border-radius: 5px; }
 .progress-bar .fill.accent { background: var(--accent); }
 .progress-bar .fill.gold { background: var(--gold); }
 
@@ -259,18 +302,26 @@ tr:hover td { background: rgba(0,212,170,.03); }
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 32px;
+  padding: 40px;
   text-align: center;
-  min-height: 180px;
+  min-height: 220px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
-.flip-card .question { font-size: 18px; margin-bottom: 16px; }
-.flip-card .answer { font-size: 16px; color: var(--gold); display: none; }
+.flip-card .question { font-size: 20px; margin-bottom: 20px; }
+.flip-card .answer { font-size: 18px; color: var(--gold); display: none; }
 .flip-card.show-answer .answer { display: block; }
 
+/* ── Toast ── */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 20px; font-size: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.4); pointer-events: auto; animation: toastIn .3s ease; max-width: 400px; }
+.toast.info { border-color: var(--accent); }
+.toast.error { border-color: var(--danger); }
+.toast.success { border-color: var(--gold); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+
 /* ── Misc ── */
-.flex { display: flex; gap: 8px; }
+.flex { display: flex; gap: 10px; }
 .flex-col { flex-direction: column; }
 .flex-1 { flex: 1; }
 .gap-4 { gap: 4px; }
@@ -280,20 +331,22 @@ tr:hover td { background: rgba(0,212,170,.03); }
 .text-dim { color: var(--text-dim); }
 .text-accent { color: var(--accent); }
 .text-gold { color: var(--gold); }
-.text-sm { font-size: 12px; }
+.text-sm { font-size: 13px; }
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hidden { display: none !important; }
 
 /* ── Responsive ── */
-@media (max-width: 768px) {
-  .topbar { height: auto; padding: 6px; flex-wrap: wrap; }
-  .context-bar { top: 80px; flex-wrap: wrap; height: auto; padding: 4px 8px; }
-  .main { margin-top: 120px; padding: 12px; }
-  .nav a { font-size: 11px; padding: 4px 8px; }
+@media (max-width: 900px) {
+  .topbar { height: auto; padding: 8px; flex-wrap: wrap; }
+  .context-bar { top: auto; flex-wrap: wrap; height: auto; padding: 6px 12px; }
+  .main { margin-top: 100px; padding: 14px; max-width: 100%; }
+  .nav a { font-size: 12px; padding: 5px 9px; }
   .study-grid { grid-template-columns: 1fr; }
   .form-row { flex-direction: column; }
   .split-layout { flex-direction: column; }
-  .split-sidebar { flex: none; max-height: 200px; }
+  .split-sidebar { flex: none; max-height: 240px; }
+  .chat-layout { flex-direction: column; height: auto; }
+  .chat-sidebar { width: 100%; max-height: 180px; }
 }
 </style>
 </head>
@@ -315,16 +368,16 @@ tr:hover td { background: rgba(0,212,170,.03); }
   <div class="brand">⎔ Aqua</div>
   <div class="nav" id="nav">
     <a data-page="dashboard" class="active">Dashboard</a>
-    <a data-page="chat">Chat</a>
-    <a data-page="documents">Docs</a>
+    <a data-page="sources">Sources</a>
     <a data-page="notes">Notes</a>
-    <a data-page="teach">Teach</a>
     <a data-page="study">Study</a>
+    <a data-page="chat">Chat</a>
     <a data-page="research">Research</a>
-    <a data-page="profile">Profile</a>
-    <a data-page="voice">Voice</a>
-    <a data-page="settings">Settings</a>
+    <a data-page="stats">📊 Stats</a>
+    <a data-page="timer">⏱ Timer</a>
+    <a data-page="settings" style="margin-left:auto" title="Settings">⚙️</a>
   </div>
+  <input id="quickSearch" placeholder="Search everything..." style="max-width:240px;margin-left:8px;font-size:12px;padding:4px 10px;height:28px" onkeydown="if(event.key==='Enter' && this.value.trim()) { quickSearch(this.value.trim()); this.value=''; }">
 </div>
 
 <!-- Context Bar -->
@@ -333,7 +386,8 @@ tr:hover td { background: rgba(0,212,170,.03); }
   <label>Subject <select id="ctxSubject" onchange="ctxChanged()"><option value="">All</option></select></label>
   <label>Chapter <select id="ctxChapter" onchange="ctxChanged()"><option value="">All</option></select></label>
   <span class="ctx-navlink" onclick="switchPage('notes')">📝 Notes</span>
-  <span class="ctx-navlink" onclick="switchPage('teach')">🧑‍🏫 Teach</span>
+  <span class="ctx-navlink" onclick="switchPage('chat')">💬 Chat</span>
+  <span class="ctx-navlink" onclick="switchPage('research')">🔬 Research</span>
 </div>
 
 <div class="main" id="main">
@@ -348,16 +402,17 @@ tr:hover td { background: rgba(0,212,170,.03); }
     <div class="stat-card"><div class="num" id="statQuizzes">-</div><div class="label">Quizzes</div></div>
     <div class="stat-card"><div class="num" id="statPlans">-</div><div class="label">Study Plans</div></div>
     <div class="stat-card"><div class="num" id="statMinutes">-</div><div class="label">Study Minutes</div></div>
+    <div class="stat-card"><div class="num" id="statStreak">-</div><div class="label">Day Streak</div></div>
   </div>
   <div class="study-grid">
     <div class="card">
       <h3>Quick Actions</h3>
       <div class="flex-col gap-4">
-        <button class="gold" onclick="switchPage('chat')">Ask a Question</button>
-        <button class="primary" onclick="switchPage('research')">Research Topic</button>
-        <button onclick="switchPage('notes')">Generate Notes</button>
-        <button onclick="switchPage('teach')">Start Teaching</button>
-        <button onclick="switchPage('study')">Review Flashcards</button>
+        <button class="gold" onclick="switchPage('chat')">💬 Ask a Question</button>
+        <button class="primary" onclick="switchPage('sources')">📄 View Sources</button>
+        <button onclick="switchPage('research')">🔬 Research Topic</button>
+        <button onclick="switchPage('notes')">📝 Study Notes</button>
+        <button onclick="showStudyGuide()" style="color:var(--gold)">📚 Create Study Guide</button>
       </div>
     </div>
     <div class="card">
@@ -373,37 +428,61 @@ tr:hover td { background: rgba(0,212,170,.03); }
 
 <!-- ── Chat ── -->
 <div class="page" id="page-chat">
-  <h2 style="margin-bottom:12px; color: var(--accent);">Chat</h2>
-  <div class="card">
-    <div class="chat-log" id="chatLog"></div>
-    <div class="chat-input">
-      <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
-      <button class="primary" onclick="sendChat()">Send</button>
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <button class="primary small" style="width:100%;margin-bottom:6px" onclick="newChat()">+ New Chat</button>
+      <input id="chatSessionSearch" placeholder="Search sessions..." style="font-size:11px;padding:4px 8px;margin-bottom:6px" oninput="filterSessions()">
+      <div id="chatSessionList"></div>
     </div>
-    <div class="chat-options">
-      <select id="chatTask"><option value="conversation">General</option><option value="research">Research</option><option value="study">Study</option></select>
-      <input id="chatSystem" placeholder="System override (optional)" style="flex:1.5">
-      <input id="chatModel" placeholder="Model override (optional)" style="flex:1" title="Override the model for this message (e.g. mixtral-8x7b-32768)">
-      <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text-dim);cursor:pointer">
-        <input type="checkbox" id="chatAgentic"> Agent mode
-      </label>
+    <div class="card" style="flex:1;display:flex;flex-direction:column">
+      <div class="chat-header" id="chatHeader">
+        <span id="chatSessionName" class="text-accent text-sm" style="font-weight:600"></span>
+        <div style="display:flex;gap:4px">
+          <button class="small" id="chatExportBtn" onclick="exportChat()" title="Export as Markdown" style="display:none">📥</button>
+          <button class="small gold" id="chatPinBtn" onclick="togglePinSession()" title="Pin session" style="display:none">☆</button>
+          <button class="small danger" id="chatDeleteBtn" onclick="deleteCurrentChat()" style="display:none">✕</button>
+        </div>
+      </div>
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-input">
+        <input id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}">
+        <button class="primary" id="chatSendBtn" onclick="sendChat()">Send</button>
+      </div>
+      <div class="chat-options">
+        <select id="chatTask"><option value="conversation">General</option><option value="research">Research</option><option value="study">Study</option></select>
+        <input id="chatSystem" placeholder="System override (optional)" style="flex:1">
+        <select id="chatProvider" onchange="onProviderChange()"><option value="">Auto provider</option></select>
+        <select id="chatModel"><option value="">Default model</option></select>
+        <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text-dim);cursor:pointer">
+          <input type="checkbox" id="chatTutor"> Tutor mode
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;white-space:nowrap;font-size:12px;text-transform:none;letter-spacing:0;color:var(--text-dim);cursor:pointer">
+          <input type="checkbox" id="chatStream"> Stream
+        </label>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ── Documents ── -->
-<div class="page" id="page-documents">
-  <h2 style="margin-bottom:12px; color: var(--accent);">Documents</h2>
+<!-- ── Sources ── -->
+<div class="page" id="page-sources">
+  <h2 style="margin-bottom:12px; color: var(--accent);">Sources</h2>
   <div class="study-wide card">
     <div class="flex gap-4" style="margin-bottom:8px">
-      <input id="docSearch" placeholder="Search documents..." onkeydown="if(event.key==='Enter')loadDocs()">
-      <button onclick="loadDocs()">Search</button>
-      <button onclick="document.getElementById('fileUploader').click()" class="gold">Upload PDF</button>
-      <input type="file" id="fileUploader" accept=".pdf" class="hidden" onchange="uploadPDF(this)">
+      <input id="docSearch" placeholder="Search sources..." onkeydown="if(event.key==='Enter')loadDocs(document.getElementById('docSearch').value.trim())">
+      <button onclick="loadDocs(document.getElementById('docSearch').value.trim())">Search</button>
+      <button onclick="document.getElementById('fileUploader').click()" class="gold">Upload File</button>
+      <input type="file" id="fileUploader" accept=".pdf,.html,.htm" class="hidden" onchange="uploadFile(this)">
     </div>
     <div class="flex gap-4">
       <input id="fetchUrl" placeholder="Import from URL..." style="flex:3">
       <button onclick="fetchURL()" class="primary">Fetch</button>
+    </div>
+    <p class="text-xs text-dim" style="margin-top:4px">Works best with Wikipedia, NCERT, Khan Academy, and other server-rendered pages. Sites with Cloudflare/JS challenges (Scribd, Pinterest, TikTok) are blocked.</p>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <span class="ctx-navlink" onclick="switchPage('study')">🃏 Review Flashcards</span>
+      <span class="ctx-navlink" onclick="switchPage('study')">📋 Take Quiz</span>
+      <span class="ctx-navlink" onclick="showStudyGuide()" style="color:var(--gold)">📚 Study Guide</span>
     </div>
   </div>
   <div id="docList"></div>
@@ -418,6 +497,7 @@ tr:hover td { background: rgba(0,212,170,.03); }
         <button class="small primary" onclick="loadNoteTree()" style="flex:1">Refresh</button>
         <button class="small gold" onclick="showNoteGenerator()">Generate</button>
       </div>
+      <input id="noteSearch" placeholder="Filter notes..." style="font-size:12px;padding:4px 8px;margin-bottom:6px" oninput="filterNoteTree(this.value)">
       <div id="noteTree"><p class="text-dim text-sm">Loading...</p></div>
     </div>
     <div class="split-main">
@@ -442,6 +522,24 @@ tr:hover td { background: rgba(0,212,170,.03); }
     <div class="flex gap-4">
       <button class="gold" onclick="generateNotes()" id="genNoteBtn">Generate</button>
       <button onclick="hideNoteGenerator()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Study Guide Modal -->
+<div id="studyGuideModal" class="hidden">
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Create Study Guide</h3>
+      <button class="small" onclick="document.getElementById('studyGuideModal').classList.add('hidden')">✕</button>
+    </div>
+    <p class="text-sm text-dim">Select sources to combine into a study guide.</p>
+    <div id="studyGuideDocList" class="mt-8" style="max-height:300px;overflow-y:auto">
+      <p class="text-dim text-sm">Loading...</p>
+    </div>
+    <div class="flex gap-4 mt-8">
+      <input id="studyGuideTitle" placeholder="Study Guide Title (optional)" style="flex:1">
+      <button class="gold" onclick="generateStudyGuide()">Generate Guide</button>
     </div>
   </div>
 </div>
@@ -488,13 +586,15 @@ tr:hover td { background: rgba(0,212,170,.03); }
       <div class="flex gap-4 mb-8">
         <input id="fcTopic" placeholder="Topic filter">
         <button onclick="loadFlashcards()">List</button>
-        <button class="gold" onclick="startReview()">Review</button>
+        <button class="gold" onclick="startReview(false)">Review All</button>
+        <button class="gold" onclick="startReview(true)">Review Due <span id="fcDueBadge" class="text-sm text-gold"></span></button>
       </div>
       <div class="flex gap-4 mb-8">
         <input id="fcQuestion" placeholder="Question" style="flex:2">
         <input id="fcAnswer" placeholder="Answer" style="flex:2">
       </div>
       <button class="primary" onclick="addFlashcard()">Add Card</button>
+      <button class="small" onclick="exportFlashcardsCSV()" style="margin-left:8px">Export CSV</button>
       <div id="fcList" class="mt-8"></div>
     </div>
     <div class="card">
@@ -526,21 +626,31 @@ tr:hover td { background: rgba(0,212,170,.03); }
 <!-- ── Research ── -->
 <div class="page" id="page-research">
   <h2 style="margin-bottom:12px; color: var(--accent);">Research</h2>
-  <div class="card">
-    <h3>Web Research</h3>
-    <div class="form-row">
-      <div><label>Search Query</label><input id="rsQuery" placeholder="topic to research"></div>
-      <div style="flex:0 0 80px"><label>Results</label><input id="rsMax" type="number" value="3" min="1" max="10"></div>
-    </div>
-    <button class="gold" onclick="doResearch()">Research &amp; Import</button>
-  </div>
-  <div class="card">
-    <h3>Web Search</h3>
+  <div class="card" style="margin-bottom:12px">
     <div class="flex gap-4">
-      <input id="wsQuery" placeholder="Search the web..." onkeydown="if(event.key==='Enter')doWebSearch()">
-      <button onclick="doWebSearch()" class="primary">Search</button>
+      <input id="rsQuery" placeholder="Ask a research question..." style="flex:1" onkeydown="if(event.key==='Enter')doAskResearch()">
+      <button onclick="doAskResearch()" class="gold" id="rsAskBtn">Research</button>
     </div>
-    <div id="wsResults" class="mt-8"></div>
+    <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+      <label class="text-sm text-dim" style="display:flex;align-items:center;gap:4px">
+        <input type="checkbox" id="rsAutoImport"> Auto-import sources
+      </label>
+      <select id="rsMax" style="font-size:12px;padding:2px 6px;width:auto">
+        <option value="3">3 results</option>
+        <option value="5" selected>5 results</option>
+        <option value="8">8 results</option>
+      </select>
+    </div>
+  </div>
+  <div id="researchLog"></div>
+  <div id="researchFollowUp" class="hidden" style="margin-top:8px">
+    <div class="flex gap-4">
+      <input id="rsFollowUp" placeholder="Ask a follow-up question..." style="flex:1" onkeydown="if(event.key==='Enter')doAskResearch()">
+      <button onclick="doAskResearch()" class="primary">Ask</button>
+    </div>
+  </div>
+  <div id="researchEmpty" class="card">
+    <p class="text-dim">Ask a research question above. The AI will search the web and synthesize an answer with citations, like Perplexity.</p>
   </div>
 </div>
 
@@ -577,6 +687,35 @@ tr:hover td { background: rgba(0,212,170,.03); }
   </div>
 </div>
 
+<!-- ── Stats ── -->
+<div class="page" id="page-stats">
+  <h2 style="margin-bottom:16px; color: var(--accent);">📊 Study Statistics</h2>
+  <div id="statsContent"><p class="text-dim">Loading...</p></div>
+</div>
+
+<!-- ── Timer ── -->
+<div class="page" id="page-timer">
+  <h2 style="margin-bottom:16px; color: var(--accent);">⏱ Pomodoro Timer</h2>
+  <div class="card" style="max-width:400px;margin:0 auto;text-align:center">
+    <div style="font-size:64px;font-weight:700;font-family:var(--font-mono);margin:16px 0" id="timerDisplay">25:00</div>
+    <div class="text-dim mb-8" id="timerPhase">Focus</div>
+    <div class="flex gap-4" style="justify-content:center">
+      <button class="primary" id="timerStartBtn" onclick="timerStart()">Start</button>
+      <button class="small" id="timerPauseBtn" onclick="timerPause()" disabled>Pause</button>
+      <button class="small" id="timerResetBtn" onclick="timerReset()">Reset</button>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;font-size:13px">
+      <label><input type="radio" name="timerMode" value="25" checked onchange="timerSetMode(25)"> 25m Focus</label>
+      <label><input type="radio" name="timerMode" value="50" onchange="timerSetMode(50)"> 50m Focus</label>
+    </div>
+    <div class="mt-8 text-dim text-sm">Sessions completed today: <strong id="timerSessions">0</strong></div>
+  </div>
+  <div class="card mt-16" style="max-width:400px;margin:0 auto">
+    <h3 class="mb-8">Session History</h3>
+    <div id="timerHistory"><p class="text-dim text-sm">No sessions yet today.</p></div>
+  </div>
+</div>
+
 <!-- ── Settings ── -->
 <div class="page" id="page-settings">
   <h2 style="margin-bottom:12px; color: var(--accent);">Settings</h2>
@@ -585,23 +724,23 @@ tr:hover td { background: rgba(0,212,170,.03); }
     <p class="text-dim text-sm mb-8">Enter API keys and optionally override the default model per provider.</p>
     <div class="form-row">
       <div style="flex:1"><label>Groq Key</label><input id="keyGroq" type="password" placeholder="gsk_..."></div>
-      <div style="flex:1"><label>Groq Model</label><input id="modelGroq" placeholder="llama-3.3-70b-versatile"></div>
+      <div style="flex:1"><label>Groq Model</label><select id="modelGroq" class="model-select"><option value="">Default</option></select></div>
     </div>
     <div class="form-row">
       <div style="flex:1"><label>NVIDIA Key</label><input id="keyNvidia" type="password" placeholder="nvapi-..."></div>
-      <div style="flex:1"><label>NVIDIA Model</label><input id="modelNvidia" placeholder="meta/llama-3.1-8b-instruct"></div>
+      <div style="flex:1"><label>NVIDIA Model</label><select id="modelNvidia" class="model-select"><option value="">Default</option></select></div>
     </div>
     <div class="form-row">
       <div style="flex:1"><label>OpenAI Key</label><input id="keyOpenAI" type="password" placeholder="sk-..."></div>
-      <div style="flex:1"><label>OpenAI Model</label><input id="modelOpenAI" placeholder="gpt-4o-mini"></div>
+      <div style="flex:1"><label>OpenAI Model</label><select id="modelOpenAI" class="model-select"><option value="">Default</option></select></div>
     </div>
     <div class="form-row">
       <div style="flex:1"><label>Anthropic Key</label><input id="keyAnthropic" type="password" placeholder="sk-ant-..."></div>
-      <div style="flex:1"><label>Anthropic Model</label><input id="modelAnthropic" placeholder="claude-3-haiku-20240307"></div>
+      <div style="flex:1"><label>Anthropic Model</label><select id="modelAnthropic" class="model-select"><option value="">Default</option></select></div>
     </div>
     <div class="form-row">
       <div style="flex:1"><label>Google Key</label><input id="keyGoogle" type="password" placeholder="AIza..."></div>
-      <div style="flex:1"><label>Google Model</label><input id="modelGoogle" placeholder="gemini-2.0-flash-exp"></div>
+      <div style="flex:1"><label>Google Model</label><select id="modelGoogle" class="model-select"><option value="">Default</option></select></div>
     </div>
     <button class="gold" onclick="saveApiKeys()">Save Keys &amp; Models</button>
     <span id="keySaveStatus" class="text-sm text-dim ml-8"></span>
@@ -611,12 +750,19 @@ tr:hover td { background: rgba(0,212,170,.03); }
     <div id="providerStatus"></div>
   </div>
   <div class="card">
+    <h3>Display</h3>
+    <div class="flex" style="align-items:center"><label style="margin:0">Font Size</label><input id="fontSizeSlider" type="range" min="13" max="22" step="1" style="max-width:200px" oninput="setFontSize(this.value)"><span id="fontSizeLabel" class="text-sm ml-8"></span></div>
+    <div class="flex" style="align-items:center;margin-top:8px"><label style="margin:0">Theme</label><button class="small" id="themeToggleBtn" onclick="toggleTheme()" style="min-width:80px"></button></div>
+  </div>
+  <div class="card">
     <h3>Environment</h3>
     <div id="settingsEnv"></div>
   </div>
 </div>
 
 </div><!-- /main -->
+
+<div class="toast-container" id="toastContainer"></div>
 
 <datalist id="ctxClassDatalist"></datalist>
 <datalist id="ctxSubjectDatalist"></datalist>
@@ -642,10 +788,9 @@ function doLogin() {
   const pw = document.getElementById("loginPass").value;
   api("POST", "/api/auth", {password:pw}).then(d => {
     if (d.ok) { TOKEN = pw; sessionStorage.setItem("aqua_token", pw); document.getElementById("loginOverlay").classList.remove("show"); init(); }
-    else alert("Wrong password");
-  });
+    else toast("Wrong password", "error");
+  }).catch(e => toast("Login failed: "+e.message, "error"));
 }
-fetch(API+"/health").then(r=>r.json()).then(h => { if (h.auth_required && !TOKEN) document.getElementById("loginOverlay").classList.add("show"); });
 
 // ── Navigation ──
 document.querySelectorAll(".nav a").forEach(a => {
@@ -655,32 +800,39 @@ function switchPage(name) {
   document.querySelectorAll(".nav a").forEach(a => a.classList.toggle("active", a.dataset.page === name));
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-"+name));
   if (name === "dashboard") loadDashboard();
-  if (name === "documents") loadDocs();
+  if (name === "chat") { loadChatSessions(); loadModels(); }
+  if (name === "sources") { document.getElementById("docSearch").value = ""; loadDocs(""); }
   if (name === "notes") { loadNoteTree(); loadGenDocs(); }
   if (name === "study") { loadFlashcards(); loadQuizDocs(); }
-  if (name === "teach") loadTeachSessions();
-  if (name === "profile") loadProfile();
+  if (name === "research") { _researchHistory = []; document.getElementById("researchLog").innerHTML = ""; document.getElementById("researchFollowUp").classList.add("hidden"); document.getElementById("researchEmpty").classList.remove("hidden"); }
+  if (name === "stats") loadStats();
+  if (name === "timer") { loadTimerHistory(); }
   if (name === "settings") loadSettings();
   loadContextDatalists();
 }
 
-// ── Context Bar ──
-function ctxChanged() {
-  const cls = document.getElementById("ctxClass").value;
-  const sub = document.getElementById("ctxSubject").value;
-  const ch = document.getElementById("ctxChapter").value;
-  if (cls) api("GET", "/notes/subjects?class_std="+encodeURIComponent(cls)).then(subs => {
-    const sel = document.getElementById("ctxSubject");
-    sel.innerHTML = '<option value="">All</option>'+subs.map(s => `<option value="${s}">${s}</option>`).join('');
-    if (sub) sel.value = sub;
-    return api("GET", "/notes/chapters?class_std="+encodeURIComponent(cls)+"&subject="+encodeURIComponent(sub||subs[0]||""));
-  }).then(chs => {
-    if (!chs) return;
-    const sel = document.getElementById("ctxChapter");
-    sel.innerHTML = '<option value="">All</option>'+chs.map(c => `<option value="${c}">${c}</option>`).join('');
-    if (ch) sel.value = ch;
+function quickSearch(q) {
+  api("GET", "/search/all?q="+encodeURIComponent(q)+"&limit=5").then(r => {
+    const parts = [];
+    if (r.documents && r.documents.length) parts.push(r.documents.length + " docs");
+    if (r.notes && r.notes.length) parts.push(r.notes.length + " notes");
+    if (r.flashcards && r.flashcards.length) parts.push(r.flashcards.length + " cards");
+    if (parts.length) {
+      toast("Found: " + parts.join(", "), "info");
+      // Navigate to most relevant page
+      if (r.documents.length) { switchPage("sources"); loadDocs(q); }
+      else if (r.notes.length) { switchPage("notes"); }
+      else { switchPage("study"); }
+    } else {
+      toast("No results found for \"" + q + "\"", "warning");
+    }
+  }).catch(() => {
+    // Fallback to sources search
+    switchPage("sources");
+    loadDocs(q);
   });
 }
+
 function getCtx() {
   return {
     class_std: document.getElementById("ctxClass").value,
@@ -696,15 +848,39 @@ function loadDashboard() {
   api("GET","/flashcards?limit=1000").then(d => document.getElementById("statCards").textContent = d.length);
   api("GET","/quizzes?limit=1000").then(d => document.getElementById("statQuizzes").textContent = d.length);
   api("GET","/study/stats").then(d => {
-    document.getElementById("statPlans").textContent = d.total_plans;
-    document.getElementById("statMinutes").textContent = d.total_study_minutes;
+    document.getElementById("statPlans").textContent = d.summary.plans;
+    document.getElementById("statMinutes").textContent = d.summary.study_minutes;
+  });
+  api("GET","/study/streak").then(d => {
+    document.getElementById("statStreak").textContent = d.streak;
+    document.getElementById("statStreak").style.color = d.streak > 0 ? "var(--gold)" : "";
   });
   api("GET","/study/plans").then(plans => {
     const active = plans.filter(p => p.progress < 100).sort((a,b)=>b.progress-a.progress)[0];
     const el = document.getElementById("dashActivePlan");
     if (active) {
-      const ctx = getCtx();
-      el.innerHTML = `<p class="text-sm"><strong>${esc(active.title)}</strong></p><div class="progress-bar mt-8" style="height:6px"><div class="fill accent" style="width:${active.progress}%"></div></div><p class="text-sm text-dim mt-4">${active.progress.toFixed(0)}% · ${active.tasks ? active.tasks.filter(t=>t.completed).length+'/'+active.tasks.length+' tasks' : ''}</p>`;
+      api("GET","/study/plans/"+active.id).then(detail => {
+        const tasks = detail.tasks || [];
+        const done = tasks.filter(t => t.completed).length;
+        const dayNum = Math.min(Math.floor((Date.now() - new Date(detail.created_at?.replace(/Z?$/, "Z") || Date.now()).getTime()) / 86400000) + 1, detail.duration_days || 7);
+        const todayTasks = tasks.filter(t => t.day === dayNum);
+        let taskHtml = "";
+        if (todayTasks.length) {
+          taskHtml = '<div class="mt-8" style="border-top:1px solid var(--border);padding-top:8px">';
+          todayTasks.forEach(t => {
+            taskHtml += `<label class="flex gap-4" style="align-items:center;padding:2px 0;font-size:13px;${t.completed ? 'opacity:0.5;text-decoration:line-through' : ''}">
+              <input type="checkbox" ${t.completed ? 'checked disabled' : ''} onchange="completeTask(${t.id},this.checked)" style="cursor:pointer">
+              <span style="flex:1">${esc(t.title)}</span>
+              <span class="text-dim text-xs">${t.duration_minutes}m</span>
+            </label>`;
+          });
+          taskHtml += '</div>';
+        }
+        el.innerHTML = `<p class="text-sm"><strong>${esc(detail.title)}</strong> <span class="text-dim text-xs">(Day ${dayNum})</span></p>
+          <div class="progress-bar mt-8" style="height:6px"><div class="fill accent" style="width:${detail.progress}%"></div></div>
+          <p class="text-sm text-dim mt-4">${detail.progress.toFixed(0)}% · ${done}/${tasks.length} tasks</p>
+          <button class="small mt-8" onclick="switchPage('study')">View Plan</button>${taskHtml}`;
+      });
     } else {
       el.innerHTML = '<p class="text-dim text-sm">No active study plan.</p>';
     }
@@ -712,7 +888,10 @@ function loadDashboard() {
   api("GET","/activity?limit=10").then(acts => {
     const el = document.getElementById("dashActivity");
     if (!acts.length) { el.innerHTML = '<p class="text-dim text-sm">No activity yet.</p>'; return; }
-    el.innerHTML = acts.map(a => `<div class="activity-item"><span class="act-icon">●</span><div class="act-body"><span class="text-accent">${esc(a.action)}</span> ${esc(a.detail)}<div class="act-time">${esc(a.created_at||'').slice(0,16)}</div></div></div>`).join('');
+    el.innerHTML = acts.map(a => {
+      const isDoc = a.action === 'added_document';
+      return `<div class="activity-item"${isDoc ? ` style="cursor:pointer" onclick="switchPage('sources');setTimeout(()=>{document.getElementById('docSearch').value='';loadDocs('');},100)"` : ''}><span class="act-icon">●</span><div class="act-body"><span class="text-accent">${esc(a.action)}</span> ${esc(a.detail)}<div class="act-time">${esc(a.created_at||'').slice(0,16)}</div></div></div>`;
+    }).join('');
   });
 }
 
@@ -753,6 +932,84 @@ async function loadNoteTree() {
   });
   el.innerHTML = html || '<p class="text-dim text-sm">No notes yet.</p>';
 }
+function loadStats() {
+  api("GET", "/study/stats").then(d => {
+    renderStats(d);
+  }).catch(e => {
+    document.getElementById("statsContent").innerHTML = `<p class="text-danger">Failed to load stats: ${esc(e.message)}</p>`;
+  });
+}
+function renderStats(d) {
+  const s = d.summary;
+  const maxActivity = Math.max(...d.daily_activity.map(x => x.count), 1);
+  const maxReviews = Math.max(...d.flashcard_reviews.map(x => x.count), 1);
+  const maxStudy = Math.max(...d.study_time.map(x => x.minutes), 1);
+  const bestScore = Math.max(...d.quiz_score_trend.map(x => x.pct), 0);
+  let html = `
+  <div class="dashboard-stats" style="margin-bottom:16px">
+    <div class="stat-card"><div class="num">${s.documents}</div><div class="label">Documents</div></div>
+    <div class="stat-card"><div class="num">${s.notes}</div><div class="label">Notes</div></div>
+    <div class="stat-card"><div class="num">${s.flashcards}</div><div class="label">Flashcards</div></div>
+    <div class="stat-card"><div class="num">${s.total_reviews}</div><div class="label">Reviews Done</div></div>
+    <div class="stat-card"><div class="num">${s.quizzes_graded}/${s.quizzes}</div><div class="label">Quizzes Graded</div></div>
+    <div class="stat-card"><div class="num">${s.avg_score}%</div><div class="label">Avg Score</div></div>
+    <div class="stat-card"><div class="num">${s.plans}</div><div class="label">Study Plans</div></div>
+    <div class="stat-card"><div class="num">${s.tasks_completed}/${s.total_tasks}</div><div class="label">Tasks Done</div></div>
+    <div class="stat-card"><div class="num">${s.study_minutes}</div><div class="label">Minutes Studied</div></div>
+    <div class="stat-card"><div class="num">🔥 ${s.streak.streak}</div><div class="label">Day Streak</div></div>
+  </div>`;
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+
+  html += '<div class="card"><h3 class="mb-8">Quiz Scores <span class="text-dim text-sm">(last ${d.quiz_score_trend.length})</span></h3>';
+  html += '<div style="display:flex;align-items:end;gap:4px;height:100px;padding:4px 0">';
+  d.quiz_score_trend.forEach(q => {
+    const h = Math.max(4, (q.pct / 100) * 90);
+    html += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:end"><div style="width:100%;background:${q.pct >= 70 ? 'var(--accent)' : q.pct >= 40 ? 'var(--gold)' : 'var(--danger)'};height:${h}px;border-radius:4px 4px 0 0;min-height:4px" title="${esc(q.title)}: ${q.score}/${q.total}"></div><span style="font-size:9px;margin-top:2px;color:var(--text-dim)">${q.pct}%</span></div>`;
+  });
+  html += '</div></div>';
+
+  html += '<div class="card"><h3 class="mb-8">Daily Activity <span class="text-dim text-sm">(30d)</span></h3>';
+  html += '<div style="display:flex;align-items:end;gap:3px;height:80px">';
+  d.daily_activity.forEach(a => {
+    const h = Math.max(2, (a.count / maxActivity) * 70);
+    html += `<div style="flex:1;background:${a.count > 0 ? 'var(--accent)' : 'var(--bg-input)'};height:${h}px;border-radius:2px 2px 0 0" title="${a.date}: ${a.count} actions"></div>`;
+  });
+  html += '</div></div>';
+
+  html += '<div class="card"><h3 class="mb-8">Flashcard Reviews <span class="text-dim text-sm">(30d)</span></h3>';
+  html += '<div style="display:flex;align-items:end;gap:3px;height:80px">';
+  d.flashcard_reviews.forEach(f => {
+    const h = Math.max(2, (f.count / maxReviews) * 70);
+    html += `<div style="flex:1;background:${f.count > 0 ? 'var(--gold)' : 'var(--bg-input)'};height:${h}px;border-radius:2px 2px 0 0" title="${f.date}: ${f.count} reviews"></div>`;
+  });
+  html += '</div></div>';
+
+  html += '<div class="card"><h3 class="mb-8">Study Time <span class="text-dim text-sm">(30d, min)</span></h3>';
+  html += '<div style="display:flex;align-items:end;gap:3px;height:80px">';
+  d.study_time.forEach(st => {
+    const h = Math.max(2, (st.minutes / maxStudy) * 70);
+    html += `<div style="flex:1;background:${st.minutes > 0 ? 'var(--accent)' : 'var(--bg-input)'};height:${h}px;border-radius:2px 2px 0 0" title="${st.date}: ${st.minutes} min"></div>`;
+  });
+  html += '</div></div>';
+
+  html += '</div>';
+
+  html += '<div class="card mt-16"><h3 class="mb-8">Recent Quizzes</h3>';
+  if (!d.quiz_history.length) {
+    html += '<p class="text-dim text-sm">No completed quizzes yet.</p>';
+  } else {
+    html += '<table style="width:100%;font-size:13px"><tr style="color:var(--text-dim)"><th style="text-align:left">Title</th><th>Score</th><th>Date</th></tr>';
+    d.quiz_history.forEach(q => {
+      const pct = q.total > 0 ? Math.round(q.score / q.total * 100) : 0;
+      html += `<tr><td>${esc(q.title)}</td><td style="text-align:center">${q.score}/${q.total} <span class="${pct >= 70 ? 'text-accent' : pct >= 40 ? 'text-gold' : 'text-danger'}">(${pct}%)</span></td><td style="text-align:center;color:var(--text-dim);font-size:12px">${q.created_at.slice(0,10)}</td></tr>`;
+    });
+    html += '</table>';
+  }
+  html += '</div>';
+
+  document.getElementById("statsContent").innerHTML = html;
+}
 function toggleTree(el) {
   const next = el.nextElementSibling;
   if (next && next.classList.contains("tree-children")) {
@@ -765,10 +1022,60 @@ function showNoteInTree(id) {
   if (!n) return;
   const el = document.getElementById("noteContent");
   const meta = [n.class_std, n.subject, n.chapter, n.note_type].filter(Boolean).join(' › ');
-  el.innerHTML = `<div class="card"><div class="flex" style="justify-content:space-between;align-items:center"><h3>${esc(meta)}</h3><button class="danger small" onclick="deleteNoteFromTree(${n.id})">Delete</button></div><div style="margin-top:8px;max-height:500px;overflow-y:auto;font-size:13px;line-height:1.6;white-space:pre-wrap;font-family:var(--font-mono);background:var(--bg);padding:12px;border-radius:var(--radius)">${esc(n.content||'(no content)')}</div></div>`;
+  const etag = Date.now();
+  el.innerHTML = `<div class="card"><div class="flex" style="justify-content:space-between;align-items:center"><h3>${esc(meta)}</h3><div class="flex gap-4"><button class="small" onclick="askAquaNote(${n.id})">Ask Aqua</button><button class="small" onclick="exportNote(${n.id},'${esc(n.title)}')">Export</button><button class="small primary" onclick="toggleEditNote(${n.id},${etag})">Edit</button><button class="danger small" onclick="deleteNoteFromTree(${n.id})">Delete</button></div></div><div class="note-content" id="noteContentBody_${etag}">${renderMarkdown(n.content || '(no content)')}</div></div>`;
+}
+let editNoteData = null;
+function toggleEditNote(id, tag) {
+  const body = document.getElementById("noteContentBody_"+tag);
+  if (!body || body.contentEditable === "true") {
+    if (editNoteData !== null) {
+      api("PUT", "/notes/"+id, {content: body.textContent}).then(() => { toast("Note updated", "success"); body.contentEditable = "false"; body.style.outline = "none"; editNoteData = null; }).catch(e => toast("Edit failed: "+e.message, "error"));
+    }
+    return;
+  }
+  editNoteData = body.textContent;
+  body.contentEditable = "true";
+  body.style.outline = "2px solid var(--accent)";
+  body.focus();
+}
+function filterNoteTree(q) {
+  const tree = document.getElementById("noteTree");
+  const lower = q.toLowerCase().trim();
+  tree.querySelectorAll(".tree-item, .tree-children").forEach(el => el.style.display = "");
+  if (!lower) return;
+  tree.querySelectorAll(".tree-item").forEach(el => {
+    const text = el.textContent.toLowerCase();
+    const match = text.includes(lower);
+    el.style.display = match ? "" : "none";
+    const children = el.nextElementSibling;
+    if (children && children.classList.contains("tree-children")) {
+      children.style.display = match ? "" : "none";
+    }
+  });
+}
+function exportNote(id, title) {
+  const n = noteTreeData.find(x => x.id === id);
+  if (!n) return;
+  const blob = new Blob([n.content], {type: "text/markdown"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = (title || "note-" + id) + ".md";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function askAquaNote(id) {
+  const n = noteTreeData.find(x => x.id === id);
+  if (!n) return;
+  switchPage("chat");
+  newChat();
+  document.getElementById("chatSystem").value = "You are discussing this note. Refer to it when answering:\n\n" + n.content.slice(0, 2000);
+  toast("Chat seeded with note context. Ask away!", "info");
 }
 function deleteNoteFromTree(id) {
-  api("DELETE","/notes/"+id).then(() => { document.getElementById("noteContent").innerHTML = '<p class="text-dim">Note deleted.</p>'; loadNoteTree(); });
+  confirmAction("Delete this note?", () => {
+    api("DELETE","/notes/"+id).then(() => { document.getElementById("noteContent").innerHTML = '<p class="text-dim">Note deleted.</p>'; loadNoteTree(); }).catch(e => console.error("Delete note failed:", e));
+  });
 }
 
 // ── Note Generator ──
@@ -792,7 +1099,7 @@ function generateNotes() {
   const cls = document.getElementById("genClass").value.trim();
   const sub = document.getElementById("genSubject").value.trim();
   const ch = document.getElementById("genChapter").value.trim();
-  if (!cls || !sub || !ch) { alert("Enter class, subject, and chapter"); return; }
+  if (!cls || !sub || !ch) { toast("Enter class, subject, and chapter", "error"); return; }
   const docId = document.getElementById("genDocSelect").value;
   const noteType = document.getElementById("genNoteType").value;
   const btn = document.getElementById("genNoteBtn");
@@ -801,26 +1108,76 @@ function generateNotes() {
   if (docId) body.document_ids = [parseInt(docId)];
   api("POST", "/notes/generate", body).then(note => {
     btn.disabled = false; btn.textContent = "Generate";
-    alert(`Notes generated for ${sub} - ${ch}`);
+    toast("Notes generated for " + sub + " - " + ch, "success");
     hideNoteGenerator();
     loadNoteTree();
     showNoteInTree(note.id);
   }).catch(e => {
     btn.disabled = false; btn.textContent = "Generate";
-    alert("Failed: "+e.message);
+    toast("Failed: "+e.message, "error");
   });
 }
 
 // ── Context Datalists ──
 function loadContextDatalists() {
+  const classSel = document.getElementById("ctxClass");
+  const oldClass = classSel.value;
   api("GET","/notes?limit=500").then(notes => {
-    const classes = [...new Set(notes.map(n => n.class_std).filter(Boolean))];
-    document.getElementById("ctxClassDatalist").innerHTML = classes.map(c => `<option value="${esc(c)}">`).join('');
+    const noteClasses = [...new Set(notes.map(n => n.class_std).filter(Boolean))];
+    const allClasses = [...new Set(["10","11","12", ...noteClasses])];
+    classSel.innerHTML = '<option value="">All</option>'+allClasses.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    if (oldClass) classSel.value = oldClass;
+    api("GET","/ncert/classes").then(ncertClasses => {
+      if (!ncertClasses || !ncertClasses.length) return;
+      const merged = [...new Set([...ncertClasses, ...noteClasses])];
+      classSel.innerHTML = '<option value="">All</option>'+merged.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+      if (oldClass) classSel.value = oldClass;
+    });
     const subjects = [...new Set(notes.map(n => n.subject).filter(Boolean))];
     document.getElementById("ctxSubjectDatalist").innerHTML = subjects.map(s => `<option value="${esc(s)}">`).join('');
     const chapters = [...new Set(notes.map(n => n.chapter).filter(Boolean))];
     document.getElementById("ctxChapterDatalist").innerHTML = chapters.map(c => `<option value="${esc(c)}">`).join('');
+    if (classSel.value) ctxChanged();
   });
+}
+
+function ctxChanged() {
+  const cls = document.getElementById("ctxClass").value;
+  const sub = document.getElementById("ctxSubject").value;
+  const ch = document.getElementById("ctxChapter").value;
+  const subSel = document.getElementById("ctxSubject");
+  const chSel = document.getElementById("ctxChapter");
+  subSel.innerHTML = '<option value="">All</option>';
+  chSel.innerHTML = '<option value="">All</option>';
+  if (!cls) { saveCtxToProfile("",""); return; }
+  const promises = [
+    api("GET","/notes/subjects?class_std="+encodeURIComponent(cls)).then(subs => subs || []),
+    api("GET","/ncert/subjects?class_std="+encodeURIComponent(cls)).then(subs => subs || []),
+  ];
+  Promise.all(promises).then(([noteSubs, ncertSubs]) => {
+    const merged = [...new Set([...noteSubs, ...ncertSubs])];
+    subSel.innerHTML = '<option value="">All</option>'+merged.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    if (sub && merged.includes(sub)) subSel.value = sub;
+    const currentSub = subSel.value;
+    saveCtxToProfile(cls, currentSub || "");
+    if (currentSub) {
+      Promise.all([
+        api("GET","/notes/chapters?class_std="+encodeURIComponent(cls)+"&subject="+encodeURIComponent(currentSub)).then(chs => chs || []),
+        api("GET","/ncert/chapters?class_std="+encodeURIComponent(cls)+"&subject="+encodeURIComponent(currentSub)).then(chs => chs || []),
+      ]).then(([noteChs, ncertChs]) => {
+        const mergedCh = [...new Set([...noteChs, ...ncertChs])];
+        chSel.innerHTML = '<option value="">All</option>'+mergedCh.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+        if (ch && mergedCh.includes(ch)) chSel.value = ch;
+      });
+    }
+  });
+}
+
+function saveCtxToProfile(cls, sub) {
+  api("POST", "/profile", {key:"class_std", value:cls, category:"academic"}).catch(() => {});
+  if (sub) api("POST", "/profile", {key:"subject", value:sub, category:"academic"}).catch(() => {});
+  const ch = document.getElementById("ctxChapter").value;
+  if (ch) api("POST", "/profile", {key:"chapter", value:ch, category:"academic"}).catch(() => {});
 }
 
 // ── Teach ──
@@ -828,7 +1185,7 @@ function startTeach() {
   const cls = document.getElementById("teachClass").value.trim() || document.getElementById("ctxClass").value;
   const sub = document.getElementById("teachSubject").value.trim() || document.getElementById("ctxSubject").value;
   const ch = document.getElementById("teachChapter").value.trim() || document.getElementById("ctxChapter").value;
-  if (!cls || !sub || !ch) { alert("Enter class, subject, and chapter (or set them in the context bar)"); return; }
+  if (!cls || !sub || !ch) { toast("Enter class, subject, and chapter (or set them in the context bar)", "error"); return; }
   api("POST","/teach/start", {class_std:cls, subject:sub, chapter:ch}).then(s => {
     teachSessionId = s.session_id;
     document.getElementById("teachStart").classList.add("hidden");
@@ -837,7 +1194,11 @@ function startTeach() {
     document.getElementById("teachLog").innerHTML = `<div class="msg assistant"><div class="meta">Tutor</div><p class="text-dim text-sm mb-8">Session started. Ask a question or say "start" to begin.</p></div>`;
     document.getElementById("teachInput").focus();
     loadTeachSessions();
-  });
+    document.getElementById("ctxClass").value = cls;
+    document.getElementById("ctxSubject").value = sub;
+    document.getElementById("ctxChapter").value = ch;
+    saveCtxToProfile(cls, sub);
+  }).catch(e => toast("Failed to start session: " + (e.message || e), "error"));
 }
 function sendTeach() {
   const input = document.getElementById("teachInput");
@@ -848,77 +1209,465 @@ function sendTeach() {
   input.value = "";
   log.scrollTop = log.scrollHeight;
   api("POST", `/teach/${teachSessionId}/message`, {message: msg}).then(d => {
-    log.innerHTML += `<div class="msg assistant"><div class="meta">Tutor</div>${esc(d.response)}</div>`;
+    log.innerHTML += `<div class="msg assistant"><div class="meta">Tutor</div>${renderMarkdown(d.response)}</div>`;
     log.scrollTop = log.scrollHeight;
   }).catch(e => {
     log.innerHTML += `<div class="msg assistant"><div class="meta" style="color:var(--danger)">Error</div>${esc(e.message||e)}</div>`;
   });
 }
+function resumeTeach(sid) {
+  teachSessionId = sid;
+  api("GET", "/teach/"+sid).then(s => {
+    document.getElementById("teachSessionTitle").textContent = "Tutoring: " + esc(s.subject) + " - " + esc(s.chapter);
+  });
+  api("GET", "/teach/"+sid+"/messages").then(msgs => {
+    const log = document.getElementById("teachLog");
+    if (!msgs.length) {
+      log.innerHTML = '<div class="msg assistant"><div class="meta">Tutor</div><p class="text-dim text-sm">Session started.</p></div>';
+    } else {
+      log.innerHTML = msgs.map(m => {
+        const cls = m.role === "user" ? "user" : "assistant";
+        const label = m.role === "user" ? "You" : "Tutor";
+        return `<div class="msg ${cls}"><div class="meta">${label}</div>${m.role === 'assistant' ? renderMarkdown(m.content) : esc(m.content)}</div>`;
+      }).join('');
+    }
+    log.scrollTop = log.scrollHeight;
+    document.getElementById("teachStart").classList.add("hidden");
+    document.getElementById("teachSession").classList.remove("hidden");
+    document.getElementById("teachInput").focus();
+  });
+}
 function endTeach() {
   if (!teachSessionId) return;
-  api("POST", `/teach/${teachSessionId}/end`);
+  const sid = teachSessionId;
   teachSessionId = null;
-  document.getElementById("teachStart").classList.remove("hidden");
-  document.getElementById("teachSession").classList.add("hidden");
-  loadTeachSessions();
+  api("POST", `/teach/${sid}/end`).then(() => {
+    document.getElementById("teachStart").classList.remove("hidden");
+    document.getElementById("teachSession").classList.add("hidden");
+    loadTeachSessions();
+  }).catch(() => {
+    teachSessionId = sid;
+    toast("Failed to end session", "error");
+  });
 }
 function loadTeachSessions() {
   api("GET","/teach?limit=20").then(sessions => {
     const el = document.getElementById("teachSessionsList");
     if (!sessions.length) { el.innerHTML = '<p class="text-dim text-sm">No sessions yet.</p>'; return; }
-    el.innerHTML = `<table><tr><th>Class</th><th>Subject</th><th>Chapter</th><th>Messages</th><th>Status</th></tr>${sessions.map(s => `<tr><td class="text-accent">${esc(s.class_std)}</td><td>${esc(s.subject)}</td><td class="text-gold">${esc(s.chapter)}</td><td class="text-dim">${s.message_count}</td><td>${s.completed ? '<span class="tag">Done</span>' : '<span class="tag gold">Active</span>'}</td></tr>`).join('')}</table>`;
-  });
+    el.innerHTML = `<table><tr><th>Class</th><th>Subject</th><th>Chapter</th><th>Messages</th><th>Status</th></tr>${sessions.map(s => `<tr style="cursor:pointer" onclick="resumeTeach('${s.session_id}')"><td class="text-accent">${esc(s.class_std)}</td><td>${esc(s.subject)}</td><td class="text-gold">${esc(s.chapter)}</td><td class="text-dim">${s.message_count}</td><td>${s.completed ? '<span class="tag">Done</span>' : '<span class="tag gold">Active</span>'}</td></tr>`).join('')}</table>`;
+  }).catch(() => { document.getElementById("teachSessionsList").innerHTML = '<p class="text-dim text-sm">Failed to load sessions.</p>'; });
 }
 
 // ── Chat ──
-function sendChat() {
-  const input = document.getElementById("chatInput");
-  const msg = input.value.trim();
-  if (!msg) return;
-  const log = document.getElementById("chatLog");
-  log.innerHTML += `<div class="msg user"><div class="meta">You</div>${esc(msg)}</div>`;
-  input.value = "";
-  log.scrollTop = log.scrollHeight;
-  const task = document.getElementById("chatTask").value;
-  const sys = document.getElementById("chatSystem").value.trim();
-  const model = document.getElementById("chatModel").value.trim();
-  const agentic = document.getElementById("chatAgentic").checked;
-  const body = {message:msg, task_type:task, system:sys || undefined, agentic};
-  if (model) body.model = model;
-  api("POST", "/chat", body).then(d => {
-    const label = d.agent_used ? "🤖 agent" : `${d.provider}/${d.model}`;
-    log.innerHTML += `<div class="msg assistant"><div class="meta">${label}</div>${esc(d.reply)}</div>`;
-    log.scrollTop = log.scrollHeight;
-  }).catch(e => {
-    log.innerHTML += `<div class="msg assistant"><div class="meta" style="color:var(--danger)">Error</div>${esc(e.message||e)}</div>`;
+let currentSessionId = null;
+let sessionNameMap = {};
+
+function newChat() {
+  currentSessionId = Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+  document.getElementById("chatLog").innerHTML = '<div class="msg assistant"><div class="meta">Aqua</div><p class="text-dim text-sm">New chat started.</p></div>';
+  document.getElementById("chatSessionName").textContent = "New Chat";
+  document.getElementById("chatDeleteBtn").style.display = "block";
+  document.getElementById("chatInput").focus();
+  highlightSession();
+  sessionStorage.setItem("aqua_chat_session", currentSessionId);
+  document.getElementById("chatSendBtn").disabled = false;
+}
+
+function loadChatSessions() {
+  api("GET", "/chat/sessions").then(sessions => {
+    sessionNameMap = {};
+    sessions.forEach(s => { sessionNameMap[s.session_id] = s.name || "Untitled"; });
+    const pinned = getPinnedSessions();
+    sessions.sort((a, b) => {
+      const aP = pinned.includes(a.session_id) ? 0 : 1;
+      const bP = pinned.includes(b.session_id) ? 0 : 1;
+      if (aP !== bP) return aP - bP;
+      return new Date(b.last_activity || 0) - new Date(a.last_activity || 0);
+    });
+    const el = document.getElementById("chatSessionList");
+    if (!sessions.length) {
+      el.innerHTML = '<p class="text-dim text-sm">No sessions yet.</p>';
+      newChat();
+      return;
+    }
+    el.innerHTML = sessions.map(s => {
+      const active = s.session_id === currentSessionId ? ' active' : '';
+      const sid = s.session_id.replace(/'/g, "\\'");
+      const ago = timeAgo(s.last_activity);
+      const star = pinned.includes(s.session_id) ? "★" : "";
+      return `<div class="session-item${active}" data-sid="${sid}"><span class="ssort">${star}</span><span class="sname">${esc(s.name || "Untitled")}</span><span class="scount">${ago}</span></div>`;
+    }).join('');
+    el.onclick = e => {
+      const item = e.target.closest(".session-item");
+      if (item) switchChat(item.dataset.sid);
+    };
+    el.ondblclick = e => {
+      const item = e.target.closest(".session-item");
+      if (!item) return;
+      const sid = item.dataset.sid;
+      const nameEl = item.querySelector(".sname");
+      const oldName = nameEl.textContent;
+      const input = document.createElement("input");
+      input.value = oldName;
+      input.style.cssText = "font-size:12px;padding:2px 4px;width:100%";
+      input.onblur = function() {
+        const val = this.value.trim();
+        nameEl.textContent = val || oldName;
+        if (val && val !== oldName) renameSession(sid, val);
+      };
+      input.onkeydown = function(e) {
+        if (e.key === "Enter") { this.blur(); }
+        if (e.key === "Escape") { nameEl.textContent = oldName; this.replaceWith(nameEl); }
+      };
+      nameEl.replaceWith(input);
+      input.focus();
+      input.select();
+    };
+    if (!currentSessionId || !sessions.find(s => s.session_id === currentSessionId)) {
+      switchChat(sessions[0].session_id);
+    }
   });
 }
 
+function switchChat(sessionId) {
+  currentSessionId = sessionId;
+  sessionStorage.setItem("aqua_chat_session", sessionId);
+  const log = document.getElementById("chatLog");
+  log.innerHTML = '<p class="text-dim text-sm" style="text-align:center;padding:20px">Loading...</p>';
+  highlightSession();
+  document.getElementById("chatSessionName").textContent = sessionNameMap[sessionId] || "Chat";
+  document.getElementById("chatDeleteBtn").style.display = "block";
+  document.getElementById("chatExportBtn").style.display = "block";
+  document.getElementById("chatPinBtn").style.display = "block";
+  document.getElementById("chatPinBtn").textContent = isPinned(sessionId) ? "★" : "☆";
+  document.getElementById("chatInput").focus();
+  document.getElementById("chatSendBtn").disabled = false;
+  api("GET", "/chat/sessions/" + encodeURIComponent(sessionId) + "/messages").then(msgs => {
+    log.innerHTML = msgs.map(m => {
+      const cls = m.role === "user" ? "user" : "assistant";
+      const label = m.role === "user" ? "You" : "Aqua";
+      const time = m.created_at ? new Date(m.created_at + "Z").toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : "";
+      return `<div class="msg ${cls}" data-msgid="${m.id}" data-orig="${esc(m.content)}"><div class="meta">${label} <span class="text-dim" style="font-weight:400">${time}</span>
+        <span class="msg-actions" style="margin-left:8px">
+          <button class="small-link" onclick="editChatMsg(${m.id})" title="Edit">✏️</button>
+          <button class="small-link" onclick="deleteChatMsg(${m.id})" title="Delete">🗑️</button>
+        </span></div>${m.role === 'assistant' ? renderMarkdown(m.content) : esc(m.content)}</div>`;
+    }).join('');
+    if (!msgs.length) log.innerHTML = '<div class="msg assistant"><div class="meta">Aqua</div><p class="text-dim text-sm">Start a conversation. Ask questions, request explanations, or discuss your study material.</p></div>';
+    log.scrollTop = log.scrollHeight;
+  });
+}
+
+function timeAgo(iso) {
+  if (!iso) return "";
+  const diff = Date.now() - new Date(iso + "Z").getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "now";
+  if (mins < 60) return mins + "m";
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + "h";
+  return Math.floor(hrs / 24) + "d";
+}
+
+function highlightSession() {
+  document.querySelectorAll(".session-item").forEach(el => {
+    el.classList.toggle("active", el.dataset.sid === currentSessionId);
+  });
+}
+
+function deleteCurrentChat() {
+  if (!currentSessionId) return;
+  confirmAction("Delete this chat session?", () => {
+    const sid = currentSessionId;
+    currentSessionId = null;
+    if (!sessionNameMap[sid]) {
+      document.getElementById("chatLog").innerHTML = "";
+      document.getElementById("chatSessionName").textContent = "";
+      document.getElementById("chatDeleteBtn").style.display = "none";
+      loadChatSessions();
+      return;
+    }
+    api("DELETE", "/chat/sessions/" + encodeURIComponent(sid)).then(() => {
+      document.getElementById("chatLog").innerHTML = "";
+      document.getElementById("chatSessionName").textContent = "";
+      document.getElementById("chatDeleteBtn").style.display = "none";
+      loadChatSessions();
+    }).catch(e => console.error("Delete session failed:", e));
+  });
+}
+
+function sendChat() {
+  const btn = document.getElementById("chatSendBtn");
+  if (btn.disabled) return;
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+  if (!msg) return;
+  if (!currentSessionId) newChat();
+  const log = document.getElementById("chatLog");
+  const task = document.getElementById("chatTask").value;
+  const sys = document.getElementById("chatSystem").value.trim();
+  const provider = document.getElementById("chatProvider").value;
+  const model = document.getElementById("chatModel").value;
+  const tutor = document.getElementById("chatTutor").checked;
+  const stream = document.getElementById("chatStream").checked;
+  const body = {message:msg, session_id:currentSessionId, task_type:task, system:sys || undefined, stream};
+  if (tutor) body.task_type = "study";
+  if (model) body.model = model;
+  if (provider) body.provider = provider;
+  log.innerHTML += `<div class="msg user"><div class="meta">You</div>${esc(msg)}</div>`;
+  input.value = "";
+  log.scrollTop = log.scrollHeight;
+  btn.disabled = true;
+
+  if (stream) {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "msg assistant";
+    msgDiv.innerHTML = '<div class="meta">Streaming...</div><span class="stream-content"></span>';
+    log.appendChild(msgDiv);
+    log.scrollTop = log.scrollHeight;
+    const contentSpan = msgDiv.querySelector(".stream-content");
+    const sid = currentSessionId;
+    let fullReply = "";
+    fetch(API + "/chat/stream", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)}).then(resp => {
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      function read() {
+        reader.read().then(({done, value}) => {
+          if (done) { btn.disabled = false; loadChatSessions(); return; }
+          buffer += decoder.decode(value, {stream: true});
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+          lines.forEach(line => {
+            if (line.startsWith("data: ")) {
+              try {
+                const d = JSON.parse(line.slice(6));
+                if (d.token) {
+                  if (currentSessionId === sid) {
+                    fullReply += d.token;
+                    contentSpan.innerHTML = renderMarkdown(fullReply);
+                    log.scrollTop = log.scrollHeight;
+                  }
+                }
+                if (d.done) {
+                  if (currentSessionId === sid) {
+                    msgDiv.querySelector(".meta").textContent = "Aqua";
+                    loadChatSessions();
+                  }
+                  btn.disabled = false;
+                  return;
+                }
+                if (d.error) { contentSpan.textContent += "\n[Error: " + d.error + "]"; btn.disabled = false; }
+              } catch(e) {}
+            }
+          });
+          read();
+        });
+      }
+      read();
+    }).catch(e => {
+      contentSpan.textContent += "\n[Connection error]";
+      btn.disabled = false;
+    });
+    return;
+  }
+
+  const sid = currentSessionId;
+  api("POST", "/chat", body).then(d => {
+    if (currentSessionId !== sid) return;
+    const label = d.provider ? `${d.provider}/${d.model || 'default'}` : 'Aqua';
+    log.innerHTML += `<div class="msg assistant"><div class="meta">${label}</div>${renderMarkdown(d.reply)}</div>`;
+    log.scrollTop = log.scrollHeight;
+    btn.disabled = false;
+    loadChatSessions();
+  }).catch(e => {
+    log.innerHTML += `<div class="msg assistant"><div class="meta" style="color:var(--danger)">Error</div>${esc(e.message||e)}</div>`;
+    btn.disabled = false;
+  });
+}
+
+function renameSession(sid, newName) {
+  api("POST", "/chat/sessions/" + encodeURIComponent(sid) + "/rename", {name: newName}).then(() => {
+    loadChatSessions();
+  }).catch(e => console.error("Rename failed:", e));
+}
+function editChatMsg(id) {
+  const el = document.querySelector(`.msg[data-msgid="${id}"]`);
+  if (!el) return;
+  const contentEl = el.querySelector("p, div:not(.meta)") || el;
+  const old = el.dataset.orig || contentEl.textContent;
+  const input = document.createElement("textarea");
+  input.value = old;
+  input.style.cssText = "width:100%;min-height:60px;font-size:13px";
+  contentEl.replaceWith(input);
+  input.focus();
+  const save = () => {
+    const val = input.value.trim();
+    if (val && val !== old) {
+      api("PUT", "/chat/messages/" + id, {content: val}).then(() => {
+        switchChat(currentSessionId);
+      }).catch(e => toast("Edit failed: " + e.message, "error"));
+    } else {
+      switchChat(currentSessionId);
+    }
+  };
+  input.onblur = save;
+  input.onkeydown = e => { if (e.key === "Enter" && e.ctrlKey) { e.preventDefault(); save(); } };
+}
+function deleteChatMsg(id) {
+  confirmAction("Delete this message?", () => {
+    api("DELETE", "/chat/messages/" + id).then(() => {
+      const el = document.querySelector(`.msg[data-msgid="${id}"]`);
+      if (el) el.remove();
+    }).catch(e => toast("Delete failed: " + e.message, "error"));
+  });
+}
+
+function filterSessions() {
+  const q = document.getElementById("chatSessionSearch").value.toLowerCase();
+  document.querySelectorAll(".session-item").forEach(el => {
+    const name = el.querySelector(".sname").textContent.toLowerCase();
+    el.style.display = name.includes(q) ? "" : "none";
+  });
+}
+
+function getPinnedSessions() {
+  try { return JSON.parse(localStorage.getItem("aqua_pinned") || "[]"); } catch { return []; }
+}
+function setPinnedSessions(ids) {
+  localStorage.setItem("aqua_pinned", JSON.stringify(ids));
+}
+function isPinned(sid) { return getPinnedSessions().includes(sid); }
+function togglePinSession() {
+  const sid = currentSessionId;
+  if (!sid) return;
+  const pinned = getPinnedSessions();
+  if (pinned.includes(sid)) {
+    setPinnedSessions(pinned.filter(s => s !== sid));
+    document.getElementById("chatPinBtn").textContent = "☆";
+  } else {
+    setPinnedSessions([sid, ...pinned]);
+    document.getElementById("chatPinBtn").textContent = "★";
+  }
+  loadChatSessions();
+}
+function exportChat() {
+  const msgs = document.querySelectorAll("#chatLog .msg");
+  if (!msgs.length) return;
+  let md = "# Chat Export\n\n";
+  msgs.forEach(m => {
+    const meta = m.querySelector(".meta")?.textContent || "";
+    const text = m.textContent.replace(meta, "").trim();
+    const role = m.classList.contains("user") ? "**You**" : "**Aqua**";
+    md += `${role}: ${text}\n\n`;
+  });
+  const blob = new Blob([md], {type: "text/markdown"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `chat-${currentSessionId || "export"}.md`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+let cachedModels = {};
+
+function loadModels() {
+  api("GET", "/chat/models").then(models => {
+    cachedModels = models;
+    const provSel = document.getElementById("chatProvider");
+    const curProv = provSel.value;
+    provSel.innerHTML = '<option value="">Auto provider</option>';
+    Object.keys(models).forEach(prov => {
+      if (models[prov] && models[prov].length) {
+        const opt = document.createElement("option");
+        opt.value = prov;
+        opt.textContent = prov.charAt(0).toUpperCase() + prov.slice(1) + " (" + models[prov].length + " models)";
+        provSel.appendChild(opt);
+      }
+    });
+    if (curProv && [...provSel.options].some(o => o.value === curProv)) provSel.value = curProv;
+    if (provSel.value) onProviderChange();
+    else { provSel.value = ""; populateModels(""); }
+  }).catch(() => {});
+}
+
+function onProviderChange() {
+  const prov = document.getElementById("chatProvider").value;
+  populateModels(prov);
+}
+
+function populateModels(provider) {
+  const sel = document.getElementById("chatModel");
+  const curModel = sel.value;
+  const models = provider ? (cachedModels[provider] || []) : [];
+  sel.innerHTML = '<option value="">Default model</option>';
+  if (provider && !models.length) {
+    sel.innerHTML = '<option value="">(no models fetched)</option>';
+    return;
+  }
+  if (!provider) {
+    Object.keys(cachedModels).forEach(prov => {
+      (cachedModels[prov] || []).forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = "[" + prov + "] " + m;
+        sel.appendChild(opt);
+      });
+    });
+  } else {
+    models.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      sel.appendChild(opt);
+    });
+  }
+  if (curModel && [...sel.options].some(o => o.value === curModel)) sel.value = curModel;
+}
+
 // ── Documents ──
-function loadDocs() {
-  const q = document.getElementById("docSearch").value.trim();
+function loadDocs(searchQuery) {
+  const q = searchQuery !== undefined ? searchQuery : document.getElementById("docSearch").value.trim();
   const url = q ? "/documents/search/"+encodeURIComponent(q) : "/documents?limit=50";
   api("GET", url).then(docs => {
     const el = document.getElementById("docList");
-    if (!docs.length) { el.innerHTML = '<p class="text-dim">No documents found.</p>'; return; }
-    el.innerHTML = `<table><tr><th>ID</th><th>Title</th><th>Source</th><th>Tags</th><th></th></tr>${docs.map(d => `<tr><td>${d.id}</td><td class="truncate" style="max-width:300px">${esc(d.title)}</td><td class="text-sm text-dim">${esc(d.source)}</td><td>${(d.tags||[]).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</td><td><button class="text-sm" onclick="showDoc(${d.id})">View</button> <button class="danger text-sm" onclick="deleteDoc(${d.id})">Del</button></td></tr>`).join('')}</table>`;
-  });
+    if (!docs.length) { el.innerHTML = '<p class="text-dim">No sources found. Upload a file (PDF/HTML) or <a href="#" onclick="switchPage(\'research\');return false" style="color:var(--accent)">search the web</a> to import content.</p>'; return; }
+    el.innerHTML = `<table><tr><th>ID</th><th>Title</th><th>Source</th><th>Actions</th></tr>${docs.map(d => `<tr><td>${d.id}</td><td class="truncate" style="max-width:300px">${esc(d.title)}</td><td class="text-sm text-dim">${esc(d.source)}</td><td><button class="text-sm" onclick="showDoc(${d.id})">View</button> <button class="danger text-sm" onclick="deleteDoc(${d.id})">Del</button></td></tr>`).join('')}</table>`;
+  }).catch(e => { document.getElementById("docList").innerHTML = '<p class="text-dim">Failed to load sources: ' + esc(e.message) + '</p>'; });
 }
 function showDoc(id) {
   api("GET", "/documents/"+id).then(d => {
     const el = document.getElementById("docList");
-    el.innerHTML = `<div class="card"><h3>${esc(d.title)}</h3><p class="text-sm text-dim">${esc(d.source)} ${d.source_url ? '· <a href="'+esc(d.source_url)+'" target="_blank" style="color:var(--accent)">source</a>' : ''}</p><div style="margin-top:8px;max-height:500px;overflow-y:auto;font-size:12px;white-space:pre-wrap;font-family:var(--font-mono);background:var(--bg);padding:12px;border-radius:var(--radius)">${esc(d.content||'(no content)')}</div><button class="mt-8" onclick="loadDocs()">Back</button></div>`;
-  });
+    el.innerHTML = `<div class="card"><h3>${esc(d.title)}</h3><p class="text-sm text-dim">${esc(d.source)} ${d.source_url ? '· <a href="'+esc(d.source_url)+'" target="_blank" style="color:var(--accent)">source</a>' : ''}</p>
+      <div class="flex gap-4" style="margin:8px 0">
+        <button class="gold" onclick="chatAboutDoc(${d.id})">💬 Ask AI about this</button>
+        <button class="primary" onclick="generateStudyPack(${d.id})">🎒 Study Pack</button>
+        <button class="primary" onclick="generateNotesFromDoc(${d.id})">📝 Notes</button>
+        <button class="primary" onclick="generateFlashcardsFromDoc(${d.id})">🃏 Flashcards</button>
+        <button class="primary" onclick="generateQuizFromDoc(${d.id})">📋 Quiz</button>
+        <button class="primary" onclick="generatePlanFromDoc(${d.id})" style="color:var(--gold)">📅 Study Plan</button>
+        <button onclick="loadDocs()">Back</button>
+        <button class="danger small" onclick="deleteDoc(${d.id})">Delete</button>
+      </div>
+      <div style="max-height:500px;overflow-y:auto;font-size:12px;white-space:pre-wrap;font-family:var(--font-mono);background:var(--bg);padding:12px;border-radius:var(--radius)">${esc(d.content||'(no content)')}</div></div>`;
+  }).catch(e => toast("Failed to load document: " + (e.message || e), "error"));
 }
 function deleteDoc(id) {
-  api("DELETE", "/documents/"+id).then(() => loadDocs());
+  confirmAction("Delete this document?", () => {
+    api("DELETE", "/documents/"+id).then(() => { document.getElementById("docSearch").value = ""; loadDocs(""); }).catch(e => toast("Delete failed: " + (e.message || e), "error"));
+  });
 }
 function fetchURL() {
   const url = document.getElementById("fetchUrl").value.trim();
   if (!url) return;
-  api("POST", "/web/fetch", {url}).then(d => { alert("Imported: "+d.title); loadDocs(); });
+  api("POST", "/web/fetch", {url}).then(d => {
+    if (d.error) { toast(d.error, "error"); return; }
+    toast("Imported: "+d.title, "success");
+    document.getElementById("docSearch").value = "";
+    loadDocs("");
+  }).catch(e => toast("Fetch failed: " + (e.message || e), "error"));
 }
-function uploadPDF(input) {
+function uploadFile(input) {
   const file = input.files[0];
   if (!file) return;
   const fd = new FormData();
@@ -926,39 +1675,156 @@ function uploadPDF(input) {
   const opts = {method:"POST", headers:{}};
   if (TOKEN) opts.headers["Authorization"] = "Bearer "+TOKEN;
   opts.body = fd;
-  fetch(API+"/documents/import", opts).then(r=>r.json()).then(d => { alert("Imported: "+d.title); loadDocs(); });
+  fetch(API+"/documents/import", opts).then(r=>r.json()).then(d => { toast("Imported: "+d.title, "success"); input.value=""; document.getElementById("docSearch").value=""; loadDocs(""); }).catch(e => toast("Import failed: "+e.message, "error"));
+}
+function chatAboutDoc(id) {
+  api("GET", "/documents/"+id).then(d => {
+    const context = "You are helping me study the following document. Answer my questions based ONLY on this content.\n\n---\n" + d.title + "\n\n" + (d.content || "(empty)").slice(0, 8000);
+    switchPage("chat");
+    newChat();
+    document.getElementById("chatSystem").value = context;
+    toast("Document loaded into chat context. Ask questions about \"" + d.title + "\"", "success");
+  });
+}
+function generateNotesFromDoc(id) {
+  api("GET", "/documents/"+id).then(d => {
+    document.getElementById("genClass").value = document.getElementById("ctxClass").value;
+    document.getElementById("genSubject").value = document.getElementById("ctxSubject").value;
+    document.getElementById("genChapter").value = "";
+    document.getElementById("genDocSelect").value = id;
+    showNoteGenerator();
+  });
+}
+function generateFlashcardsFromDoc(id) {
+  api("GET", "/documents/"+id).then(d => {
+    const prompt = "Generate 10 flashcards (Q&A pairs) from the following text. Return as a JSON array of objects with 'question' and 'answer' keys:\n\n" + (d.content || "(empty)").slice(0, 6000);
+    api("POST", "/chat", {message:prompt, session_id:"flashcard-gen-"+id, task_type:"study", system:"You are a flashcard generator. Return ONLY valid JSON."}).then(r => {
+      try {
+        let text = r.reply || "";
+        text = text.replace(/```json\s*/gi, "").replace(/```\s*$/g, "").trim();
+        const cards = JSON.parse(text);
+        if (!Array.isArray(cards)) throw "not array";
+        const batch = cards.slice(0, 10).map(c => api("POST", "/flashcards", {question:c.question, answer:c.answer, topic:d.title}));
+        Promise.all(batch).then(() => {
+          toast("Created " + batch.length + " flashcards from \"" + d.title + "\"", "success");
+          loadFlashcards();
+        }).catch(() => toast("Some flashcards failed to save", "error"));
+      } catch(e) { toast("Failed to parse flashcards from AI response", "error"); }
+    });
+  });
+}
+function generateStudyPack(id) {
+  const btn = (typeof event !== 'undefined' && event && event.target) || document.querySelector(`button[onclick*="generateStudyPack(${id})"]`);
+  if (btn) { btn.disabled = true; btn.textContent = "Generating..."; }
+  api("POST", "/study/generate-pack", {document_id: id}).then(r => {
+    const parts = [];
+    if (r.notes && r.notes.id) parts.push("notes");
+    if (r.flashcards && r.flashcards.count) parts.push(r.flashcards.count + " flashcards");
+    if (r.quiz && r.quiz.id) parts.push("quiz");
+    toast("Study pack created: " + parts.join(", "), "success");
+    if (btn) { btn.disabled = false; btn.textContent = "🎒 Study Pack"; }
+  }).catch(e => {
+    toast("Study pack failed: " + (e.message || e), "error");
+    if (btn) { btn.disabled = false; btn.textContent = "🎒 Study Pack"; }
+  });
+}
+function showStudyGuide() {
+  api("GET", "/documents?limit=100").then(docs => {
+    const el = document.getElementById("studyGuideDocList");
+    if (!docs.length) { el.innerHTML = '<p class="text-dim">No sources available.</p>'; return; }
+    el.innerHTML = docs.map(d => `<label class="flex gap-4" style="align-items:center;padding:4px 0"><input type="checkbox" class="sg-checkbox" value="${d.id}"> <span>${esc(d.title)}</span></label>`).join('');
+  });
+  document.getElementById("studyGuideModal").classList.remove("hidden");
+}
+function generateStudyGuide() {
+  const checks = document.querySelectorAll("#studyGuideDocList .sg-checkbox:checked");
+  const ids = [...checks].map(c => parseInt(c.value));
+  if (!ids.length) { toast("Select at least one source", "warning"); return; }
+  const title = document.getElementById("studyGuideTitle").value.trim();
+  const btn = document.querySelector("#studyGuideModal .gold");
+  btn.disabled = true; btn.textContent = "Generating...";
+  api("POST", "/study/guide", {document_ids: ids, title}).then(r => {
+    document.getElementById("studyGuideModal").classList.add("hidden");
+    btn.disabled = false; btn.textContent = "Generate Guide";
+    toast("Study guide created: " + r.title, "success");
+    switchPage("notes");
+    loadNoteTree();
+  }).catch(e => {
+    toast("Study guide failed: " + (e.message || e), "error");
+    btn.disabled = false; btn.textContent = "Generate Guide";
+  });
+}
+function generatePlanFromDoc(id) {
+  const btn = (typeof event !== 'undefined' && event && event.target) || null;
+  if (btn) { btn.disabled = true; btn.textContent = "Generating..."; }
+  api("POST", "/study/plans/generate-from-doc", {document_id: id, duration_days: 7}).then(p => {
+    toast("Study plan created: " + p.title, "success");
+    if (btn) btn.textContent = "📅 Study Plan";
+    switchPage("dashboard");
+    loadDashboard();
+  }).catch(e => {
+    toast("Plan failed: " + (e.message || e), "error");
+    if (btn) { btn.disabled = false; btn.textContent = "📅 Study Plan"; }
+  });
+}
+function generateQuizFromDoc(id) {
+  api("GET", "/documents/"+id).then(d => {
+    document.getElementById("qzDocSelect").value = id;
+    switchPage("study");
+    setTimeout(generateQuiz, 100);
+  });
+}
+function generateQuiz() {
+  const id = document.getElementById("qzDocSelect").value;
+  if (!id) { toast("Select a document first", "warning"); return; }
+  api("POST", "/quizzes/generate", {document_id: parseInt(id), num_questions: 5}).then(q => {
+    toast("Quiz generated: " + q.title, "success");
+    loadQuiz(q.id);
+  }).catch(e => toast("Quiz generation failed", "error"));
+}
+function completeTask(taskId, checked) {
+  if (!checked) return;
+  api("POST", "/study/tasks/" + taskId + "/complete").then(() => {
+    toast("Task completed!", "success");
+    loadDashboard();
+  }).catch(e => toast("Failed: " + e.message, "error"));
 }
 
 // ── Flashcards ──
 function loadFlashcards() {
   const topic = document.getElementById("fcTopic").value.trim();
   const params = topic ? "?topic="+encodeURIComponent(topic)+"&limit=100" : "?limit=100";
+  api("GET", "/flashcards/due-count"+(topic?"?topic="+encodeURIComponent(topic):"")).then(dc => {
+    const due = dc.count || 0;
+    document.getElementById("fcDueBadge").textContent = due ? due+" due" : "";
+  }).catch(() => {});
   api("GET", "/flashcards"+params).then(cards => {
     const el = document.getElementById("fcList");
     if (!cards.length) { el.innerHTML = '<p class="text-dim">No flashcards.</p>'; return; }
-    el.innerHTML = `<table><tr><th>ID</th><th>Question</th><th>Topic</th><th>Diff</th></tr>${cards.map(c => `<tr><td>${c.id}</td><td class="truncate" style="max-width:250px">${esc(c.question)}</td><td class="text-dim text-sm">${esc(c.topic)}</td><td>${c.difficulty}</td></tr>`).join('')}</table>`;
-  });
+    el.innerHTML = `<table><tr><th>ID</th><th>Question</th><th>Topic</th><th>Diff</th><th>Next</th></tr>${cards.map(c => `<tr><td>${c.id}</td><td class="truncate" style="max-width:250px">${esc(c.question)}</td><td class="text-dim text-sm">${esc(c.topic)}</td><td>${c.difficulty}</td><td class="text-sm text-dim">${c.next_review_at ? timeAgo(c.next_review_at) : 'new'}</td></tr>`).join('')}</table>`;
+  }).catch(() => { document.getElementById("fcList").innerHTML = '<p class="text-dim">Failed to load flashcards.</p>'; });
 }
 function addFlashcard() {
   const q = document.getElementById("fcQuestion").value.trim();
   const a = document.getElementById("fcAnswer").value.trim();
   const t = document.getElementById("fcTopic").value.trim();
   if (!q || !a) return;
-  api("POST", "/flashcards", {question:q, answer:a, topic:t}).then(() => { document.getElementById("fcQuestion").value=""; document.getElementById("fcAnswer").value=""; loadFlashcards(); });
+  api("POST", "/flashcards", {question:q, answer:a, topic:t}).then(() => { document.getElementById("fcQuestion").value=""; document.getElementById("fcAnswer").value=""; loadFlashcards(); }).catch(e => toast("Failed to add card: " + e.message, "error"));
 }
-let reviewCards = [], reviewIdx = 0;
-function startReview() {
+let reviewCards = [], reviewIdx = 0, reviewCorrect = 0;
+function startReview(dueOnly) {
   const topic = document.getElementById("fcTopic").value.trim();
-  const params = topic ? "?topic="+encodeURIComponent(topic)+"&limit=100" : "?limit=100";
+  let params = topic ? "?topic="+encodeURIComponent(topic)+"&limit=100" : "?limit=100";
+  if (dueOnly) params += (topic ? "&" : "?") + "due_only=true";
   api("GET", "/flashcards"+params).then(cards => {
-    if (!cards.length) { alert("No cards to review!"); return; }
-    reviewCards = cards; reviewIdx = 0;
+    if (!cards.length) { toast("No cards to review!", "error"); return; }
+    reviewCards = cards; reviewIdx = 0; reviewCorrect = 0;
     document.getElementById("reviewArea").classList.remove("hidden");
     showReviewCard();
-  });
+  }).catch(e => toast("Failed to load cards: "+e.message, "error"));
 }
 function showReviewCard() {
-  if (reviewIdx >= reviewCards.length) { alert("Review complete!"); endReview(); return; }
+  if (reviewIdx >= reviewCards.length) { toast("Review complete!", "success"); endReview(); return; }
   const c = reviewCards[reviewIdx];
   document.getElementById("reviewQ").textContent = c.question;
   document.getElementById("reviewA").textContent = c.answer;
@@ -975,83 +1841,228 @@ function showAnswer() {
 }
 function markReview(correct) {
   const c = reviewCards[reviewIdx];
-  api("POST", "/flashcards/"+c.id+"/review", {correct}).then(() => { reviewIdx++; showReviewCard(); });
+  if (correct) reviewCorrect++;
+  api("POST", "/flashcards/"+c.id+"/review", {correct}).then(() => { reviewIdx++; showReviewCard(); }).catch(e => { toast("Review failed: " + (e.message || e), "error"); endReview(); });
 }
 function endReview() {
-  document.getElementById("reviewArea").classList.add("hidden");
+  const area = document.getElementById("reviewArea");
+  let summary = "";
+  if (reviewCards.length && reviewCorrect !== undefined) {
+    summary = `Review complete: ${reviewCorrect}/${reviewCards.length} correct (${reviewCards.length > 0 ? Math.round(reviewCorrect/reviewCards.length*100) : 0}%)`;
+    toast(summary, reviewCorrect === reviewCards.length ? "success" : "info");
+  }
+  reviewCards = []; reviewIdx = 0; reviewCorrect = 0;
+  area.classList.add("hidden");
+  loadFlashcards();
+}
+function exportFlashcardsCSV() {
+  const topic = document.getElementById("fcTopic").value.trim();
+  const params = topic ? "?topic="+encodeURIComponent(topic)+"&limit=10000" : "?limit=10000";
+  api("GET", "/flashcards"+params).then(cards => {
+    if (!cards.length) { toast("No flashcards to export", "warning"); return; }
+    let csv = "Question,Answer,Topic,Difficulty\n";
+    cards.forEach(c => {
+      const q = '"' + c.question.replace(/"/g, '""') + '"';
+      const a = '"' + c.answer.replace(/"/g, '""') + '"';
+      const t = '"' + (c.topic || '').replace(/"/g, '""') + '"';
+      csv += q + "," + a + "," + t + "," + (c.difficulty || 1) + "\n";
+    });
+    const blob = new Blob([csv], {type: "text/csv"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "flashcards" + (topic ? "-" + topic : "") + ".csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast("Exported " + cards.length + " flashcards", "success");
+  });
 }
 
 // ── Quizzes ──
+let currentQuizData = null;
 function loadQuizDocs() {
   api("GET","/documents?limit=100").then(docs => {
     const sel = document.getElementById("qzDocSelect");
     sel.innerHTML = '<option value="">Select document...</option>'+docs.map(d => `<option value="${d.id}">${esc(d.title).slice(0,60)}</option>`).join('');
-  });
+  }).catch(() => {});
   api("GET","/quizzes?limit=20").then(qz => {
     const el = document.getElementById("qzList");
     if (!qz.length) { el.innerHTML = '<p class="text-dim mt-8">No quizzes yet. Generate one from a document above.</p>'; return; }
-    el.innerHTML = `<table class="mt-8"><tr><th>ID</th><th>Title</th><th>Score</th></tr>${qz.map(q => `<tr><td>${q.id}</td><td>${esc(q.title)}</td><td>${q.score != null ? q.score.toFixed(0)+'%' : '-'}</td></tr>`).join('')}</table>`;
+    el.innerHTML = `<table class="mt-8"><tr><th>ID</th><th>Title</th><th>Score</th><th></th></tr>${qz.map(q => `<tr><td>${q.id}</td><td>${esc(q.title)}</td><td>${q.score != null ? q.score.toFixed(0)+'%' : '-'}</td><td><button class="small" onclick="loadQuiz(${q.id})">Open</button></td></tr>`).join('')}</table>`;
+  }).catch(() => { document.getElementById("qzList").innerHTML = '<p class="text-dim">Failed to load quizzes.</p>'; });
+}
+function loadQuiz(id) {
+  api("GET","/quizzes/"+id).then(q => { currentQuizData = q; renderQuiz(q); }).catch(e => toast("Failed to load quiz: " + (e.message || e), "error"));
+}
+function renderQuiz(q) {
+  const el = document.getElementById("qzList");
+  let html = `<div class="card" id="quiz_${q.id}"><div class="flex" style="justify-content:space-between;align-items:center"><h3>${esc(q.title)}</h3><span class="text-accent">${q.score != null ? q.score.toFixed(0)+'%' : 'Not attempted'}</span></div>`;
+  q.questions.forEach((qd, i) => {
+    const ansGiven = qd.user_answer != null;
+    const isRight = qd.is_correct === 1;
+    const color = ansGiven ? (isRight ? 'var(--accent)' : 'var(--danger)') : '';
+    html += `<div class="mb-8" style="${color ? 'border-left:3px solid '+color+';padding-left:10px' : ''}"><p><strong>Q${i+1}:</strong> ${esc(qd.question)}</p>`;
+    if (qd.options && qd.options.length) {
+      html += qd.options.map(o => `<label style="display:block;margin:3px 0;font-size:14px"><input type="radio" name="qz_${q.id}_${i}" value="${esc(o)}" ${qd.user_answer === o ? 'checked' : ''} ${ansGiven ? 'disabled' : ''}> ${esc(o)}${ansGiven && o === qd.correct_answer ? ' ✓' : ''}</label>`).join('');
+    } else {
+      html += `<input id="qzAns_${q.id}_${i}" placeholder="Your answer..." style="margin-top:4px" value="${esc(qd.user_answer || '')}" ${ansGiven ? 'disabled' : ''}>`;
+    }
+    if (ansGiven) {
+      html += `<p class="text-sm" style="color:${isRight ? 'var(--accent)' : 'var(--danger)'}">${isRight ? '✓ Correct' : '✗ Wrong — correct: ' + esc(qd.correct_answer)}</p>`;
+    }
+    html += '</div>';
+  });
+  if (q.questions.some(qd => qd.user_answer == null)) {
+    html += `<button class="gold" onclick="submitQuiz(${q.id})">Submit Answers</button>`;
+  }
+  if (q.score != null) {
+    const wrong = q.questions.filter(qd => qd.is_correct !== 1);
+    if (wrong.length) html += ` <button class="small" onclick="reviewWrong(${q.id})">Review ${wrong.length} wrong</button>`;
+    if (wrong.length) html += ` <button class="small primary" onclick="retryWrong(${q.id})">Retry Wrong</button>`;
+    html += ` <button class="small" onclick="renderQuiz(currentQuizData)">Reset view</button>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+function submitQuiz(id) {
+  const q = currentQuizData;
+  if (!q) return;
+  const promises = [];
+  q.questions.forEach((qd, i) => {
+    let answer = "";
+    if (qd.options && qd.options.length) {
+      const sel = document.querySelector(`input[name="qz_${id}_${i}"]:checked`);
+      if (sel) answer = sel.value;
+    } else {
+      answer = document.getElementById(`qzAns_${id}_${i}`).value.trim();
+    }
+    if (answer) {
+      promises.push(api("POST", `/quizzes/${id}/questions/${qd.id}/answer`, {answer}));
+    }
+  });
+  if (!promises.length) { toast("Answer at least one question", "error"); return; }
+  Promise.all(promises).then(() => {
+    api("POST", `/quizzes/${id}/grade`).then(() => {
+      loadQuiz(id);
+      loadQuizDocs();
+      toast("Quiz submitted!", "success");
+    });
+  }).catch(e => toast("Submit failed: "+e.message, "error"));
+}
+function reviewWrong(id) {
+  api("GET","/quizzes/"+id).then(q => {
+    currentQuizData = q;
+    const wrong = q.questions.filter(qd => qd.is_correct !== 1);
+    const el = document.getElementById("qzList");
+    let html = `<div class="card"><h3>Review: ${esc(q.title)} — Wrong Answers</h3>`;
+    wrong.forEach((qd, i) => {
+      html += `<div class="mb-8" style="border-left:3px solid var(--danger);padding-left:10px"><p><strong>Q${i+1}:</strong> ${esc(qd.question)}</p>`;
+      if (qd.options && qd.options.length) {
+        html += qd.options.map(o => `<label style="display:block;margin:3px 0;font-size:14px;${o === qd.correct_answer ? 'color:var(--accent)' : ''}">${esc(o)}${o === qd.correct_answer ? ' ✓' : ''}</label>`).join('');
+      }
+      html += `<p class="text-accent">Correct: ${esc(qd.correct_answer)}</p>`;
+      if (qd.user_answer) html += `<p class="text-sm" style="color:var(--danger)">You answered: ${esc(qd.user_answer)}</p>`;
+      html += '</div>';
+    });
+    html += `<button class="small mt-8" onclick="loadQuiz(${id})">Back to full quiz</button></div>`;
+    el.innerHTML = html;
   });
 }
-function generateQuiz() {
-  const docId = document.getElementById("qzDocSelect").value;
-  if (!docId) { alert("Select a document first"); return; }
-  api("POST", "/quizzes/generate", {document_id:parseInt(docId), num_questions:5}).then(q => {
-    alert("Quiz generated: "+q.title+" (id="+q.id+")");
-    document.getElementById("qzDocSelect").value = "";
-    const el = document.getElementById("qzList");
-    let html = `<div class="card"><h3>${esc(q.title)}</h3>`;
-    q.questions.forEach((qd, i) => {
-      html += `<div class="mb-8"><p><strong>Q${i+1}:</strong> ${esc(qd.question)}</p>`;
-      if (qd.options && qd.options.length) {
-        html += qd.options.map(o => `<label style="display:block;margin:2px 0;font-size:13px"><input type="radio" name="qz_${i}" value="${esc(o)}"> ${esc(o)}</label>`).join('');
-      } else {
-        html += `<input id="qzAns_${i}" placeholder="Your answer..." style="margin-top:4px">`;
-      }
-      html += `<p class="text-sm text-dim mt-4">Correct: ${esc(qd.correct_answer)}</p></div>`;
-    });
-    html += '</div>';
-    el.innerHTML = html;
-    loadQuizDocs();
-  });
+function retryWrong(id) {
+  api("POST", `/quizzes/${id}/retry-wrong`).then(q => {
+    toast("Retry quiz created: " + q.title, "success");
+    currentQuizData = q;
+    renderQuiz(q);
+  }).catch(e => toast("Retry failed: " + (e.message || e), "error"));
 }
 
 // ── Research ──
-function doWebSearch() {
-  const q = document.getElementById("wsQuery").value.trim();
+let _researchHistory = [];
+function doAskResearch() {
+  const input = document.getElementById("researchFollowUp").classList.contains("hidden") ? document.getElementById("rsQuery") : document.getElementById("rsFollowUp");
+  const q = input.value.trim();
   if (!q) return;
-  api("POST", "/web/search", {query:q, max_results:5}).then(d => {
-    const el = document.getElementById("wsResults");
-    const rs = d.results || [];
-    if (!rs.length) { el.innerHTML = '<p class="text-dim">No results.</p>'; return; }
-    el.innerHTML = rs.map(r => `<div class="card" style="padding:10px"><a href="${esc(r.url)}" target="_blank" style="color:var(--accent);text-decoration:none"><strong>${esc(r.title)}</strong></a><p class="text-sm text-dim">${esc(r.snippet).slice(0,200)}</p></div>`).join('');
+  input.value = "";
+  const btns = [document.getElementById("rsAskBtn"), ...document.querySelectorAll("#researchFollowUp button")];
+  btns.forEach(b => { b.disabled = true; if (b.id === "rsAskBtn") b.textContent = "Researching..."; });
+  const log = document.getElementById("researchLog");
+  log.innerHTML += `<div class="msg user"><div class="meta">You</div>${esc(q)}</div>`;
+  log.scrollTop = log.scrollHeight;
+  document.getElementById("researchEmpty").classList.add("hidden");
+
+  const max = parseInt(document.getElementById("rsMax").value) || 5;
+  api("POST", "/web/ask", {query: q, max_results: max}).then(d => {
+    const answer = d.answer || "No answer generated.";
+    const sources = d.sources || [];
+    _researchHistory.push({query: q, answer, sources});
+
+    let html = `<div class="msg assistant"><div class="meta">Research${d.provider ? ' · ' + d.provider : ''}</div>`;
+    html += renderMarkdown(answer);
+    if (sources.length) {
+      html += `<div style="margin-top:12px;padding-top:8px;border-top:1px solid var(--border)"><p class="text-sm text-dim" style="margin-bottom:4px"><strong>Sources</strong></p>`;
+      sources.forEach((s, i) => {
+        html += `<div class="flex gap-4" style="align-items:start;margin:4px 0;font-size:13px">
+          <span class="text-accent text-sm" style="min-width:24px">[${i+1}]</span>
+          <div style="flex:1">
+            <a href="${esc(s.url)}" target="_blank" style="color:var(--accent);text-decoration:none">${esc(s.title || s.url)}</a>
+            <p class="text-xs text-dim">${esc(s.snippet).slice(0,150)}</p>
+          </div>
+          <button class="small primary" onclick="importResearchSource(${_researchHistory.length-1},${i},this)" style="flex-shrink:0">Import</button>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+    log.innerHTML += html;
+    log.scrollTop = log.scrollHeight;
+    btns.forEach(b => { b.disabled = false; if (b.id === "rsAskBtn") b.textContent = "Research"; });
+    document.getElementById("researchFollowUp").classList.remove("hidden");
+    document.getElementById("rsFollowUp").focus();
+
+    if (document.getElementById("rsAutoImport").checked && sources.length) {
+      importAllSources(_researchHistory.length - 1);
+    }
+  }).catch(e => {
+    log.innerHTML += `<div class="msg assistant"><div class="meta" style="color:var(--danger)">Error</div><p>${esc(e.message || 'Research failed')}</p></div>`;
+    btns.forEach(b => { b.disabled = false; if (b.id === "rsAskBtn") b.textContent = "Research"; });
   });
 }
-function doResearch() {
-  const q = document.getElementById("rsQuery").value.trim();
-  const max = parseInt(document.getElementById("rsMax").value) || 3;
-  if (!q) return;
-  const btn = event.target;
-  btn.disabled = true; btn.textContent = "Researching...";
-  api("POST", "/web/research", {topic:q, max_results:max}).then(d => {
-    const n = (d.documents||[]).length;
-    alert(`Imported ${n} document(s) about "${q}"`);
-    btn.disabled = false; btn.textContent = "Research & Import";
-  }).catch(() => { btn.disabled = false; btn.textContent = "Research & Import"; });
+function importResearchSource(qIdx, sIdx, btn) {
+  const src = _researchHistory[qIdx].sources[sIdx];
+  if (!src) return;
+  btn.disabled = true; btn.textContent = "...";
+  api("POST", "/web/fetch", {url: src.url}).then(d => {
+    if (d.error) { toast(d.error, "error"); btn.disabled = false; btn.textContent = "Import"; return; }
+    toast("Imported: " + d.title, "success"); btn.textContent = "✓";
+    document.getElementById("docSearch").value = ""; loadDocs("");
+  }).catch(e => {
+    toast("Import failed: " + (e.message || e), "error");
+    btn.disabled = false; btn.textContent = "Import";
+  });
+}
+function importAllSources(qIdx) {
+  const sources = _researchHistory[qIdx].sources;
+  let done = 0;
+  sources.forEach(s => {
+    api("POST", "/web/fetch", {url: s.url}).then(d => {
+      done++;
+      if (done === sources.length) { loadDocs(""); }
+    }).catch(() => { done++; if (done === sources.length) { loadDocs(""); } });
+  });
+  toast("Importing " + sources.length + " sources...", "success");
 }
 
 // ── Profile ──
 function loadProfile() {
-  api("GET", "/profile/system-prompt").then(d => document.getElementById("sysPrompt").value = d.text || "");
+  api("GET", "/profile/system-prompt").then(d => document.getElementById("sysPrompt").value = d.text || "").catch(() => {});
   api("GET", "/profile").then(entries => {
     const el = document.getElementById("pfList");
     if (!entries.length) { el.innerHTML = '<p class="text-dim">No facts yet.</p>'; return; }
     el.innerHTML = `<table><tr><th>Key</th><th>Value</th><th>Category</th><th></th></tr>${entries.map(e => `<tr><td class="text-accent">${esc(e.key)}</td><td>${esc(e.value).slice(0,60)}</td><td class="text-dim text-sm">${esc(e.category)}</td><td><button class="danger text-sm" onclick="deleteFact('${esc(e.key)}')">Del</button></td></tr>`).join('')}</table>`;
-  });
+  }).catch(() => { document.getElementById("pfList").innerHTML = '<p class="text-dim">Failed to load facts.</p>'; });
 }
 function saveSysPrompt() {
   const text = document.getElementById("sysPrompt").value;
-  api("PUT", "/profile/system-prompt", {text}).then(() => alert("Saved"));
+  api("PUT", "/profile/system-prompt", {text}).then(() => toast("Saved", "success"));
 }
 function addProfileFact() {
   const key = document.getElementById("pfKey").value.trim();
@@ -1061,7 +2072,9 @@ function addProfileFact() {
   api("POST", "/profile", {key, value:val, category:cat}).then(() => { document.getElementById("pfKey").value=""; document.getElementById("pfValue").value=""; document.getElementById("pfCat").value=""; loadProfile(); });
 }
 function deleteFact(key) {
-  api("DELETE", "/profile/"+encodeURIComponent(key)).then(() => loadProfile());
+  confirmAction("Delete this fact?", () => {
+    api("DELETE", "/profile/"+encodeURIComponent(key)).then(() => loadProfile());
+  });
 }
 
 // ── Voice ──
@@ -1079,7 +2092,7 @@ function stopVoice() {
     document.getElementById("voiceStartBtn").classList.remove("hidden");
     document.getElementById("voiceStopBtn").classList.add("hidden");
     document.getElementById("voiceLog").textContent += "Voice assistant stopped.\n";
-  });
+  }).catch(() => {});
 }
 
 // ── Settings ──
@@ -1090,6 +2103,25 @@ const KEY_FIELDS = [
   { id: "keyAnthropic", env: "ANTHROPIC_API_KEY" },
   { id: "keyGoogle", env: "GOOGLE_API_KEY" },
 ];
+
+function setFontSize(val) {
+  document.documentElement.style.setProperty("--base-font", val + "px");
+  document.getElementById("fontSizeLabel").textContent = val + "px";
+  localStorage.setItem("aqua_font_size", val);
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "light" ? "" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("aqua_theme", next || "dark");
+  updateThemeBtn();
+}
+function updateThemeBtn() {
+  const btn = document.getElementById("themeToggleBtn");
+  if (!btn) return;
+  const isLight = document.documentElement.getAttribute("data-theme") === "light";
+  btn.textContent = isLight ? "☀️ Light" : "🌙 Dark";
+}
 
 const MODEL_FIELDS = [
   { id: "modelGroq", env: "GROQ_DEFAULT_MODEL" },
@@ -1110,19 +2142,42 @@ function loadSettings() {
     MODEL_FIELDS.forEach(mf => {
       const envName = mf.env.toLowerCase();
       const current = s[envName] || "";
-      document.getElementById(mf.id).placeholder = current || "(default)";
-      document.getElementById(mf.id).value = "";
+      const sel = document.getElementById(mf.id);
+      sel.dataset.current = current;
+      sel.value = current;
+      if (!current) sel.value = "";
     });
-  });
+    const el = document.getElementById("settingsEnv");
+    el.innerHTML = Object.entries(s).filter(([k]) => !k.includes('key') && !k.includes('password')).map(([k,v]) => `<div class="flex"><span class="text-dim text-sm" style="min-width:200px">${esc(k)}</span><span>${esc(String(v))}</span></div>`).join('');
+  }).catch(() => toast("Failed to load settings", "error"));
   api("GET", "/settings/providers").then(provs => {
     const el = document.getElementById("providerStatus");
     if (!provs || !provs.length) { el.innerHTML = '<p class="text-dim">No providers configured.</p>'; return; }
-    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex" style="align-items:center"><span class="text-accent" style="flex:1">${esc(p.name)}</span><span class="${p.available ? 'text-accent' : 'text-gold'}" style="font-size:11px">${p.available ? '✓ online' : '✗ offline'}</span></div><p class="text-sm text-dim">${p.default_model || ''}</p></div>`).join('');
-  });
-  api("GET", "/settings").then(s => {
-    const el = document.getElementById("settingsEnv");
-    el.innerHTML = Object.entries(s).filter(([k]) => !k.includes('key') && !k.includes('password')).map(([k,v]) => `<div class="flex"><span class="text-dim text-sm" style="min-width:200px">${esc(k)}</span><span>${esc(String(v))}</span></div>`).join('');
-  });
+    el.innerHTML = provs.map(p => `<div class="card" style="padding:10px"><div class="flex" style="align-items:center"><span class="text-accent" style="flex:1">${esc(p.name)}</span><span class="${p.available ? 'text-accent' : 'text-gold'}" style="font-size:11px">${p.available ? '✓ online' : '✗ offline'}</span></div><p class="text-sm text-dim">${esc(p.default_model || '')}</p></div>`).join('');
+  }).catch(() => { document.getElementById("providerStatus").innerHTML = '<p class="text-dim">Failed to load providers.</p>'; });
+  api("GET", "/chat/models").then(models => {
+    const provMap = {groq:"modelGroq",nvidia:"modelNvidia",openai:"modelOpenAI",anthropic:"modelAnthropic",google:"modelGoogle"};
+    Object.entries(models).forEach(([prov, mods]) => {
+      const id = provMap[prov];
+      if (!id || !mods || !mods.length) return;
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const cur = sel.dataset.current || "";
+      sel.innerHTML = '<option value="">Default</option>';
+      mods.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        sel.appendChild(opt);
+      });
+      if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+    });
+  }).catch(() => {});
+  const fs = localStorage.getItem("aqua_font_size");
+  if (fs) { document.getElementById("fontSizeSlider").value = fs; document.getElementById("fontSizeLabel").textContent = fs + "px"; }
+  const theme = localStorage.getItem("aqua_theme") || "dark";
+  document.documentElement.setAttribute("data-theme", theme === "light" ? "light" : "");
+  updateThemeBtn();
 }
 
 function saveApiKeys() {
@@ -1134,9 +2189,6 @@ function saveApiKeys() {
   MODEL_FIELDS.forEach(mf => {
     const val = document.getElementById(mf.id).value.trim();
     if (val) updates[mf.env] = val;
-  });
-    const val = document.getElementById(kf.id).value.trim();
-    if (val) updates[kf.env] = val;
   });
   if (!Object.keys(updates).length) { document.getElementById("keySaveStatus").textContent = "Nothing to save."; return; }
   const btn = document.querySelector("#apiKeysCard .gold");
@@ -1154,7 +2206,195 @@ function saveApiKeys() {
 
 // ── Init ──
 function init() { loadDashboard(); loadContextDatalists(); }
+
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && !["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) {
+    e.preventDefault(); const ci = document.getElementById("chatInput"); if (ci) ci.focus();
+  }
+  if (e.key === "Escape") {
+    const modal = document.getElementById("noteGenModal");
+    if (modal && !modal.classList.contains("hidden")) modal.classList.add("hidden");
+  }
+  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+    const btn = document.getElementById("chatSendBtn");
+    if (btn && !btn.disabled) sendChat();
+  }
+});
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function toast(msg, type) {
+  const el = document.createElement("div");
+  el.className = "toast " + (type || "info");
+  el.textContent = msg;
+  document.getElementById("toastContainer").appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity .3s"; setTimeout(() => el.remove(), 300); }, 3000);
+}
+function confirmAction(msg, fn) {
+  const el = document.getElementById("toastContainer");
+  const div = document.createElement("div");
+  div.className = "toast info";
+  div.style.display = "flex"; div.style.alignItems = "center"; div.style.gap = "12px";
+  div.innerHTML = '<span style="flex:1">' + esc(msg) + '</span><button class="small danger" style="white-space:nowrap">Confirm</button><button class="small" style="white-space:nowrap">Cancel</button>';
+  div.querySelectorAll("button")[1].onclick = () => { div.remove(); };
+  div.querySelectorAll("button")[0].onclick = () => { div.remove(); fn(); };
+  el.appendChild(div);
+  setTimeout(() => { try { div.remove(); } catch(e) {} }, 8000);
+}
+(function(){ const sz = localStorage.getItem("aqua_font_size"); if (sz) { document.documentElement.style.setProperty("--base-font", sz + "px"); } const th = localStorage.getItem("aqua_theme"); if (th === "light") { document.documentElement.setAttribute("data-theme", "light"); } })();
+function renderMarkdown(t) {
+  t = t.replace(/<br\s*\/?>/gi, '\n');
+  t = t.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+  t = t.replace(/<\/?[^>]+(>|$)/g, '');
+  const lines = t.split('\n');
+  let inTable = false, inList = false, html = '';
+  for (let i = 0; i < lines.length; i++) {
+    let l = lines[i];
+    if (/^#{1,4}\s/.test(l)) { html += `<h${l.match(/^#+/)[0].length}>${l.replace(/^#+\s*/, '')}</h${l.match(/^#+/)[0].length}>`; continue; }
+    if (/^- (.+)$/.test(l)) { if (!inList) { html += '<ul>'; inList = true; } html += `<li>${l.slice(2)}</li>`; continue; }
+    if (inList) { html += '</ul>'; inList = false; }
+    if (l.includes('\t') && /\S/.test(l)) {
+      const cells = l.split('\t').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+      if (cells) { if (!inTable) { html += '<table>'; inTable = true; } html += `<tr>${cells}</tr>`; continue; }
+    }
+    if (inTable && !l.includes('\t')) { html += '</table>'; inTable = false; }
+    if (/^```/.test(l)) {
+      let code = '';
+      for (i++; i < lines.length && !/^```/.test(lines[i]); i++) code += (i > 0 ? '\n' : '') + lines[i];
+      html += `<pre><code>${esc(code)}</code></pre>`;
+      continue;
+    }
+    if (l.trim()) {
+      let pl = l;
+      pl = pl.replace(/`([^`]+)`/g, '<code>$1</code>');
+      pl = pl.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+      pl = pl.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+      pl = pl.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      pl = pl.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      pl = pl.replace(/_([^_]+)_/g, '<em>$1</em>');
+      html += `<p>${pl}</p>`;
+    }
+  }
+  if (inList) html += '</ul>';
+  if (inTable) html += '</table>';
+  return html;
+}
+
+// ── Pomodoro Timer ──
+let timerInterval = null;
+let timerSeconds = 25 * 60;
+let timerRunning = false;
+let timerMode = 25; // minutes
+let timerPhase = "focus"; // "focus" | "break"
+let timerSessionsToday = 0;
+
+function timerSetMode(mins) {
+  if (timerRunning) return;
+  timerMode = mins;
+  timerPhase = "focus";
+  timerSeconds = mins * 60;
+  updateTimerDisplay();
+  document.getElementById("timerPhase").textContent = "Focus";
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60);
+  const s = timerSeconds % 60;
+  document.getElementById("timerDisplay").textContent = String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+
+function timerStart() {
+  if (timerRunning) return;
+  if (timerSeconds <= 0) timerReset();
+  timerRunning = true;
+  document.getElementById("timerStartBtn").disabled = true;
+  document.getElementById("timerPauseBtn").disabled = false;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRunning = false;
+      document.getElementById("timerStartBtn").disabled = false;
+      document.getElementById("timerPauseBtn").disabled = true;
+      // Beep
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 880;
+        osc.type = "sine";
+        gain.gain.value = 0.3;
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch(e) {}
+      // Log session
+      if (timerPhase === "focus") {
+        timerLogSession(timerMode);
+        timerSessionsToday++;
+        document.getElementById("timerSessions").textContent = timerSessionsToday;
+        // Auto-switch to break
+        timerPhase = "break";
+        timerSeconds = 5 * 60;
+        updateTimerDisplay();
+        document.getElementById("timerPhase").textContent = "Break 🎉";
+        toast("Focus session complete! Take a 5min break.", "success");
+      } else {
+        timerPhase = "focus";
+        timerSeconds = timerMode * 60;
+        updateTimerDisplay();
+        document.getElementById("timerPhase").textContent = "Focus";
+        toast("Break over. Ready to focus!", "info");
+      }
+      loadTimerHistory();
+    }
+  }, 1000);
+}
+
+function timerPause() {
+  if (!timerRunning) return;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRunning = false;
+  document.getElementById("timerStartBtn").disabled = false;
+  document.getElementById("timerPauseBtn").disabled = true;
+}
+
+function timerReset() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRunning = false;
+  timerPhase = "focus";
+  timerSeconds = timerMode * 60;
+  updateTimerDisplay();
+  document.getElementById("timerPhase").textContent = "Focus";
+  document.getElementById("timerStartBtn").disabled = false;
+  document.getElementById("timerPauseBtn").disabled = true;
+}
+
+function timerLogSession(mins) {
+  api("POST", "/activity", {action: "pomodoro", detail: `${mins}min focus session`}).catch(() => {});
+}
+
+function loadTimerHistory() {
+  api("GET", "/activity?limit=50").then(acts => {
+    const today = new Date().toISOString().slice(0,10);
+    const sessions = acts.filter(a => a.action === "pomodoro" && a.created_at.slice(0,10) === today);
+    timerSessionsToday = sessions.length;
+    document.getElementById("timerSessions").textContent = timerSessionsToday;
+    const el = document.getElementById("timerHistory");
+    if (!sessions.length) {
+      el.innerHTML = '<p class="text-dim text-sm">No sessions yet today.</p>';
+    } else {
+      el.innerHTML = '<div style="font-size:13px">' + sessions.map(s =>
+        `<div class="text-dim">${(s.created_at || "").slice(11,16)} — ${s.detail || ""}</div>`
+      ).join('') + '</div>';
+    }
+  }).catch(() => {
+    document.getElementById("timerSessions").textContent = "?";
+  });
+}
 
 fetch(API+"/health").then(r=>r.json()).then(h => {
   if (h.auth_required && !TOKEN) document.getElementById("loginOverlay").classList.add("show");

@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import httpx
@@ -5,6 +6,8 @@ import httpx
 from .base import AIProvider, CompletionResult
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
+
+logger = logging.getLogger("aqua.providers.anthropic")
 
 
 class AnthropicProvider(AIProvider):
@@ -38,5 +41,8 @@ class AnthropicProvider(AIProvider):
             resp.raise_for_status()
             data = resp.json()
 
-        text = data["content"][0]["text"]
+        content_blocks = data.get("content", [])
+        text = content_blocks[0].get("text", "") if content_blocks else ""
+        if not text:
+            logger.warning("Anthropic returned empty content; response keys: %s", list(data.keys()))
         return CompletionResult(text=text, provider=self.name, model=model, raw=data)

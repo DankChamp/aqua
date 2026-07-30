@@ -8,13 +8,11 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts, search as search_routes, study, teach as teach_routes, activity as activity_routes
+from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts, search as search_routes, study, teach as teach_routes, activity as activity_routes, ncert as ncert_routes
 from api.routes import settings as settings_routes
 from config import get_settings
 
 logger = logging.getLogger("aqua.main")
-
-settings = get_settings()
 
 
 @asynccontextmanager
@@ -25,7 +23,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, debug=settings.debug, lifespan=lifespan)
+s = get_settings()
+app = FastAPI(title=s.app_name, debug=s.debug, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -55,6 +54,7 @@ app.include_router(settings_routes.router)
 app.include_router(study.router)
 app.include_router(teach_routes.router)
 app.include_router(activity_routes.router)
+app.include_router(ncert_routes.router)
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 if WEB_DIR.is_dir():
@@ -63,12 +63,14 @@ if WEB_DIR.is_dir():
 
 @app.get("/")
 def root():
-    return {"status": "Aqua is running", "app": settings.app_name}
+    s = get_settings()
+    return {"status": "Aqua is running", "app": s.app_name}
 
 
 @app.get("/health")
 def health():
-    return {"ok": True, "auth_required": bool(settings.web_password)}
+    s = get_settings()
+    return {"ok": True, "auth_required": bool(s.web_password)}
 
 
 class LoginRequest(BaseModel):
@@ -77,20 +79,22 @@ class LoginRequest(BaseModel):
 
 @app.post("/api/auth")
 def login(payload: LoginRequest):
-    if settings.web_password and payload.password == settings.web_password:
+    s = get_settings()
+    if s.web_password and payload.password == s.web_password:
         return {"ok": True}
     raise HTTPException(401, "Wrong password")
 
 
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
-    if not settings.web_password:
+    s = get_settings()
+    if not s.web_password:
         return await call_next(request)
     if request.url.path in ("/", "/health", "/api/auth") or request.url.path.startswith("/ui/") or request.url.path.startswith("/api/facts"):
         return await call_next(request)
     auth = request.headers.get("Authorization", "")
-    if auth == f"Bearer {settings.web_password}":
+    if auth == f"Bearer {s.web_password}":
         return await call_next(request)
-    if request.cookies.get("aqua_token") == settings.web_password:
+    if request.cookies.get("aqua_token") == s.web_password:
         return await call_next(request)
     return JSONResponse({"detail": "Unauthorized"}, status_code=401)

@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import httpx
@@ -5,6 +6,8 @@ import httpx
 from .base import AIProvider, CompletionResult
 
 NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
+
+logger = logging.getLogger("aqua.providers.nvidia")
 
 
 class NvidiaProvider(AIProvider):
@@ -35,5 +38,7 @@ class NvidiaProvider(AIProvider):
             resp.raise_for_status()
             data = resp.json()
 
-        text = data["choices"][0]["message"]["content"]
+        text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        if not text:
+            logger.warning("NVIDIA returned empty content; response keys: %s", list(data.keys()))
         return CompletionResult(text=text, provider=self.name, model=model, raw=data)

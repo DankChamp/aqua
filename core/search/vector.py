@@ -1,5 +1,6 @@
 import logging
-from typing import Optional
+
+from config import get_settings
 
 logger = logging.getLogger("aqua.search")
 
@@ -16,7 +17,7 @@ def _lazy_init():
         import chromadb
         from chromadb.utils.embedding_functions import ONNXMiniLM_L6_V2
         _client = chromadb.PersistentClient(
-            path=str(__import__("config").get_settings().db_path.parent / "chroma")
+            path=str(get_settings().db_path.parent / "chroma")
         )
         _ONNX_EF = ONNXMiniLM_L6_V2()
         _HAS_CHROMA = True
@@ -78,8 +79,8 @@ def remove_document(doc_id: int):
         existing = col.get(where={"doc_id": str(doc_id)})
         if existing and existing["ids"]:
             col.delete(ids=existing["ids"])
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Chroma remove_document failed: %s", exc)
 
 
 def index_note(note_id: int, title: str, content: str):

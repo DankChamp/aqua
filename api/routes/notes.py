@@ -1,9 +1,12 @@
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from api.deps import get_ai_router
+
+logger = logging.getLogger("aqua.notes")
 from core.router import AIRouter
 from core.documents.manager import (
     add_note, get_note, list_notes, search_notes, edit_note, delete_note,
@@ -68,8 +71,8 @@ async def create_note(payload: NoteCreate):
         title = payload.title or "untitled"
         from core.emma_bridge import push_summary_to_emma
         await push_summary_to_emma("note", title, payload.content[:200])
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Emma bridge failed: %s", exc)
     return note
 
 

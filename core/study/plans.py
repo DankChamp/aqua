@@ -323,7 +323,10 @@ async def generate_plan(topic: str, document_ids: list[int], duration_days: int 
         raw = raw.split("\n", 1)[-1]
         raw = raw.rsplit("```", 1)[0]
 
-    data = json.loads(raw)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        raise RuntimeError(f"AI returned invalid JSON for study plan. Raw: {raw[:200]}")
     plan = create_plan(
         title=data.get("title", f"Study Plan: {topic}"),
         topic=topic,

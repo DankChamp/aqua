@@ -17,11 +17,11 @@ def get_settings_route():
     s = get_settings()
     safe = {k: v for k, v in s.model_dump().items() if "key" not in k.lower() and "password" not in k.lower()}
     safe["has_password"] = bool(s.web_password)
-    safe["has_groq_key"] = bool(s.groq_api_key)
-    safe["has_nvidia_key"] = bool(s.nvidia_api_key)
-    safe["has_openai_key"] = bool(s.openai_api_key)
-    safe["has_anthropic_key"] = bool(s.anthropic_api_key)
-    safe["has_google_key"] = bool(s.google_api_key)
+    safe["has_groq_api_key"] = bool(s.groq_api_key)
+    safe["has_nvidia_api_key"] = bool(s.nvidia_api_key)
+    safe["has_openai_api_key"] = bool(s.openai_api_key)
+    safe["has_anthropic_api_key"] = bool(s.anthropic_api_key)
+    safe["has_google_api_key"] = bool(s.google_api_key)
     return safe
 
 

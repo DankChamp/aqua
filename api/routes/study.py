@@ -1,3 +1,5 @@
+import json
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Depends
@@ -8,9 +10,19 @@ from core.router import AIRouter, TaskType
 from core.study.plans import (
     create_plan, get_plan, list_plans, delete_plan,
     add_task, list_tasks, complete_task,
-    get_plan_with_tasks, start_session, end_session, get_stats,
+    get_plan_with_tasks, start_session, end_session,
     generate_plan,
 )
+from core.study.progress import get_progress
+from core.study.flashcards import add_flashcard, create_quiz
+from core.documents.manager import get_document, add_note
+from core.activity import get_streak
+from core.study.analytics import (
+    get_study_stats, get_quiz_history, get_daily_activity,
+    get_flashcard_reviews, get_quiz_score_trend, get_study_time_trend,
+)
+
+logger = logging.getLogger("aqua.study")
 
 router = APIRouter(prefix="/study", tags=["study"])
 
@@ -129,4 +141,150 @@ def do_end_session(session_id: int, payload: SessionEnd):
 
 @router.get("/stats")
 def study_stats():
-    return get_stats()
+    return {
+        "summary": get_study_stats(),
+        "quiz_history": get_quiz_history(10),
+        "quiz_score_trend": get_quiz_score_trend(10),
+        "daily_activity": get_daily_activity(30),
+        "flashcard_reviews": get_flashcard_reviews(30),
+        "study_time": get_study_time_trend(30),
+    }
+
+
+class PackGenerate(BaseModel):
+    document_id: int
+
+
+class GuideGenerate(BaseModel):
+    document_ids: list[int]
+    title: str = ""
+
+
+class PlanFromDoc(BaseModel):
+    document_id: int
+    duration_days: int = 7
+
+
+@router.get("/streak")
+def streak():
+    return get_streak()
+
+
+@router.post("/plans/generate-from-doc")
+async def generate_plan_from_doc(payload: PlanFromDoc, ai_router: AIRouter = Depends(get_ai_router)):
+    doc = get_document(payload.document_id)
+    if not doc:
+        raise HTTPException(400, "Document not found")
+    from core.study.plans import generate_plan as gp
+    try:
+        plan = await gp(doc.title, [doc.id], payload.duration_days)
+        return get_plan_with_tasks(plan.id)
+    except Exception as exc:
+        raise HTTPException(503, f"Plan generation failed: {exc}")
+
+
+@router.post("/generate-pack")
+async def generate_study_pack(payload: PackGenerate, ai_router: AIRouter = Depends(get_ai_router)):
+    doc = get_document(payload.document_id)
+    if not doc:
+        raise HTTPException(400, "Document not found")
+    content = (doc.title + "\n\n" + doc.content)[:6000]
+
+    async def gen_notes():
+        prompt = (
+            f"Generate comprehensive, detailed study notes from the following document. "
+            f"Cover every concept in depth with examples, explanations, and key takeaways. "
+            f"Return in clean markdown format.\n\nDocument:\n{content}"
+        )
+        r = await ai_router.run(TaskType.STUDY, prompt, system="You are a study note generator.")
+        return add_note(content=r.text, title=f"Notes: {doc.title}", document_id=doc.id, note_type="detailed")
+
+    async def gen_flashcards():
+        prompt = (
+            f"Generate 10 flashcards (Q&A pairs) from this document. "
+            f"Return ONLY a JSON array of objects with 'question' and 'answer' keys.\n\n{content}"
+        )
+        r = await ai_router.run(TaskType.STUDY, prompt, system="You are a flashcard generator. Return ONLY valid JSON.")
+        raw = r.text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1]
+            raw = raw.rsplit("```", 1)[0]
+        cards = json.loads(raw)
+        if not isinstance(cards, list):
+            raise ValueError("Not a list")
+        count = 0
+        for cd in cards[:10]:
+            add_flashcard(question=cd["question"], answer=cd["answer"], topic=doc.title)
+            count += 1
+        return count
+
+    async def gen_quiz():
+        prompt = (
+            f"Generate 5 quiz questions from this document. "
+            f"Return ONLY a JSON array of objects with keys: question, correct_answer, options (array of 4 choices).\n\n{content}"
+        )
+        r = await ai_router.run(TaskType.STUDY, prompt, system="You are a quiz generator. Return ONLY valid JSON.")
+        raw = r.text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[-1]
+            raw = raw.rsplit("```", 1)[0]
+        questions = json.loads(raw)
+        if not isinstance(questions, list):
+            raise ValueError("Not a list")
+        return create_quiz(f"Quiz: {doc.title}", doc.title, questions)
+
+    import asyncio
+    notes_task = gen_notes()
+    fc_task = gen_flashcards()
+    quiz_task = gen_quiz()
+
+    results = await asyncio.gather(notes_task, fc_task, quiz_task, return_exceptions=True)
+
+    notes_result, fc_result, quiz_result = results
+
+    resp = {}
+    if isinstance(notes_result, Exception):
+        logger.warning("Note generation failed: %s", notes_result)
+        resp["notes"] = {"error": str(notes_result)}
+    else:
+        resp["notes"] = {"id": notes_result.id, "title": notes_result.title}
+
+    if isinstance(fc_result, Exception):
+        logger.warning("Flashcard generation failed: %s", fc_result)
+        resp["flashcards"] = {"error": str(fc_result)}
+    else:
+        resp["flashcards"] = {"count": fc_result}
+
+    if isinstance(quiz_result, Exception):
+        logger.warning("Quiz generation failed: %s", quiz_result)
+        resp["quiz"] = {"error": str(quiz_result)}
+    else:
+        resp["quiz"] = {"id": quiz_result.id, "title": quiz_result.title}
+
+    return resp
+
+
+@router.post("/guide")
+async def study_guide(payload: GuideGenerate, ai_router: AIRouter = Depends(get_ai_router)):
+    docs_text = ""
+    for did in payload.document_ids:
+        doc = get_document(did)
+        if doc:
+            docs_text += f"\n\n--- {doc.title} ---\n{doc.content[:3000]}"
+    if not docs_text:
+        raise HTTPException(400, "No valid documents found")
+
+    prompt = (
+        f"Create a comprehensive study guide combining the source materials below. "
+        f"Organize by topics, identify key concepts and their relationships, "
+        f"and create a coherent learning path with summaries and review questions. "
+        f"Return in clean markdown format.\n\n{docs_text[:12000]}"
+    )
+    result = await ai_router.run(
+        TaskType.STUDY, prompt,
+        system="You are a study guide creator. Synthesize multiple sources into a well-structured study guide in markdown.",
+    )
+
+    title = payload.title or f"Study Guide ({len(payload.document_ids)} sources)"
+    note = add_note(content=result.text, title=title, note_type="study_guide")
+    return {"id": note.id, "title": note.title, "content": result.text}

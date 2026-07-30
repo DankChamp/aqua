@@ -6,7 +6,9 @@ from core.web.search import search_duckduckgo
 def import_url(url: str) -> dict:
     fetched = fetch_url(url)
     if not fetched:
-        return {}
+        return {"error": "Failed to fetch URL — the site may be unreachable."}
+    if "error" in fetched:
+        return {"error": fetched["error"]}
     doc = doc_manager.add_document(
         title=fetched.get("title") or url,
         content=fetched.get("content", ""),
@@ -24,10 +26,13 @@ def import_url(url: str) -> dict:
 def research_topic(topic: str, max_results: int = 5) -> list[dict]:
     results = search_duckduckgo(topic, max_results=max_results)
     imported = []
+    errors = []
     for r in results:
         doc = import_url(r["url"])
-        if doc:
+        if doc and "error" not in doc:
             doc["search_title"] = r["title"]
             doc["search_snippet"] = r["snippet"]
             imported.append(doc)
-    return imported
+        elif doc and "error" in doc:
+            errors.append({"url": r["url"], "error": doc["error"]})
+    return {"documents": imported, "errors": errors}

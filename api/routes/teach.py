@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from api.deps import get_ai_router
+from core.chat.memory import get_session_messages
 from core.router import AIRouter
 from core.teach.engine import start_session, end_session, get_session, list_sessions, teach
 
@@ -45,6 +46,11 @@ def teach_get(session_id: str):
     if not session:
         raise HTTPException(404, "Session not found")
     return session
+
+
+@router.get("/{session_id}/messages")
+def teach_messages(session_id: str):
+    return get_session_messages(session_id)
 
 
 @router.get("")

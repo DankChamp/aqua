@@ -49,9 +49,9 @@ def set(key: str, value: str, category: str = ""):
 def delete(key: str) -> bool:
     conn = get_db()
     _migrate(conn)
-    conn.execute("DELETE FROM profile WHERE key = ?", (key,))
+    cur = conn.execute("DELETE FROM profile WHERE key = ?", (key,))
     conn.commit()
-    return conn.total_changes > 0
+    return cur.rowcount > 0
 
 
 def get_system_prompt() -> str:

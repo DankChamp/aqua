@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
+from typing import AsyncGenerator, Optional
 
 
 @dataclass
@@ -21,3 +21,7 @@ class AIProvider(ABC):
     @abstractmethod
     async def complete(self, prompt: str, system: Optional[str] = None, **kwargs) -> CompletionResult:
         raise NotImplementedError
+
+    async def stream(self, prompt: str, system: Optional[str] = None, **kwargs) -> AsyncGenerator[str, None]:
+        result = await self.complete(prompt, system=system, **kwargs)
+        yield result.text

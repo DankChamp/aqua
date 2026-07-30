@@ -3,7 +3,7 @@ import httpx
 from config import get_settings
 
 
-async def push_summary_to_emma(item_type: str, title: str, summary: str, tags: list[str] | None = None) -> bool:
+async def push_summary_to_emma(item_type: str, title: str, summary: str, tags: Optional[list[str]] = None) -> bool:
     settings = get_settings()
     if not settings.emma_api_url:
         return False

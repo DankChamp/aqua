@@ -17,6 +17,8 @@ class Flashcard:
     review_count: int = 0
     last_reviewed: Optional[str] = None
     created_at: str = ""
+    ease_factor: float = 2.5
+    next_review_at: Optional[str] = None
 
 
 @dataclass
@@ -40,7 +42,9 @@ def _migrate(conn: sqlite3.Connection):
             difficulty INTEGER NOT NULL DEFAULT 1,
             review_count INTEGER NOT NULL DEFAULT 0,
             last_reviewed TEXT,
-            created_at TEXT NOT NULL DEFAULT ''
+            created_at TEXT NOT NULL DEFAULT '',
+            ease_factor REAL NOT NULL DEFAULT 2.5,
+            next_review_at TEXT
         );
         CREATE TABLE IF NOT EXISTS quizzes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,6 +64,14 @@ def _migrate(conn: sqlite3.Connection):
             is_correct INTEGER DEFAULT 0
         );
     """)
+    try:
+        conn.execute("ALTER TABLE flashcards ADD COLUMN ease_factor REAL NOT NULL DEFAULT 2.5")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        conn.execute("ALTER TABLE flashcards ADD COLUMN next_review_at TEXT")
+    except sqlite3.OperationalError:
+        pass
 
 
 def _now() -> str:
@@ -88,19 +100,49 @@ def get_flashcard(card_id: int) -> Optional[Flashcard]:
     return Flashcard(**dict(row))
 
 
-def list_flashcards(topic: Optional[str] = None, limit: int = 100) -> list[Flashcard]:
+def list_flashcards(topic: Optional[str] = None, limit: int = 100, due_only: bool = False) -> list[Flashcard]:
     conn = get_db()
     _migrate(conn)
-    if topic:
-        rows = conn.execute(
-            "SELECT * FROM flashcards WHERE topic = ? ORDER BY last_reviewed ASC NULLS FIRST LIMIT ?",
-            (topic, limit),
-        ).fetchall()
+    now = _now()
+    if due_only:
+        if topic:
+            rows = conn.execute(
+                "SELECT * FROM flashcards WHERE topic = ? AND (next_review_at IS NULL OR next_review_at <= ?) ORDER BY next_review_at ASC LIMIT ?",
+                (topic, now, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM flashcards WHERE next_review_at IS NULL OR next_review_at <= ? ORDER BY next_review_at ASC LIMIT ?",
+                (now, limit),
+            ).fetchall()
     else:
-        rows = conn.execute(
-            "SELECT * FROM flashcards ORDER BY last_reviewed ASC NULLS FIRST LIMIT ?", (limit,)
-        ).fetchall()
+        if topic:
+            rows = conn.execute(
+                "SELECT * FROM flashcards WHERE topic = ? ORDER BY last_reviewed ASC NULLS FIRST LIMIT ?",
+                (topic, limit),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM flashcards ORDER BY last_reviewed ASC NULLS FIRST LIMIT ?", (limit,)
+            ).fetchall()
     return [Flashcard(**dict(r)) for r in rows]
+
+
+def due_count(topic: Optional[str] = None) -> int:
+    conn = get_db()
+    _migrate(conn)
+    now = _now()
+    if topic:
+        row = conn.execute(
+            "SELECT COUNT(*) as c FROM flashcards WHERE topic = ? AND (next_review_at IS NULL OR next_review_at <= ?)",
+            (topic, now),
+        ).fetchone()
+    else:
+        row = conn.execute(
+            "SELECT COUNT(*) as c FROM flashcards WHERE next_review_at IS NULL OR next_review_at <= ?",
+            (now,),
+        ).fetchone()
+    return row["c"] if row else 0
 
 
 def review_flashcard(card_id: int, correct: bool) -> Optional[Flashcard]:
@@ -112,10 +154,26 @@ def review_flashcard(card_id: int, correct: bool) -> Optional[Flashcard]:
     card = Flashcard(**dict(row))
     card.review_count += 1
     card.last_reviewed = _now()
-    card.difficulty = max(1, card.difficulty - 1) if correct else min(5, card.difficulty + 1)
+
+    quality = 4 if correct else 0
+    if quality >= 3:
+        if card.review_count == 1:
+            card.difficulty = 1
+        elif card.review_count == 2:
+            card.difficulty = 6
+        else:
+            card.difficulty = int(card.difficulty * card.ease_factor)
+    else:
+        card.difficulty = 1
+        card.review_count = 0
+
+    card.ease_factor = max(1.3, card.ease_factor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)))
+    from datetime import timedelta
+    card.next_review_at = (datetime.utcnow() + timedelta(days=card.difficulty)).isoformat()
+
     conn.execute(
-        "UPDATE flashcards SET review_count = ?, last_reviewed = ?, difficulty = ? WHERE id = ?",
-        (card.review_count, card.last_reviewed, card.difficulty, card_id),
+        "UPDATE flashcards SET review_count = ?, last_reviewed = ?, difficulty = ?, ease_factor = ?, next_review_at = ? WHERE id = ?",
+        (card.review_count, card.last_reviewed, card.difficulty, card.ease_factor, card.next_review_at, card_id),
     )
     conn.commit()
     return card
@@ -124,9 +182,9 @@ def review_flashcard(card_id: int, correct: bool) -> Optional[Flashcard]:
 def delete_flashcard(card_id: int) -> bool:
     conn = get_db()
     _migrate(conn)
-    conn.execute("DELETE FROM flashcards WHERE id = ?", (card_id,))
+    cur = conn.execute("DELETE FROM flashcards WHERE id = ?", (card_id,))
     conn.commit()
-    return conn.total_changes > 0
+    return cur.rowcount > 0
 
 
 def create_quiz(title: str, topic: str, questions_data: list[dict]) -> Quiz:
@@ -206,3 +264,14 @@ def grade_quiz(quiz_id: int) -> Optional[dict]:
     conn.execute("UPDATE quizzes SET score = ?, total = ? WHERE id = ?", (score, total, quiz_id))
     conn.commit()
     return {"score": score, "correct": correct, "total": total}
+
+
+def retry_wrong_quiz(quiz_id: int) -> Optional[Quiz]:
+    quiz = get_quiz(quiz_id)
+    if not quiz:
+        return None
+    wrong = [q for q in (quiz.questions or []) if q.get("is_correct") != 1]
+    if not wrong:
+        return None
+    new_title = f"Retry: {quiz.title}"
+    return create_quiz(new_title, quiz.topic, wrong)
