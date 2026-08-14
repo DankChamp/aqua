@@ -41,15 +41,19 @@ class ChatResponse(BaseModel):
 
 async def _build_system_parts(payload: ChatRequest) -> list[str]:
     AQUA_INSTRUCTIONS = (
-        "You are Aqua, a sharp and efficient research & study assistant. "
+        "You are Aqua, a sharp, warm, and efficient research & study assistant. "
         "Always use Markdown formatting. NEVER output HTML tags like <br>, "
         "<table>, <b>, or any other HTML. For tables use | pipes |, for "
         "line breaks just use a blank line, for bold use **double stars**, "
         "for lists use - dashes, for code use backticks. "
+        "Talk like a patient, slightly flirty teacher: playful, attentive, and confident, "
+        "with light teasing or warmth only when it fits. Keep it respectful and focused on learning. "
         "Be conversational, not academic. Use short paragraphs, bullet points, "
         "or simple lists to keep responses scannable. Never write a huge wall "
-        "of text unless the user explicitly asks for depth. If you use web or "
-        "knowledge sources, briefly cite them. Adapt your tone to the user."
+        "of text unless the user explicitly asks for depth. Teach step by step, "
+        "check understanding, and slow down when the user seems unsure. If you use web or "
+        "knowledge sources, briefly cite them. Adapt your tone to the user. "
+        "If the user asks you to remember something, acknowledge it briefly and use it later."
         " When discussing academic topics, ALWAYS look up and reference NCERT "
         "book chapters and topics. Align explanations with the NCERT curriculum."
     )
@@ -116,6 +120,7 @@ async def _build_system_parts(payload: ChatRequest) -> list[str]:
 @router.post("", response_model=ChatResponse)
 async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router)):
     add_message(payload.session_id, "user", payload.message)
+    remembered = profile_mgr.remember_from_text(payload.message)
 
     parts = await _build_system_parts(payload)
 
@@ -133,6 +138,8 @@ async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router
         except Exception as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
 
+        if remembered:
+            reply = f"I'll remember that, sweetheart: {remembered['value']}.\n\n{reply}"
         add_message(payload.session_id, "assistant", reply)
         return ChatResponse(reply=reply, provider="agent", model="agent", agent_used=True, session_id=payload.session_id)
 
@@ -149,13 +156,18 @@ async def chat(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router
     except Exception as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    add_message(payload.session_id, "assistant", result.text)
-    return ChatResponse(reply=result.text, provider=result.provider, model=result.model, session_id=payload.session_id)
+    reply = result.text
+    if remembered:
+        reply = f"I'll remember that, sweetheart: {remembered['value']}.\n\n{reply}"
+
+    add_message(payload.session_id, "assistant", reply)
+    return ChatResponse(reply=reply, provider=result.provider, model=result.model, session_id=payload.session_id)
 
 
 @router.post("/stream")
 async def chat_stream(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai_router)):
     add_message(payload.session_id, "user", payload.message)
+    remembered = profile_mgr.remember_from_text(payload.message)
 
     parts = await _build_system_parts(payload)
 
@@ -172,13 +184,18 @@ async def chat_stream(payload: ChatRequest, ai_router: AIRouter = Depends(get_ai
             )
         except Exception as exc:
             raise HTTPException(status_code=503, detail=str(exc)) from exc
+        if remembered:
+            reply = f"I'll remember that, sweetheart: {remembered['value']}.\n\n{reply}"
         add_message(payload.session_id, "assistant", reply)
         return ChatResponse(reply=reply, provider="agent", model="agent", agent_used=True, session_id=payload.session_id)
 
     system = "\n\n".join(parts) if parts else None
 
     async def event_stream():
-        full = ""
+        prefix = f"I'll remember that, sweetheart: {remembered['value']}.\n\n" if remembered else ""
+        full = prefix
+        if prefix:
+            yield f"data: {json.dumps({'token': prefix})}\n\n"
         try:
             async for chunk in ai_router.stream(
                 payload.task_type,

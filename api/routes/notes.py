@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from api.deps import get_ai_router
+from core import voice_service
 
 logger = logging.getLogger("aqua.notes")
 from core.router import AIRouter
@@ -53,6 +54,11 @@ async def generate(payload: GenerateRequest, ai_router: AIRouter = Depends(get_a
             chapter=payload.chapter,
             document_ids=payload.document_ids or None,
             note_type=payload.note_type,
+        )
+        voice_service.say(
+            voice_service.summarize_note_for_speech(note.title, note.content),
+            interrupt=True,
+            max_chars=3200,
         )
         return note
     except Exception as exc:

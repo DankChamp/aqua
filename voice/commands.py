@@ -4,6 +4,11 @@ from typing import Optional
 from .client import VoiceBackendClient
 
 
+def _memory_key(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")[:42]
+    return "memory_" + (slug or "fact")
+
+
 class VoiceCommandRouter:
     def __init__(self, client: VoiceBackendClient):
         self.client = client
@@ -24,7 +29,16 @@ class VoiceCommandRouter:
             except Exception as e:
                 return f"Sorry, the search failed: {e}"
 
-        doc_match = re.search(r"\b(?:save|store|remember)\s+(.+?)(?:\s+as\s+a\s+document)?$", text)
+        remember_match = re.search(r"\bremember(?:\s+that)?\s+(.+)$", transcript.strip(), flags=re.IGNORECASE)
+        if remember_match:
+            content = remember_match.group(1).strip(" .!?:;\"'")
+            try:
+                self.client.remember_fact(_memory_key(content), content)
+                return f"I'll remember that, sweetheart: {content}."
+            except Exception as e:
+                return f"Sorry, I couldn't remember that: {e}"
+
+        doc_match = re.search(r"\b(?:save|store)\s+(.+?)(?:\s+as\s+a\s+document)?$", text)
         if doc_match:
             content = doc_match.group(1).strip()
             title = content[:60]

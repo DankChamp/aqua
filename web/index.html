@@ -678,7 +678,7 @@ tr:hover td { background: rgba(0,212,170,.03); }
 <div class="page" id="page-voice">
   <h2 style="margin-bottom:12px; color: var(--accent);">Voice</h2>
   <div class="card">
-    <p class="text-dim mb-8">Voice assistant listens for <strong class="text-accent">"hey aqua"</strong> wake word. Requires microphone access, Vosk model, and Piper TTS voice.</p>
+    <p class="text-dim mb-8">Aqua speaks through the local Piper/pyttsx3 voice system. Wake-word listening still runs from the CLI voice mode.</p>
     <div class="flex gap-4">
       <button id="voiceStartBtn" class="gold" onclick="startVoice()">Start Voice</button>
       <button id="voiceStopBtn" class="danger hidden" onclick="stopVoice()">Stop Voice</button>
@@ -781,6 +781,34 @@ function api(method, path, body) {
     if (r.status === 401 && !path.includes("/api/auth")) { sessionStorage.removeItem("aqua_token"); location.reload(); }
     return r.json();
   });
+}
+
+function cleanForSpeech(text) {
+  const div = document.createElement("div");
+  div.innerHTML = renderMarkdown(String(text || ""));
+  return div.textContent
+    .replace(/\s+/g, " ")
+    .replace(/[•●▶▼★☆]/g, "")
+    .trim();
+}
+
+function speakAqua(text, opts = {}) {
+  const spoken = cleanForSpeech(text);
+  if (!spoken) return;
+  const maxChars = opts.maxChars || 3600;
+  api("POST", "/voice/say", {text: spoken, interrupt: opts.interrupt !== false, max_chars: maxChars})
+    .catch(e => toast("Voice failed: " + (e.message || e), "error"));
+}
+
+function stopAquaSpeech() {
+  api("POST", "/voice/stop").catch(() => {});
+}
+
+function summarizeNoteForSpeech(note) {
+  const title = note.title || [note.subject, note.chapter].filter(Boolean).join(" - ") || "your notes";
+  const plain = cleanForSpeech(note.content || "");
+  const intro = `Your notes for ${title} are ready. I'll read the opening and key ideas now. `;
+  return intro + plain.slice(0, 2600);
 }
 
 // ── Auth ──
@@ -1023,7 +1051,7 @@ function showNoteInTree(id) {
   const el = document.getElementById("noteContent");
   const meta = [n.class_std, n.subject, n.chapter, n.note_type].filter(Boolean).join(' › ');
   const etag = Date.now();
-  el.innerHTML = `<div class="card"><div class="flex" style="justify-content:space-between;align-items:center"><h3>${esc(meta)}</h3><div class="flex gap-4"><button class="small" onclick="askAquaNote(${n.id})">Ask Aqua</button><button class="small" onclick="exportNote(${n.id},'${esc(n.title)}')">Export</button><button class="small primary" onclick="toggleEditNote(${n.id},${etag})">Edit</button><button class="danger small" onclick="deleteNoteFromTree(${n.id})">Delete</button></div></div><div class="note-content" id="noteContentBody_${etag}">${renderMarkdown(n.content || '(no content)')}</div></div>`;
+  el.innerHTML = `<div class="card"><div class="flex" style="justify-content:space-between;align-items:center"><h3>${esc(meta)}</h3><div class="flex gap-4"><button class="small" onclick="speakAqua(summarizeNoteForSpeech(noteTreeData.find(x=>x.id===${n.id})),{maxChars:4200})">Read</button><button class="small" onclick="stopAquaSpeech()">Stop</button><button class="small" onclick="askAquaNote(${n.id})">Ask Aqua</button><button class="small" onclick="exportNote(${n.id},'${esc(n.title)}')">Export</button><button class="small primary" onclick="toggleEditNote(${n.id},${etag})">Edit</button><button class="danger small" onclick="deleteNoteFromTree(${n.id})">Delete</button></div></div><div class="note-content" id="noteContentBody_${etag}">${renderMarkdown(n.content || '(no content)')}</div></div>`;
 }
 let editNoteData = null;
 function toggleEditNote(id, tag) {
@@ -2082,9 +2110,9 @@ function startVoice() {
   api("POST", "/voice/start").then(d => {
     document.getElementById("voiceStartBtn").classList.add("hidden");
     document.getElementById("voiceStopBtn").classList.remove("hidden");
-    document.getElementById("voiceLog").textContent = "Voice assistant started. Listening for 'hey aqua'...\n";
+    document.getElementById("voiceLog").textContent = "Voice speaker ready: " + (d.backend || "auto") + "\n";
   }).catch(e => {
-    document.getElementById("voiceLog").textContent = "Error: "+e.message+"\nVoice mode must be run from CLI for now.";
+    document.getElementById("voiceLog").textContent = "Error: "+e.message+"\nCheck Piper/pyttsx3 voice setup.";
   });
 }
 function stopVoice() {

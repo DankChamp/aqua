@@ -16,6 +16,7 @@ from core.study.plans import (
 from core.study.progress import get_progress
 from core.study.flashcards import add_flashcard, create_quiz
 from core.documents.manager import get_document, add_note
+from core import voice_service
 from core.activity import get_streak
 from core.study.analytics import (
     get_study_stats, get_quiz_history, get_daily_activity,
@@ -248,6 +249,11 @@ async def generate_study_pack(payload: PackGenerate, ai_router: AIRouter = Depen
         resp["notes"] = {"error": str(notes_result)}
     else:
         resp["notes"] = {"id": notes_result.id, "title": notes_result.title}
+        voice_service.say(
+            voice_service.summarize_note_for_speech(notes_result.title, notes_result.content),
+            interrupt=True,
+            max_chars=3200,
+        )
 
     if isinstance(fc_result, Exception):
         logger.warning("Flashcard generation failed: %s", fc_result)
@@ -287,4 +293,9 @@ async def study_guide(payload: GuideGenerate, ai_router: AIRouter = Depends(get_
 
     title = payload.title or f"Study Guide ({len(payload.document_ids)} sources)"
     note = add_note(content=result.text, title=title, note_type="study_guide")
+    voice_service.say(
+        voice_service.summarize_note_for_speech(note.title, note.content),
+        interrupt=True,
+        max_chars=3200,
+    )
     return {"id": note.id, "title": note.title, "content": result.text}

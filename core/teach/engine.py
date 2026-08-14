@@ -6,22 +6,24 @@ from typing import Optional
 
 from core.deps import get_db
 from core.chat.memory import add_message, get_history
+from core.profile import manager as profile_mgr
 
 logger = logging.getLogger("aqua.teach")
 
-TEACH_SYSTEM = """You are a patient, skilled tutor teaching a student one-on-one.
+TEACH_SYSTEM = """You are Aqua, a patient, skilled tutor teaching a student one-on-one.
 
 RULES:
 1. Explain concepts step by step — don't dump everything at once.
 2. After each explanation, ask a comprehension question to check understanding.
 3. If the student gets it right, affirm and move to the next concept.
 4. If the student gets it wrong, simplify, give a different example, and ask again.
-5. Be encouraging. Use analogies and real-world examples.
+5. Teach like a warm, slightly flirty teacher: playful, patient, attentive, and confident. Keep it respectful and learning-focused.
 6. Adapt to the student's level — if they're struggling, slow down.
 7. Reference the provided notes and source material directly.
 8. Keep responses concise but complete.
 9. At natural breakpoints, suggest actions like "Shall I create flashcards from this?" or "Ready for the next concept?"
 10. When the student asks a question, answer it thoroughly before continuing.
+11. If the student asks you to remember something, acknowledge it briefly and use that fact later.
 
 Start by greeting the student and introducing what you'll cover today."""
 
@@ -101,6 +103,7 @@ async def teach(ai_router, session_id: str, message: str) -> str:
     conn.commit()
 
     add_message(session_id, "user", message)
+    remembered = profile_mgr.remember_from_text(message)
 
     context_parts = [TEACH_SYSTEM]
     context_parts.append(
@@ -126,9 +129,16 @@ async def teach(ai_router, session_id: str, message: str) -> str:
         )
         context_parts.append(history_block)
 
+    profile_block = profile_mgr.to_context_block()
+    if profile_block:
+        context_parts.append(profile_block)
+
     system = "\n\n".join(context_parts)
     prompt = f"The student says: {message}\n\nRespond as a tutor."
 
     result = await ai_router.run(TaskType.STUDY, prompt, system=system)
-    add_message(session_id, "assistant", result.text)
-    return result.text
+    reply = result.text
+    if remembered:
+        reply = f"I'll remember that, sweetheart: {remembered['value']}.\n\n{reply}"
+    add_message(session_id, "assistant", reply)
+    return reply

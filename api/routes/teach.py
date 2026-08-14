@@ -5,6 +5,7 @@ from api.deps import get_ai_router
 from core.chat.memory import get_session_messages
 from core.router import AIRouter
 from core.teach.engine import start_session, end_session, get_session, list_sessions, teach
+from core import voice_service
 
 router = APIRouter(prefix="/teach", tags=["teach"])
 
@@ -29,6 +30,7 @@ def teach_start(payload: StartRequest):
 async def teach_message(session_id: str, payload: MessageRequest, ai_router: AIRouter = Depends(get_ai_router)):
     try:
         response = await teach(ai_router, session_id, payload.message)
+        voice_service.say(response, interrupt=True)
         return {"response": response}
     except ValueError as exc:
         raise HTTPException(404, str(exc))

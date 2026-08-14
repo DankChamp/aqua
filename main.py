@@ -1,3 +1,4 @@
+import argparse
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -8,9 +9,10 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts, search as search_routes, study, teach as teach_routes, activity as activity_routes, ncert as ncert_routes
-from api.routes import settings as settings_routes
+from api.routes import chat, documents, notes, flashcards, quizzes, profile, webroutes, facts, search as search_routes, study, teach as teach_routes, activity as activity_routes, ncert as ncert_routes, voice as voice_routes
+from api.routes import settings as settings_routes, automation as automation_routes
 from config import get_settings
+from bridge.server import start_server
 
 logger = logging.getLogger("aqua.main")
 
@@ -55,6 +57,8 @@ app.include_router(study.router)
 app.include_router(teach_routes.router)
 app.include_router(activity_routes.router)
 app.include_router(ncert_routes.router)
+app.include_router(voice_routes.router)
+app.include_router(automation_routes.router)
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 if WEB_DIR.is_dir():
@@ -98,3 +102,22 @@ async def auth_middleware(request: Request, call_next):
     if request.cookies.get("aqua_token") == s.web_password:
         return await call_next(request)
     return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Aqua — Research & Study AI")
+    parser.add_argument("--serve", action="store_true", help="Run Aqua automation bridge server")
+    parser.add_argument("--port", type=int, default=8702, help="Bridge server port")
+    args = parser.parse_args()
+
+    if args.serve:
+        import asyncio
+        asyncio.run(start_server(bridge_token=s.emma_api_key, port=args.port))
+        return
+
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=s.debug)
+
+
+if __name__ == "__main__":
+    main()

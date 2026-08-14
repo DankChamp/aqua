@@ -35,6 +35,15 @@ class VoiceBackendClient:
         resp.raise_for_status()
         return resp.json()
 
+    def remember_fact(self, key: str, value: str, category: str = "memory") -> dict:
+        resp = httpx.post(
+            f"{self.base_url}/profile",
+            json={"key": key, "value": value, "category": category},
+            timeout=10.0,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
     def search_web(self, query: str, max_results: int = 3) -> list[dict]:
         resp = httpx.post(f"{self.base_url}/web/search", json={"query": query, "max_results": max_results}, timeout=15.0)
         resp.raise_for_status()

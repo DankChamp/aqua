@@ -1,0 +1,11 @@
+id: test-pipe
+source:
+  type: file
+destination:
+  type: database
+transform:
+  sql: SELECT * FROM source
+schedule: ''
+created_at: '2026-08-15T03:59:52.468008'
+updated_at: '2026-08-15T03:59:52.468024'
+status: created
