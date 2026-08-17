@@ -14,14 +14,14 @@ dependencies = [
     "pydantic-settings>=2.0",
     "httpx>=0.25",
     "rich>=13.0",
-    "duckduckgo-search>=8.0",
+    "duckduckgo-search>=8.1.1",
 ]
 
 [project.optional-dependencies]
 all = [
-    "chromadb>=0.4.0",
-    "sentence-transformers>=2.2",
-    "pypdf>=3.0",
+    "chromadb>=1.5.9",
+    "sentence-transformers>=5.7.0",
+    "pypdf>=6.16.1",
 ]
 
 [project.scripts]
