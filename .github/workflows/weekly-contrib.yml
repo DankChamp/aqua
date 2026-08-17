@@ -1,0 +1,49 @@
+name: Weekly Contribution
+
+on:
+  schedule:
+    - cron: '0 12 * * 4'  # Every Thursday at 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  contribute:
+    name: Weekly meaningful commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install deps
+        run: pip install -e ".[all]"
+
+      - name: Run lint & typecheck
+        run: |
+          ruff check .
+          mypy .
+
+      - name: Run tests
+        run: pytest -q --tb=short
+
+      - name: Auto-fix lint
+        run: ruff check --fix . || true
+
+      - name: Commit improvements
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore: weekly lint fix & improvements [bot]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
